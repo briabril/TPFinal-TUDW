@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getUsers } from "../controllers/usersController";
+import { getUsers } from "../controllers/userController";
 
 const router = Router();
 router.get("/", getUsers);

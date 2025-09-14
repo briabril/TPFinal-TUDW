@@ -9,8 +9,9 @@ const db = new Pool({
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   port: Number(process.env.DB_PORT) || 5432,
-  max: 10, 
-  idleTimeoutMillis: 30000, 
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 db.on("connect", () => {
   console.log("✅ Conectado a la base de datos");

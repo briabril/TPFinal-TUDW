@@ -1,0 +1,42 @@
+{
+  "name": "tpfinal-tudw",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "next dev frontend --turbopack -p 3000",
+    "dev:backend": "ts-node-dev --respawn --transpile-only backend/src/server.ts",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "next build frontend --turbopack",
+    "build:backend": "tsc -p backend/tsconfig.json",
+    "start:frontend": "next start frontend",
+    "start:backend": "node backend/dist/server.js",
+    "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
+    "lint": "eslint frontend"
+  },
+  "dependencies": {
+    "@types/dotenv": "^6.1.1",
+    "autoprefixer": "^10.4.21",
+    "cors": "^2.8.5",
+    "express": "^4.19.0",
+    "next": "15.5.3",
+    "pg": "^8.16.3",
+    "postcss": "^8.5.6",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "tailwindcss": "^4.1.13"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.7",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "concurrently": "^9.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.3",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.2"
+  }
+}

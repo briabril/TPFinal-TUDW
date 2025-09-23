@@ -1,20 +1,19 @@
-// backend/src/server.ts
-import express from "express";
-import cors from "cors";
-import usersRouter from "./routes/user";
 
+const express = require("express");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
+import userRoutes from "./routes/userRoutes";
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000", 
+  credentials: true,
+}));
+
 app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.send("🚀 Backend funcionando desde monorepo!");
-});
-
-app.use("/api/users", usersRouter);
-
+app.use(cookieParser());
+app.use("/api/users", userRoutes);
 app.listen(PORT, () => {
   console.log(`Servidor backend corriendo en http://localhost:${PORT}`);
 });

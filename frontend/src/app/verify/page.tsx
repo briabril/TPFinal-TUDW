@@ -39,13 +39,13 @@ export default function VerifyPage() {
       {status === "loading" && <p>Verificando tu cuenta...</p>}
       {status === "success" && (
         <>
-          <h1 className="text-2xl font-bold mb-4">✅ Cuenta activada</h1>
+          <h1 className="text-2xl font-bold mb-4">Cuenta activada</h1>
           <p>Redirigiendo a login...</p>
         </>
       )}
       {status === "error" && (
         <>
-          <h1 className="text-2xl font-bold mb-4">❌ Verificación inválida</h1>
+          <h1 className="text-2xl font-bold mb-4">Verificación inválida</h1>
           <p>El token no es válido, expiró o ya fue usado.</p>
         </>
       )}

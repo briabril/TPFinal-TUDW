@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
 export async function sendVerificationEmail(to: string, token: string) {
   const url = `${process.env.FRONTEND_URL}/verify?token=${token}`;
   const html = `
-    <p>Bienvenido a La Red 👋</p>
+    <p>Bienvenido a La Red!</p>
     <p>Para activar tu cuenta haz click en el siguiente enlace:</p>
     <p><a href="${url}">${url}</a></p>
     <p>Si no te registraste, ignorá este mensaje.</p>

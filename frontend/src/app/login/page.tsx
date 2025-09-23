@@ -2,8 +2,9 @@
 
 import AuthForm from "@/components/AuthForm"
 import toast from "react-hot-toast"
-
+import { useRouter } from "next/navigation";
 export default function LoginPage(){
+      const router = useRouter();
     const handleLogin = async (data: Record<string, string>)=>{
         try{
             const res = await fetch("http://localhost:4000/api/users/login",{
@@ -15,6 +16,7 @@ export default function LoginPage(){
             );
             if(!res.ok) throw new Error("Error en el login");
             toast.success("Login exitoso :)")
+            setTimeout(() => router.push("/"), 2000);
         }catch(error: any){
              toast.error("❌ " + error.message);
         }

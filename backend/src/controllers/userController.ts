@@ -1,11 +1,14 @@
 import { Request, Response } from "express";
+import * as crypto from "crypto";
 import * as bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
-import { createUser, findUserByEmail, 
-findUserByEmailOrUsername, getAllUsers } from "../models/userModel";
+import { createUserPendingVerification, createEmailVerification, findUserByEmail, 
+findUserByEmailOrUsername, getAllUsers, activateUser, findVerificationByToken, markVerificationUsed } from "../models/userModel";
+import { sendVerificationEmail } from "../utils/mailer";
 
 const JWT_SECRET = process.env.JWT_SECRET ;
 
+// obtener todos los usuarios
 export const getUsers = async (req: Request, res: Response) => {
   try {
     const users = await getAllUsers();
@@ -15,7 +18,7 @@ export const getUsers = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Error al obtener usuarios" });
   }
 };
-
+// registrar usuario
 export const registerUser = async (req: Request, res: Response) =>{
   try{
     const { email, username, password, displayname} = req.body;
@@ -27,9 +30,16 @@ export const registerUser = async (req: Request, res: Response) =>{
       return res.status(409).json({ error: "El email ya está registrado" });
     }
     const hashed = await bcrypt.hash(password, 10);
-    const newUser = await createUser(email, username, hashed, displayname);
+    const newUser = await createUserPendingVerification(email, username, hashed, displayname);
+
+    // token aleatorio
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+
+     await createEmailVerification(newUser.id, token, expiresAt);
+    await sendVerificationEmail(newUser.email, token);
     const { password_hash, ...safeUser } = newUser;
-    res.status(201).json(safeUser);
+    res.status(201).json({ user: safeUser, message: "Revisa tu email para verificar la cuenta" });;
   }
    catch (err) {
     console.error(err);
@@ -49,6 +59,9 @@ export const loginUser = async (req: Request, res: Response) =>{
     if(!user){
       return res.status(401).json({error: "Credenciales inválidas"})
     }
+        if (user.status !== "ACTIVE") {
+  return res.status(403).json({ error: "Cuenta no verificada. Revisa tu correo." });
+}
     const match = await bcrypt.compare(password, user.password_hash);
     if(!match){
       return res.status(401).json({error: "Credenciales incorrectas"})
@@ -91,3 +104,26 @@ export const getMe = async (req: Request, res: Response) =>{
     res.status(401).json({error : "Token inválido"})
   }
 }
+
+// verificar usuario
+export const verifyUser = async (req: Request, res: Response) => {
+  try {
+    const token = String(req.query.token || req.body.token || "");
+    if (!token) return res.status(400).json({ error: "Token faltante" });
+
+    const verification = await findVerificationByToken(token);
+    if (!verification) return res.status(400).json({ error: "Token inválido o ya usado" });
+
+    if (new Date(verification.expires_at) < new Date())
+      return res.status(400).json({ error: "Token expirado" });
+
+    await activateUser(verification.user_id);
+    await markVerificationUsed(verification.id);
+
+
+    return res.json({ success: true, message: "Cuenta activada" });
+  } catch (err) {
+    console.error("Verify error:", err);
+    return res.status(500).json({ error: "Error al verificar cuenta" });
+  }
+};

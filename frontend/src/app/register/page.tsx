@@ -2,8 +2,10 @@
 
 import AuthForm from "@/components/AuthForm";
 import toast from "react-hot-toast"
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage(){
+     const router = useRouter();
     const handleRegister = async (data: Record<string, string>) => {
         try{
             const res = await fetch("http://localhost:4000/api/users/register", {
@@ -13,7 +15,9 @@ export default function RegisterPage(){
             });
 
             if(!res.ok) throw new Error("Error en el registro")
-                toast.success("✅ Usuario registrado con éxito");
+            if (res.ok) {
+  router.push("/checkEmail");
+}
         }
         catch(err: any){
             toast.error("❌ " + err.message);

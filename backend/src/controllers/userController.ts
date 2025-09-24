@@ -127,3 +127,13 @@ export const verifyUser = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Error al verificar cuenta" });
   }
 };
+
+// logout usuario 
+export const logoutUser = (req: Request, res: Response) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+  res.json({ message: "Logout exitoso" });
+};

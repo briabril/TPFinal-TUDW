@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import Button from "@/components/Button";
 
 export default function Home() {
 const [user, setUser] = useState<any>(null)
@@ -31,8 +33,24 @@ useEffect (()=>{
  
 }, []);
 
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("http://localhost:4000/api/users/logout", {
+        method: "POST",
+        credentials: "include", 
+      });
+      if (!res.ok) throw new Error("Error al cerrar sesión");
+      toast.success("👋 Sesión cerrada");
+      window.location.href = "/login"; 
+    } catch (err: any) {
+      toast.error("❌ " + err.message);
+    }
+  };
+
   return (
-    user ? (<><h1>Hola {user.displayname}!</h1></>):(<><h1>No has iniciado sesión</h1>
+    user ? (<><h1>Hola {user.displayname}!</h1>
+    <Button onClick={handleLogout}>Cerrar Sesión</Button>
+    </>):(<><h1>No has iniciado sesión</h1>
     <div className="flex gap-4 mt-4 justify-center">
             <a
               href="/login"

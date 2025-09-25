@@ -1,36 +1,39 @@
 "use client";
 
-type ButtonProps ={
-    children: React.ReactNode;
-    onClick? : () => void;
-    type?: "button" | "submit";
-    variant?: "primary" | "secondary" | "out";
-    disabled?: boolean;
-};
+import { Button as HeroButton } from "@heroui/react";
+import clsx from "clsx";
+interface ButtonProps {
+  label: string;
+  loading?: boolean;
+  type?: "button" | "submit" | "reset";
+  onClick?: () => void;
+  fullWidth?: boolean;
+  className? : string;
+}
 
-const Button : React.FC<ButtonProps> = ({
-    children,
-    onClick,
-    type = "button",
-    variant = "primary",
-    disabled = false,
-}) => {
-    const base = "px-4 py-2 rounded-lg font-medium transition-colors w-full cursor-pointer"
-    const styles = 
-    variant === "primary"
-      ?  "bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-400"
-      : "bg-gray-200 text-gray-800 hover:bg-gray-300 disabled:bg-gray-100";
-
+export default function Button({
+  label,
+  loading = false,
+  type = "button",
+  onClick,
+  fullWidth = true,
+  className,
+}: ButtonProps) {
   return (
-    <button
+    <HeroButton
       type={type}
+      color="primary"
+      fullWidth={fullWidth}
+      isLoading={loading}
       onClick={onClick}
-      disabled={disabled}
-      className={`${base} ${styles}`}
+     className={clsx(
+        // estilos por defecto
+        "rounded-lg px-4 py-2 font-medium transition-colors",
+        "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer",
+        // lo que venga desde afuera
+        className)}
     >
-      {children}
-    </button>
+      {label}
+    </HeroButton>
   );
-};
-
-export default Button;
+}

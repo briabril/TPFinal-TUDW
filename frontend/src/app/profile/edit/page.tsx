@@ -23,7 +23,14 @@ export default function EditProfilePage() {
         const res = await axios.get("http://localhost:4000/api/users/me", {
           withCredentials: true
         });
-        const user = res.data;
+        type User = {
+          id: string;
+          username: string;
+          displayname: string;
+          bio?: string;
+          profilePicture?: string;
+        };
+        const user = res.data as User;
         setUserId(user.id);
         setForm(f => ({
           ...f,
@@ -32,8 +39,10 @@ export default function EditProfilePage() {
           bio: user.bio || "",
           profile_picture_url: user.profilePicture || ""
         }));
-      } catch (err) {
-        setError("No autenticado");
+      } catch (err: any) {
+        setError(
+          err?.response?.data?.error || "No autenticado"
+        );
       }
       setLoading(false);
     }
@@ -60,7 +69,7 @@ export default function EditProfilePage() {
       if (res.status === 200) {
         setSuccess("¡Perfil actualizado correctamente!");
       } else {
-        setError(res.data?.error || "Error al actualizar el perfil.");
+        setError("Error al actualizar el perfil.");
       }
     } catch (err: any) {
       setError(

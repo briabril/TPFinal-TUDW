@@ -1,42 +1,65 @@
 "use client"
-
-import AuthForm from "@/components/AuthForm"
-import toast from "react-hot-toast"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import api from "@/lib/axios";
+import FormInput from "@/components/FormInput";
+import Button from "@/components/Button";
+import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-export default function LoginPage(){
-      const router = useRouter();
-    const handleLogin = async (data: Record<string, string>)=>{
-        try{
-            const res = await fetch("http://localhost:4000/api/users/login",{
-                method: "POST",
-                credentials : "include",
-                headers: {"Content-Type" : "application/json"},
-                body: JSON.stringify(data)
-            }
-            );
-            if(!res.ok) throw new Error("Error en el login");
-            toast.success("Login exitoso :)")
-            setTimeout(() => router.push("/"), 2000);
-        }catch(error: any){
-             toast.error("❌ " + error.message);
-        }
+import { loginData, loginSchema } from "@/schemas/loginSchema";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<loginData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: loginData) => {
+    try {
+      await api.post("/users/login", data);
+      toast.success("Login exitoso 🎉");
+      router.push("/");
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || "Error en el login");
     }
-    return(
-        <div className="flex flex-col justify-center items-center">
-        <AuthForm
-        title="Inciar Sesión"
-        fields ={[
-            {name: "identifier", label:"Email o Usuario"},
-            {name: "password", label: "Contraseña", type: "password"}
-        ]}
-        onSubmit={handleLogin}
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="w-full max-w-md bg-white shadow-lg rounded-2xl p-8 flex flex-col gap-6"
+      >
+        <h1 className="text-3xl font-bold text-center text-gray-800">
+          Iniciar Sesión
+        </h1>
+
+        <FormInput
+          label="Email o Usuario"
+          name="identifier"
+          register={register}
+          error={errors.identifier}
         />
-           <a
-              href="/register"
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 w-38 text-center"
-            >
-              Registrarse
-            </a>
-        </div>
-    )
+
+        <FormInput
+          label="Contraseña"
+          type="password"
+          name="password"
+          register={register}
+          error={errors.password}
+        />
+
+        <Button
+          label="Ingresar"
+          type="submit"
+          loading={isSubmitting}
+          className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors"
+        />
+      </form>
+    </div>
+  );
 }

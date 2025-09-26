@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { getAllUsers } from "../models/userModel";
 import * as crypto from "crypto";
 import * as bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
@@ -155,9 +154,13 @@ export const getUser = async (req, res) => {
 
 export const editProfile = async (req, res) => {
   const userId = req.params.id;
-  const { username, displayname, bio, profile_picture_url } = req.body;
+  const { username, displayname, bio, profile_picture_url, password } = req.body;
   try {
-    const user = await updateUserProfile(userId, { username, displayname, bio, profile_picture_url });
+    let updateData: any = { username, displayname, bio, profile_picture_url };
+    if (password && password.length > 0) {
+      updateData.password_hash = await bcrypt.hash(password, 10);
+    }
+    const user = await updateUserProfile(userId, updateData);
     res.json(user);
   } catch (err) {
     res.status(400).json({ error: err.message });

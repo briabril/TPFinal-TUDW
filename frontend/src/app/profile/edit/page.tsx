@@ -1,36 +1,44 @@
 "use client";
 import { useState, useEffect } from "react";
+import axios from "axios";
 
 export default function EditProfilePage() {
-  const userId = "b3da6eaa-91f2-46be-a4bb-e08b6df28a28";
-
+  const [userId, setUserId] = useState<string | null>(null);
   const [form, setForm] = useState({
     username: "",
     displayname: "",
     bio: "",
-    profile_picture_url: ""
+    profile_picture_url: "",
+    password: ""
   });
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  //Obtener el usuario logueado
   useEffect(() => {
-    async function fetchUser() {
+    async function fetchMe() {
       setLoading(true);
-      const res = await fetch(`http://localhost:4000/api/users/${userId}`);
-      if (res.ok) {
-        const user = await res.json();
-        setForm({
+      try {
+        const res = await axios.get("http://localhost:4000/api/users/me", {
+          withCredentials: true
+        });
+        const user = res.data;
+        setUserId(user.id);
+        setForm(f => ({
+          ...f,
           username: user.username || "",
           displayname: user.displayname || "",
           bio: user.bio || "",
-          profile_picture_url: user.profile_picture_url || ""
-        });
+          profile_picture_url: user.profilePicture || ""
+        }));
+      } catch (err) {
+        setError("No autenticado");
       }
       setLoading(false);
     }
-    fetchUser();
-  }, [userId]);
+    fetchMe();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -42,20 +50,23 @@ export default function EditProfilePage() {
     e.preventDefault();
     setSuccess(null);
     setError(null);
+    if (!userId) return setError("No autenticado");
     try {
-      const res = await fetch(`http://localhost:4000/api/users/${userId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
-      });
-      if (res.ok) {
+      const res = await axios.put(
+        `http://localhost:4000/api/users/${userId}`,
+        form,
+        { withCredentials: true }
+      );
+      if (res.status === 200) {
         setSuccess("¡Perfil actualizado correctamente!");
       } else {
-        const data = await res.json();
-        setError(data.error || "Error al actualizar el perfil.");
+        setError(res.data?.error || "Error al actualizar el perfil.");
       }
-    } catch (err) {
-      setError("Error de conexión con el servidor.");
+    } catch (err: any) {
+      setError(
+        err.response?.data?.error ||
+        "Error de conexión con el servidor."
+      );
     }
   };
 
@@ -74,7 +85,7 @@ export default function EditProfilePage() {
     <div className="flex items-center justify-center min-h-screen ">
       <form
         onSubmit={handleSubmit}
-        className="bg-gray-800 p-8 rounded shadow-md w-full max-w-md flex flex-col gap-4"
+        className="bg-gray-800 text-white p-8 rounded shadow-md w-full max-w-md flex flex-col gap-4"
       >
         <h2 className="text-2xl font-bold mb-4 text-center">Editar Perfil</h2>
         {success && (
@@ -129,6 +140,18 @@ export default function EditProfilePage() {
           value={form.profile_picture_url}
           onChange={handleChange}
           placeholder="Profile Picture URL"
+          className="border rounded px-3 py-2 text-white"
+        />
+        <label className="text-white font-semibold" htmlFor="password">
+          Nueva Contraseña (opcional)
+        </label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          value={form.password}
+          onChange={handleChange}
+          placeholder="Nueva contraseña"
           className="border rounded px-3 py-2"
         />
         <button

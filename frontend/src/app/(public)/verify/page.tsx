@@ -19,12 +19,16 @@ export default function VerifyPage() {
         });
         const data = await res.json();
 
-    
-        if (!res.ok) {
-         setStatus("success");
-          setTimeout(() => router.push("/login"), 3000);
-}else{
-  setStatus("error")
+  if (res.ok) {
+  setStatus("success");
+  setTimeout(() => router.push("/login"), 3000);
+} else {
+  if (data.error.includes("ya usado")) {
+    setStatus("success"); 
+    setTimeout(() => router.push("/login"), 3000);
+  } else {
+    setStatus("error");
+  }
 }
       } catch (err) {
         console.error("Error en verificación:", err);

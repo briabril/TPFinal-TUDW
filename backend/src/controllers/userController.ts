@@ -129,10 +129,15 @@ export const verifyUser = async (req: Request, res: Response) => {
     if (!token) return res.status(400).json({ error: "Token faltante" });
 
     const verification = await findVerificationByToken(token);
-    if (verification.used ) return res.status(400).json({ error: "Token ya usado" });
-    
-    if (new Date(verification.expires_at) < new Date())
-      return res.status(400).json({ error: "Token expirado" });
+if (!verification) return res.status(400).json({ error: "Token inválido" });
+
+if (verification.used) {
+  return res.status(200).json({ success: true, message: "Token ya usado, cuenta ya activada" });
+}
+
+if (new Date(verification.expires_at) < new Date())
+  return res.status(400).json({ error: "Token expirado" });
+
 
     await activateUser(verification.user_id);
     await markVerificationUsed(verification.id);

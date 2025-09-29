@@ -150,7 +150,7 @@ export const createEmailVerification = async (
 // encontrar la verificación del token
 export const findVerificationByToken = async (token: string) => {
   const result = await db.query(
-    `SELECT * FROM email_verifications WHERE token = $1 AND used = FALSE LIMIT 1`,
+    `SELECT * FROM email_verifications WHERE token = $1`,
     [token]
   );
   return result.rows[0];

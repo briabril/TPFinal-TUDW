@@ -6,7 +6,6 @@ import api from "@/lib/axios";
 import { useAuth } from "@/context/AuthContext";
 import { User } from "@tpfinal/types";
 import ProfileHeader from "@/components/profile/ProfileHeader";
-import ProfileActions from "@/components/profile/ProfileActions";
 import BlockStatusMessage from "@/components/profile/BlockStatusMessage";
 import { Alert, AlertTitle, CircularProgress } from "@mui/material";
 

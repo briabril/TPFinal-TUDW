@@ -16,7 +16,6 @@ export const createUser = async (
   return result.rows[0] as User; // casteo a User para asegurar el tipo
 }
 
-//buscar usuarios
 // buscar usuarios
 export async function searchUsers(searchTerm: string, excludeIds: string[]): Promise<any[]> {
   const query = `
@@ -92,7 +91,6 @@ export const getAllUsers = async (): Promise<User[]> => {
 };
 
 // verificar email
-
 export const createEmailVerification = async (
   userId: string,
   token: string,

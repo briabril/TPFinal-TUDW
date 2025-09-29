@@ -36,7 +36,7 @@ export async function unblock(req: Request, res: Response) {
     }
 }
 
-/** Devuelve { blockedByYou, blockedByThem } para la UI */
+//Devuelve { blockedByYou, blockedByThem } para la UI 
 export async function status(req: Request, res: Response) {
     try {
         const viewerId = req.user!.id;

@@ -6,17 +6,7 @@ import api from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import { registerSchema, RegisterData } from "@/schemas/registerSchema";
 import toast from "react-hot-toast";
-
-// MUI
-import {
-  Box,
-  Button,
-  Container,
-  TextField,
-  Typography,
-  Paper,
-  Link,
-} from "@mui/material";
+import { Box, Button, Container, TextField, Typography, Paper, Link } from "@mui/material";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -117,8 +107,6 @@ export default function RegisterPage() {
             {isSubmitting ? "Registrando..." : "Registrarse"}
           </Button>
         </Box>
-
-        {/* Footer con link a login */}
         <Typography variant="body2" align="center" color="text.secondary">
           ¿Ya tienes cuenta?{" "}
           <Link

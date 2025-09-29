@@ -7,21 +7,29 @@ import Link from "next/link";
 
 function PublicHome() {
   return (
-    <div className="text-center">
-      <h1>Bienvenido a la red social</h1>
-      <div className="flex gap-4 mt-4 justify-center">
-        <Link
-          href="/login"
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          Iniciar sesión
-        </Link>
-        <Link
-          href="/register"
-          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-        >
-          Crear Cuenta
-        </Link>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="bg-white shadow-lg rounded-2xl p-10 w-full max-w-md text-center">
+        <h1 className="text-3xl font-bold text-gray-800 mb-4">
+          Bienvenido a "la red" social
+        </h1>
+        <p className="text-gray-600 mb-8">
+          Conéctate con tus amigos y comparte momentos especiales
+        </p>
+
+        <div className="flex flex-col gap-4">
+          <Link
+            href="/login"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+          >
+            Iniciar Sesión
+          </Link>
+          <Link
+            href="/register"
+            className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+          >
+            Crear Cuenta
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -43,11 +51,20 @@ export default function RootPage() {
     }
   }, [user, loading, router]);
 
-  if (loading) return <p>Cargando...</p>;
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-600">Cargando...</p>
+      </div>
+    );
 
   if (!user) {
     return <PublicHome />;
   }
 
-  return <p>Redirigiendo...</p>;
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <p className="text-gray-600">Redirigiendo...</p>
+    </div>
+  );
 }

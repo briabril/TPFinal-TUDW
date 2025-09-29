@@ -9,8 +9,7 @@ export default function VerifyPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!token) return;
-
+   if (!token || status !== "idle") return; 
     setStatus("loading");
 
     (async () => {
@@ -20,12 +19,13 @@ export default function VerifyPage() {
         });
         const data = await res.json();
 
-        if (res.ok && data.success) {
-          setStatus("success");
+    
+        if (!res.ok) {
+         setStatus("success");
           setTimeout(() => router.push("/login"), 3000);
-        } else {
-          setStatus("error");
-        }
+}else{
+  setStatus("error")
+}
       } catch (err) {
         console.error("Error en verificación:", err);
         setStatus("error");

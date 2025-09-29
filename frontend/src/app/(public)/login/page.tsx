@@ -30,7 +30,7 @@ export default function LoginPage() {
       toast.success("Login exitoso 🎉");
 
       if (me.data.role === "ADMIN") {
-        router.push("/dashboard");
+        router.push("/admin/dashboard");
       } else {
         router.push("/feed");
       }
@@ -101,8 +101,6 @@ export default function LoginPage() {
             {isSubmitting ? "Ingresando..." : "Ingresar"}
           </Button>
         </Box>
-
-        {/* Footer con link de registro */}
         <Typography variant="body2" align="center" color="text.secondary">
           ¿No tienes cuenta?{" "}
           <Link

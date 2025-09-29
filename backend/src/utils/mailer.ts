@@ -27,3 +27,31 @@ export async function sendVerificationEmail(to: string, token: string) {
     html,
   });
 }
+
+export async function sendStatusChangeEmail(to: string, newStatus: "ACTIVE" | "SUSPENDED") {
+  const subject =
+    newStatus === "ACTIVE"
+      ? "Tu cuenta ha sido reactivada"
+      : "Tu cuenta ha sido suspendida";
+
+  const html =
+    newStatus === "ACTIVE"
+      ? `
+        <p>Hola,</p>
+        <p>Te informamos que tu cuenta ha sido <b>reactivada</b>. Ya podés volver a ingresar.</p>
+        <p>Gracias por tu paciencia.</p>
+      `
+      : `
+        <p>Hola,</p>
+        <p>Te informamos que tu cuenta ha sido <b>suspendida</b>. No podrás ingresar hasta que un administrador la reactive.</p>
+        <p>Si creés que esto es un error, por favor contacta al soporte.</p>
+      `;
+
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM,
+    to,
+    subject,
+    html,
+  });
+}
+

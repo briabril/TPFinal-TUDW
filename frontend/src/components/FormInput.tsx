@@ -1,49 +1,46 @@
-"use client"
-import { Input } from "@heroui/react";
-import { FieldError } from "react-hook-form";
+"use client";
+import { TextField } from "@mui/material";
+import { FieldError, UseFormRegister } from "react-hook-form";
 
 interface FormInputProps {
   label: string;
-  error?: FieldError;
-  type?: string;
-  register: any;
   name: string;
-  
+  type?: string;
+  error?: FieldError;
+  register: UseFormRegister<any>;
 }
 
 export default function FormInput({
   label,
-  error,
-  type = "text",
-  register,
   name,
+  type = "text",
+  error,
+  register,
 }: FormInputProps) {
   return (
-    <div className="flex flex-col gap-1 w-full">
-      <Input
-        label={label}
-        type={type}
-        {...register(name)}
-        isInvalid={!!error}
-        errorMessage={error?.message}
-        variant="bordered"
-        labelPlacement="outside"
-        radius="lg"
-        classNames={{
-          base: "w-full",
-          label: "text-sm font-medium text-gray-700",
-          input: "text-base",
-          
-          inputWrapper: [
-            "border border-gray-300",
-            "transition-colors",
-             "data-[focus=true]:border-blue-600",
-
-      "data-[invalid=true]:border-red-500"
-          ],
-          errorMessage: "text-sm text-red-500"
-        }}
-      />
-    </div>
+    <TextField
+      label={label}
+      type={type}
+      {...register(name)}
+      error={!!error}
+      helperText={error?.message}
+      fullWidth
+      variant="outlined"
+      size="medium"
+      margin="dense"
+      sx={{
+        "& .MuiInputBase-root": {
+          borderRadius: "12px",
+        },
+        "& .MuiFormLabel-root": {
+          fontSize: "0.9rem",
+          fontWeight: 500,
+          color: "text.secondary",
+        },
+        "& .MuiInputBase-input": {
+          fontSize: "1rem",
+        },
+      }}
+    />
   );
 }

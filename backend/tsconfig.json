@@ -2,12 +2,11 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
     "module": "commonjs",
     "target": "ES2020",
     "esModuleInterop": true,
     "moduleResolution": "node",
-      "skipLibCheck": true,
+    "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true
   },

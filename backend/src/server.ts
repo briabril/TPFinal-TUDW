@@ -3,6 +3,8 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 import userRoutes from "./routes/userRoutes";
+import adminRoutes from "./routes/adminRoutes"
+import blockRoutes from './routes/blockRoutes'
 const app = express();
 const PORT = process.env.PORT || 4000;
 
@@ -14,6 +16,8 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 app.use("/api/users", userRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/blocks", blockRoutes)
 app.listen(PORT, () => {
   console.log(`Servidor backend corriendo en http://localhost:${PORT}`);
 });

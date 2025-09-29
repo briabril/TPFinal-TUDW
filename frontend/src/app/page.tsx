@@ -43,11 +43,9 @@ export default function RootPage() {
     if (loading) return;
 
     if (user) {
-      if (user.role === "ADMIN") {
-        router.replace("/dashboard");
-      } else {
+    
         router.replace("/feed");
-      }
+      
     }
   }, [user, loading, router]);
 

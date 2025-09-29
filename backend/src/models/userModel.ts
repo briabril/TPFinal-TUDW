@@ -90,6 +90,50 @@ export const getAllUsers = async (): Promise<User[]> => {
   return result.rows as User[];
 };
 
+export const updateUserProfile = async (
+  id: string,
+  { username, displayname, bio, profile_picture_url, password_hash }:
+  { username?: string; displayname?: string; bio?: string; profile_picture_url?: string; password_hash?: string; }
+) => {
+  const fields = [];
+  const values: any[] = [id];
+  let idx = 2;
+
+  if (username !== undefined) {
+    fields.push(`username = COALESCE($${idx++}, username)`);
+    values.push(username);
+  }
+  if (displayname !== undefined) {
+    fields.push(`displayname = COALESCE($${idx++}, displayname)`);
+    values.push(displayname);
+  }
+  if (bio !== undefined) {
+    fields.push(`bio = COALESCE($${idx++}, bio)`);
+    values.push(bio);
+  }
+  if (profile_picture_url !== undefined) {
+    fields.push(`profile_picture_url = COALESCE($${idx++}, profile_picture_url)`);
+    values.push(profile_picture_url);
+  }
+  if (password_hash !== undefined) {
+    fields.push(`password_hash = COALESCE($${idx++}, password_hash)`);
+    values.push(password_hash);
+  }
+  fields.push("updated_at = NOW()");
+
+  const result = await db.query(
+    `UPDATE users SET ${fields.join(", ")} WHERE id = $1 RETURNING *`,
+    values
+  );
+  return result.rows[0];
+};
+
+export const getUserById = async (id: string) => {
+  const result = await db.query("SELECT * FROM users WHERE id = $1", [id]);
+  return result.rows[0];
+};
+ 
+
 // verificar email
 export const createEmailVerification = async (
   userId: string,

@@ -4,7 +4,7 @@ import * as bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
 import {
   createUserPendingVerification, createEmailVerification, findUserByEmail,
-  findUserByEmailOrUsername, getAllUsers, activateUser, findVerificationByToken, markVerificationUsed
+  findUserByEmailOrUsername, getAllUsers, activateUser, findVerificationByToken, markVerificationUsed, findUserByUsername
 } from "../models/userModel";
 import { sendVerificationEmail } from "../utils/mailer";
 import { searchUsers } from "../models/userModel";
@@ -12,7 +12,10 @@ import * as BlockModel from "../models/blockModel";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// obtener todos los usuarios
+
+import { updateUserProfile } from "../models/userModel";
+import { getUserById } from "../models/userModel";
+
 export const getUsers = async (req: Request, res: Response) => {
   try {
     const users = await getAllUsers();
@@ -151,7 +154,20 @@ export const logoutUser = (req: Request, res: Response) => {
   });
   res.json({ message: "Logout exitoso" });
 };
-
+export const editProfile = async (req, res) => {
+  const userId = req.params.id;
+  const { username, displayname, bio, profile_picture_url, password } = req.body;
+  try {
+    let updateData: any = { username, displayname, bio, profile_picture_url };
+    if (password && password.length > 0) {
+      updateData.password_hash = await bcrypt.hash(password, 10);
+    }
+    const user = await updateUserProfile(userId, updateData);
+    res.json(user);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
 export const searchUsersController = async (req: Request, res: Response) => {
   try {
     const { search } = req.query
@@ -176,7 +192,7 @@ export const getProfileByUsername = async (req: Request, res: Response) => {
     const { username } = req.params;
     const currentUserId = (req as any).user.id;
     
-    const user = await findUserByEmailOrUsername(username);
+    const user = await findUserByUsername(username);
     if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
     const blockedByThem = await BlockModel.hasBlocked(user.id, currentUserId);
     if (blockedByThem) {
@@ -186,5 +202,14 @@ export const getProfileByUsername = async (req: Request, res: Response) => {
   } catch (err) {
     console.error("getProfileByUsername error:", err);
     res.status(500).json({ error: "Error al obtener el perfil" });
+  }
+};
+export const getUser = async (req, res) => {
+  try {
+    const user = await getUserById(req.params.id);
+    if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: "Error al obtener usuario" });
   }
 };

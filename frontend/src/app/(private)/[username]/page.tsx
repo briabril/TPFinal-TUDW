@@ -30,7 +30,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await api.get<User>(`/users/${username}`, {
+        const res = await api.get<User>(`/users/by-username/${username}`, {
           withCredentials: true,
         });
         setProfile(res.data);

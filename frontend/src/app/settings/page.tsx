@@ -1,19 +1,30 @@
 "use client";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "@/lib/axios";
 import Sidebar from "@/components/Sidebar";
-
+import {useForm} from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { editProfilSchema, ProfileData } from "@/schemas/editProfile";
+import {Button, TextField, Container, Paper, Typography, Box} from "@mui/material"
+import toast from "react-hot-toast";
 export default function EditProfilePage() {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    username: "",
+  const{
+    register,
+    handleSubmit,
+    setValue,
+    formState: {errors, isSubmitting},
+  } = useForm<ProfileData>({
+    resolver: zodResolver(editProfilSchema),
+  defaultValues: {
     displayname: "",
     bio: "",
-    profile_picture_url: "",
-    password: ""
-  });
-  const [success, setSuccess] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+    password: "",
+    new_password: "",
+    profile_picture_url: undefined,
+  },
+});
+  const [userId, setUserId] = useState<string | null>(null);
+
   const [loading, setLoading] = useState(true);
 
   //Obtener el usuario logueado
@@ -21,9 +32,10 @@ export default function EditProfilePage() {
     async function fetchMe() {
       setLoading(true);
       try {
-        const res = await axios.get("http://localhost:4000/api/users/me", {
+        const res = await api.get("http://localhost:4000/api/users/me", {
           withCredentials: true
         });
+    
         type User = {
           id: string;
           username: string;
@@ -32,53 +44,49 @@ export default function EditProfilePage() {
           profilePicture?: string;
         };
         const user = res.data as User;
+            setUserId(user.id);
+setValue("displayname", user.displayname || "");
+setValue("bio", user.bio || "");
+        
         setUserId(user.id);
-        setForm(f => ({
-          ...f,
-          username: user.username || "",
-          displayname: user.displayname || "",
-          bio: user.bio || "",
-          profile_picture_url: user.profilePicture || ""
-        }));
+       
       } catch (err: any) {
-        setError(
-          err?.response?.data?.error || "No autenticado"
+        toast.error(err?.response?.data?.error || "No autenticado"
         );
       }
       setLoading(false);
     }
     fetchMe();
-  }, []);
+  }, [setValue]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  
+// Actualizar los datos del usuario
+const onSubmit = async (data: ProfileData) => {
+  if (!userId) return toast.error("No autenticado");
+ try {
+      const formData = new FormData();
+      formData.append("displayname", data.displayname);
+      formData.append("password", data.password);
+      formData.append("new_password", data.new_password);
+      formData.append("bio", data.bio);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSuccess(null);
-    setError(null);
-    if (!userId) return setError("No autenticado");
-    try {
-      const res = await axios.put(
-        `http://localhost:4000/api/users/${userId}`,
-        form,
-        { withCredentials: true }
-      );
-      if (res.status === 200) {
-        setSuccess("¡Perfil actualizado correctamente!");
-      } else {
-        setError("Error al actualizar el perfil.");
+      if (data.profile_picture_url instanceof File) {
+        formData.append("profile_picture_url", data.profile_picture_url);
       }
+
+      const res = await api.put(`/users/${userId}`, formData, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      toast.success("¡Perfil actualizado correctamente!");
     } catch (err: any) {
-      setError(
-        err.response?.data?.error ||
-        "Error de conexión con el servidor."
+      toast.error(
+        err.response?.data?.error || "Error de conexión con el servidor."
       );
     }
   };
+ 
 
   if (loading) {
     return (
@@ -92,88 +100,89 @@ export default function EditProfilePage() {
   }
 
   return (
-    <div className="flex min-h-screen text-black">
-      <Sidebar />
-      <div className="flex-1 flex items-center justify-center">
-        <form
-          onSubmit={handleSubmit}
-          className="  p-8 rounded shadow-md w-full max-w-md flex flex-col gap-4"
+    <Container maxWidth="lg" sx={{minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        bgcolor: "grey.50",}}>
+ <Sidebar />
+ <Paper
+        elevation={6}
+        sx={{
+          p: 5,
+          borderRadius: 4,
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+        }}
+      >
+         <Typography variant="h3" align="center" fontWeight="bold" gutterBottom>
+          Editar Perfil
+        </Typography>
+         <Box
+          component="form"
+            onSubmit={handleSubmit(onSubmit)}
+          display="flex"
+          flexDirection="column"
+          gap={2.5}
         >
-        <h2 className="text-2xl font-bold mb-4 text-center">Editar Perfil</h2>
-        {success && (
-          <div className="bg-green-100 text-green-800 px-4 py-2 rounded text-center">
-            {success}
-          </div>
-        )}
-        {error && (
-          <div className="bg-red-100 text-red-800 px-4 py-2 rounded text-center">
-            {error}
-          </div>
-        )}
-        <label className="font-semibold" htmlFor="username">
-          Username
-        </label>
-        <input
-          id="username"
-          name="username"
-          value={form.username}
-          onChange={handleChange}
-          placeholder="Username"
-          className="border rounded px-3 py-2"
-        />
-        <label className=" font-semibold" htmlFor="displayname">
-          Display Name
-        </label>
-        <input
-          id="displayname"
-          name="displayname"
-          value={form.displayname}
-          onChange={handleChange}
-          placeholder="Display Name"
-          className="border rounded px-3 py-2"
-        />
-        <label className=" font-semibold" htmlFor="bio">
-          Bio
-        </label>
-        <textarea
-          id="bio"
-          name="bio"
-          value={form.bio}
-          onChange={handleChange}
-          placeholder="Bio"
-          className="border rounded px-3 py-2 resize-none"
-        />
-        <label className=" font-semibold" htmlFor="profile_picture_url">
-          Profile Picture URL
-        </label>
-        <input
-          id="profile_picture_url"
-          name="profile_picture_url"
-          value={form.profile_picture_url}
-          onChange={handleChange}
-          placeholder="Profile Picture URL"
-          className="border rounded px-3 py-2 "
-        />
-        <label className=" font-semibold" htmlFor="password">
-          Nueva Contraseña (opcional)
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          value={form.password}
-          onChange={handleChange}
-          placeholder="Nueva contraseña"
-          className="border rounded px-3 py-2"
-        />
-        <button
-          type="submit"
-          className="bg-blue-600 rounded px-4 py-2 hover:bg-blue-700 transition text-white cursor-pointer"
+
+           <TextField
+            label="Nombre de Usario"
+            fullWidth
+            {...register("displayname")}
+            error={!!errors.displayname}
+            helperText={errors.displayname?.message}
+          />
+          <TextField
+            label="Bio"
+            fullWidth
+            {...register("bio")}
+             error={!!errors.bio}
+            helperText={errors.bio?.message}
+          />
+          <TextField
+            label="Contraseña anterior"
+            fullWidth
+            {...register("password")}
+            error={!!errors.password}
+            helperText={errors.password?.message}
+          />
+           <TextField
+            label="Nueva contraseña"
+            fullWidth
+            {...register("new_password")}
+            error={!!errors.new_password}
+            helperText={errors.new_password?.message}
+          />
+          <label htmlFor="profile_picture_url">Elija una foto de perfil:</label>
+          <input type="file" id="profile_picture_url" {...register("profile_picture_url")} accept="image/png, image/jpeg"/>
+          {errors.profile_picture_url && (
+            <p className="text-red-600">{errors.profile_picture_url.message as string}</p>
+          )}
+          
+             <Button
+        type = "submit"
+        variant = "contained"
+        color ="primary"
+        size = "large"
+        disabled = {isSubmitting}
+        sx={{borderRadius: 2, py:1.5, fontWeight:600}}
         >
-          Guardar
-        </button>
-      </form>
-      </div>
-    </div>
+          {isSubmitting ? "Guardando..." : "Guardar"}
+        </Button>
+        </Box>
+      </Paper>
+    </Container>
+     
+      
+       
+       
+     
+      
+   
+     
+    
   );
 }

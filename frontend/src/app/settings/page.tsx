@@ -102,8 +102,10 @@ const onSubmit = async (data: ProfileData) => {
   return (
     <Container maxWidth="lg" sx={{minHeight: "100vh",
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        flexDirection: "row", 
+         justifyContent: "space-between", 
+    alignItems: "flex-start", 
+    gap: 4,
         bgcolor: "grey.50",}}>
  <Sidebar />
  <Paper
@@ -111,6 +113,7 @@ const onSubmit = async (data: ProfileData) => {
         sx={{
           p: 5,
           borderRadius: 4,
+           flex: 1, 
           width: "100%",
           display: "flex",
           flexDirection: "column",

@@ -4,36 +4,58 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+import ThemeToggle from "@/components/ThemeToggle";
+
+import { Box, Typography, Button, Paper } from "@mui/material";
 
 function PublicHome() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="bg-white shadow-lg rounded-2xl p-10 w-full max-w-md text-center">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
+    <Box
+      minHeight="100vh"
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+      bgcolor="background.default"
+      width={"w-full"}
+      px={4}
+      sx={{position:"relative"}}
+    >
+      <div className="absolute top-4 right-4">
+         <ThemeToggle  />
+      </div>
+     
+      <Paper elevation={6} sx={{ p: 5, borderRadius: 3, textAlign: "center" }}>
+        <Typography variant="h4" fontWeight="bold" color="text.primary" mb={2}>
           Bienvenido a "la red" social
-        </h1>
-        <p className="text-gray-600 mb-8">
+        </Typography>
+        <Typography color="text.secondary" mb={4}>
           Conéctate con tus amigos y comparte momentos especiales
-        </p>
+        </Typography>
 
-        <div className="flex flex-col gap-4">
-          <Link
+        <Box display="flex" flexDirection="column" gap={2}>
+          <Button
+            component={Link}
             href="/login"
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            variant="contained"
+            color="primary"
           >
             Iniciar Sesión
-          </Link>
-          <Link
+          </Button>
+          <Button
+            component={Link}
             href="/register"
-            className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+            variant="contained"
+            color="success"
           >
             Crear Cuenta
-          </Link>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </Box>
+      </Paper>
+    </Box>
   );
 }
+
 
 export default function RootPage() {
   const { user, loading } = useAuth();

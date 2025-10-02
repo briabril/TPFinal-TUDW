@@ -38,7 +38,7 @@ export default function UserTable({ users, onToggle }: Props) {
     <TableContainer component={Paper} elevation={4} sx={{ borderRadius: 2 }}>
       <Table>
         <TableHead>
-          <TableRow sx={{ backgroundColor: "grey.100" }}>
+          <TableRow >
             <TableCell align="center">
               <strong>Usuario</strong>
             </TableCell>
@@ -57,9 +57,7 @@ export default function UserTable({ users, onToggle }: Props) {
           {users.map((u, index) => (
             <TableRow
               key={u.id}
-              sx={{
-                backgroundColor: index % 2 === 0 ? "grey.50" : "white",
-              }}
+             
             >
               <TableCell align="center">{u.username}</TableCell>
               <TableCell align="center">{u.email}</TableCell>

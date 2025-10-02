@@ -28,7 +28,7 @@ export default function Sidebar() {
   if (loading) return <h1 className="text-center py-10 text-lg">Cargando...</h1>;
 
   return (
-    <aside className="w-64 h-screen shadow p-6 flex flex-col justify-between bg-white">
+    <aside className="w-64 min-h-screen shadow p-6 flex flex-col justify-between border-r-2 border-gray-500">
       <div>
         <h2 className="font-bold text-2xl mb-8 text-primary">La Red</h2>
 
@@ -72,7 +72,7 @@ export default function Sidebar() {
         {user?.role === "ADMIN" && (
           <>
             <Divider sx={{ my: 2 }} />
-            <h3 className="text-sm font-semibold text-gray-500 mb-2">Admin</h3>
+            <h3 className="text-sm font-semibold mb-2">Admin</h3>
 
             <List>
               <ListItemButton component={Link} href="/admin/dashboard">
@@ -101,7 +101,7 @@ export default function Sidebar() {
       </div>
 
       {user && (
-        <div className="flex items-center justify-between mt-6 p-2 rounded-xl bg-gray-50">
+        <div className="flex items-center justify-between mt-6 p-2 rounded-xl ">
           <div className="flex items-center gap-2">
             <Avatar
               src={user.profile_picture_url ?? undefined}

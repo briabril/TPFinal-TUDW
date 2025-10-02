@@ -105,19 +105,19 @@ const onSubmit = async (data: ProfileData) => {
         flexDirection: "row", 
          justifyContent: "space-between", 
     alignItems: "flex-start", 
-    gap: 4,
-        bgcolor: "grey.50",}}>
+
+       }}>
  <Sidebar />
  <Paper
         elevation={6}
         sx={{
           p: 5,
-          borderRadius: 4,
            flex: 1, 
           width: "100%",
           display: "flex",
           flexDirection: "column",
           gap: 3,
+          minHeight: "100vh"
         }}
       >
          <Typography variant="h3" align="center" fontWeight="bold" gutterBottom>

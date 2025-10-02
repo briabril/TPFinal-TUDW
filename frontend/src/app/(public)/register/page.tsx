@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { registerSchema, RegisterData } from "@/schemas/registerSchema";
 import toast from "react-hot-toast";
 import { Box, Button, Container, TextField, Typography, Paper, Link } from "@mui/material";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -30,16 +31,19 @@ export default function RegisterPage() {
   };
 
   return (
-    <Container
-      maxWidth="sm"
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        bgcolor: "grey.50",
-      }}
+     <Box
+      minHeight="100vh"
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+      bgcolor="background.default"
+      px={4}
+      sx={{position:"relative", width: '100%'}}
     >
+      <div className="absolute top-4 right-4">
+         <ThemeToggle  />
+      </div>
       <Paper
         elevation={6}
         sx={{
@@ -118,6 +122,6 @@ export default function RegisterPage() {
           </Link>
         </Typography>
       </Paper>
-    </Container>
+    </Box>
   );
 }

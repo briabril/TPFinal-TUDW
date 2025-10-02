@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { User } from "@tpfinal/types";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import ThemeToggle from "@/components/ThemeToggle";
 
 import { Box, Button, Container, TextField, Typography, Paper, Link } from "@mui/material";
 
@@ -40,6 +41,19 @@ export default function LoginPage() {
   };
 
   return (
+     <Box
+      minHeight="100vh"
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+      bgcolor="background.default"
+      px={4}
+      sx={{position:"relative", width: '100%'}}
+    >
+      <div className="absolute top-4 right-4">
+         <ThemeToggle  />
+      </div>
     <Container
       maxWidth="sm"
       sx={{
@@ -47,9 +61,10 @@ export default function LoginPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        bgcolor: "grey.50",
+     
       }}
     >
+ 
       <Paper
         elevation={6}
         sx={{
@@ -113,5 +128,7 @@ export default function LoginPage() {
         </Typography>
       </Paper>
     </Container>
+    </Box>
+    
   );
 }

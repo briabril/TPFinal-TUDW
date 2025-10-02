@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getUsers, getMe, registerUser, loginUser, verifyUser, logoutUser , searchUsersController, getProfileByUsername, getUser, editProfile} from "../controllers/userController";
+import { getUsers, getMe, registerUser, loginUser, verifyUser, logoutUser , searchUsersController, getProfileByUsername, getUser, editProfile, uploadMiddleware} from "../controllers/userController";
 import { authenticateJWT } from "../middleware/auth";
 
 const router = Router();
@@ -12,7 +12,7 @@ router.post("/login", loginUser)
 router.get("/verify", verifyUser);
 router.post("/logout", logoutUser);
 router.get("/by-id/:id", authenticateJWT, getUser); 
-router.put("/:id",authenticateJWT, editProfile);
+router.put("/:id",authenticateJWT, uploadMiddleware, editProfile);
 router.get("/", getUsers);       
 
 export default router;

@@ -31,8 +31,11 @@ function buildCommentTree(comments: CommentRow[]): CommentNode[] {
 
   return roots;
 }
-
-export const insertComment = async (req: Request, res: Response) => {
+// Extendemos Request para tipar io
+interface IORequest extends Request {
+  io: any;
+}
+export const insertComment = async (req: IORequest, res: Response) => {
   try {
     const { author_id, post_id, text, parent_id } = req.body;
 
@@ -42,6 +45,8 @@ export const insertComment = async (req: Request, res: Response) => {
 
     if (!parent_id) {
       const newComment = await insertCommentDB(author_id, post_id, text, null);
+      
+       req.io?.emit(`new-comment-${post_id}`, newComment);
       return res.status(201).json(newComment);
     }
 
@@ -64,13 +69,14 @@ export const updateComment = async (req: Request, res: Response) => {
   try {
     const { commentId } = req.params;
     const { text } = req.body;
+     if (!text?.trim()) {
+      return res.status(400).json({ message: "El texto no puede estar vacío" });
+    }
     const updated = await updateCommentDB(commentId, text);
 
     if (!updated)
       return res.status(404).json({ message: "Comentario no encontrado" });
-  if (!text?.trim()) {
-      return res.status(400).json({ message: "El texto no puede estar vacío" });
-    }
+ 
     res.status(200).json(updated);
   } catch (error) {
     console.error("Error al actualizar comentario:", error);
@@ -82,7 +88,7 @@ export const deleteComment = async (req: Request, res: Response) => {
   try {
     const { commentId } = req.params;
     await deleteCommentDB(commentId);
-    res.status(204).send();
+    res.status(204).json({message: "Comentario eliminado"});
   } catch (error) {
     console.error("Error al eliminar comentario:", error);
     res.status(500).json({ message: "Error interno del servidor" });

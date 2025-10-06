@@ -45,6 +45,7 @@ CREATE TABLE user_comments (
     post_id UUID NOT NULL REFERENCES post(id) ON DELETE CASCADE,
     text VARCHAR(280) NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
     parent_id UUID REFERENCES user_comments(id) ON DELETE CASCADE
 );
 CREATE TABLE reaction (

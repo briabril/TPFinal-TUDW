@@ -23,7 +23,7 @@ function buildCommentTree(comments: CommentRow[]): CommentNode[] {
     if (c.parent_id) {
       const parent = map.get(c.parent_id);
       if (parent) parent.children.push(node);
-      else roots.push(node); // o manejar como huérfano
+      else roots.push(node); 
     } else {
       roots.push(node);
     }

@@ -1,13 +1,13 @@
-
 const express = require("express");
 const cors = require("cors");
-import http from "http";
-import { Server as SocketIOServer } from "socket.io";
+const http = require("http");
+const { Server: SocketIOServer } = require("socket.io");
 const cookieParser = require("cookie-parser");
 import userRoutes from "./routes/userRoutes";
-import adminRoutes from "./routes/adminRoutes"
-import blockRoutes from './routes/blockRoutes'
-import{ attachIO } from "./middleware/socket";
+import adminRoutes from "./routes/adminRoutes";
+import blockRoutes from "./routes/blockRoutes";
+import { attachIO } from "./middleware/socket";
+
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -42,6 +42,6 @@ io.on("connection", (socket) => {
 });
 
 // Se levanta el servidor
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Servidor backend corriendo en http://localhost:${PORT}`);
 });

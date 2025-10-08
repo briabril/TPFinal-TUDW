@@ -9,8 +9,8 @@ import {
 import { authenticateJWT } from "../middleware/auth";
 const router = Router();
 
-router.post("/", authenticateJWT, insertComment);
-router.get("/post/:postId", getCommentsByPost);
+router.post("/post/:postId", authenticateJWT, insertComment);
+router.get("/post/:postId/comments", getCommentsByPost);
 router.get("/:commentId", findComment);
 router.put("/:commentId", authenticateJWT, updateComment);
 

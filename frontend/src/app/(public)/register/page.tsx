@@ -49,7 +49,7 @@ export default function RegisterPage() {
         sx={{
           p: 5,
           borderRadius: 4,
-          width: "100%",
+          width: "40%",
           display: "flex",
           flexDirection: "column",
           gap: 3,

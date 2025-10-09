@@ -1,6 +1,6 @@
 import {useForm} from "react-hook-form";
 import api from "@/lib/axios";
-import { Comment } from "@/types/comment";
+import { Comment } from "@/types/Comment";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { commentSchema, CommentFormData } from "@/schemas/commentSchema";
 import { TextField, Button, Box } from "@mui/material";

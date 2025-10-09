@@ -1,5 +1,5 @@
 "use client"
-import { Comment } from "@/types/comment";
+import { Comment } from "@/types/Comment";
 import socket from "@/socket";
 import CommentForm from "./CommentForm";
 import CommentItem from "./CommentItem";

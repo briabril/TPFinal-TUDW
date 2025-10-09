@@ -1,6 +1,6 @@
 
 "use client"
-import { Comment } from "@/types/comment";
+import { Comment } from "@/types/Comment";
 import { Typography, Box } from "@mui/material";
 import CommentForm from "./CommentForm";
 import { CommentFormData } from "@/schemas/commentSchema";

@@ -12,6 +12,7 @@ export default function EditProfilePage() {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: {errors, isSubmitting},
   } = useForm<ProfileData>({
     resolver: zodResolver(editProfilSchema),
@@ -27,6 +28,9 @@ export default function EditProfilePage() {
 
   const [loading, setLoading] = useState(true);
 
+  const bioValue = watch("bio") || "";
+  const bioLength = bioValue.length;
+  const maxBioLength = 160;
   //Obtener el usuario logueado
   useEffect(() => {
     async function fetchMe() {
@@ -138,13 +142,21 @@ const onSubmit = async (data: ProfileData) => {
             error={!!errors.displayname}
             helperText={errors.displayname?.message}
           />
+          <Box>
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Typography variant="subtitle1">Bio</Typography>
+              <Typography variant="caption" color={bioLength > maxBioLength? "error" : "text.secondary"}> {bioLength}/{maxBioLength}</Typography>
+
+       
+          </Box>
           <TextField
             label="Bio"
             fullWidth
             {...register("bio")}
              error={!!errors.bio}
-            helperText={errors.bio?.message}
+            helperText={errors.bio?.message || (bioLength > maxBioLength ? "Has superado el máximo de 160 caracteres" : "")}
           />
+               </Box>
           <TextField
             label="Contraseña anterior"
             fullWidth
@@ -179,13 +191,5 @@ const onSubmit = async (data: ProfileData) => {
       </Paper>
     </Container>
      
-      
-       
-       
-     
-      
-   
-     
-    
   );
 }

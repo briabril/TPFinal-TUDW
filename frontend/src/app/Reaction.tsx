@@ -7,7 +7,8 @@ import toast from "react-hot-toast";
 
 interface PostReactionProps {
   userId: string;
-  postId: string;
+  targetId: string; // puede ser post_id o comment_id
+  type: "post" | "comment"; // para saber qué endpoint usar
 }
 
 interface ToggleReactionResponse {
@@ -18,16 +19,17 @@ interface LikesCountResponse {
   likes: number;
 }
 
-export const PostReaction = ({ userId, postId }: PostReactionProps) => {
+export const PostReaction = ({ userId, targetId, type }: PostReactionProps) => {
   const [liked, setLiked] = useState<boolean>(false);
   const [count, setCount] = useState<number>(0);
 
   const toggleReaction = async () => {
     try {
-      const result = await api.post<ToggleReactionResponse>("/api/reactions", {
-        user_id: userId,
-        post_id: postId,
-      });
+    
+        const endpoint = type === "post" ? ("/api/reactions") : ("/api/reactions/comments")
+        const payload = type === "post" ? {user_id: userId, post_id: targetId} : {user_id: userId, comment_id : targetId}
+    
+      const result = await api.post<ToggleReactionResponse>(endpoint, payload);
 
       setLiked(result.data.liked);
       fetchCount(); // actualiza el contador
@@ -38,8 +40,9 @@ export const PostReaction = ({ userId, postId }: PostReactionProps) => {
 
   const fetchCount = async () => {
     try {
+      const endopoint = type === "post" ? (`/api/reactions/post/${targetId}/likes`) :  (`/api/reactions/comment/${targetId}/likes`)
       const result = await api.get<LikesCountResponse>(
-        `/api/reactions/post/${postId}/likes`
+        endopoint
       );
       setCount(result.data.likes);
     } catch {

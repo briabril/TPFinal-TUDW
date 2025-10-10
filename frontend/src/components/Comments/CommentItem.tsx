@@ -5,7 +5,7 @@ import { Typography, Box } from "@mui/material";
 import CommentForm from "./CommentForm";
 import { CommentFormData } from "@/schemas/commentSchema";
 import { Reaction } from "../Reaction";
-const { user } = useAuth();
+import { useAuth } from "@/context/AuthContext";
 
 interface CommentItemProps{
     comment: Comment;
@@ -16,6 +16,7 @@ const CommentItem: React.FC<CommentItemProps> = ({comment, onReply})=>{
     const handleReply = (data: CommentFormData) =>{
         onReply(data, comment.id)
     }
+    const { user } = useAuth();
 return(
     <Box className="border-l-2 border-gray-300 pl-4 mt-2">
       <Reaction userId={user?.id} targetId={comment.id}  type="comment"/>

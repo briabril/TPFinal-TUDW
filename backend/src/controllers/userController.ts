@@ -330,8 +330,11 @@ export const getProfileByUsername = async (req: Request, res: Response) => {
   try {
     const { username } = req.params;
     const currentUserId = (req as any).user.id;
-    
+
+    console.log("getProfileByUsername called", { username, currentUserId });
+
     const user = await findUserByUsername(username);
+    console.log("findUserByUsername result:", !!user ? `found id=${user.id}` : "not found");
     if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
     const blockedByThem = await BlockModel.hasBlocked(user.id, currentUserId);
     if (blockedByThem) {

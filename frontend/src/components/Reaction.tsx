@@ -6,7 +6,7 @@ import api from "@/lib/axios";
 import toast from "react-hot-toast";
 
 interface PostReactionProps {
-  userId: string;
+  userId?: string ;
   targetId: string; // puede ser post_id o comment_id
   type: "post" | "comment"; // para saber qué endpoint usar
 }
@@ -19,7 +19,7 @@ interface LikesCountResponse {
   likes: number;
 }
 
-export const PostReaction = ({ userId, targetId, type }: PostReactionProps) => {
+export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
   const [liked, setLiked] = useState<boolean>(false);
   const [count, setCount] = useState<number>(0);
 

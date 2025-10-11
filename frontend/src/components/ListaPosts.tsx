@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import PostBody from "./PostBody";
 import {Reaction} from "./Reaction"
 import Comments from "./Comments/Comments";
+import { Card, CardContent, CardMedia, Typography, Stack, Box } from "@mui/material";
 type RawPost = Record<string, any>;
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:4000";
 
@@ -68,10 +69,10 @@ const ListaPosts: React.FC<{ mineOnly?: boolean }> = ({ mineOnly = false }) => {
 
   return (
     <>
-      <div className="space-y-6">
-        <h2 className="text-xl font-semibold">Posts publicados</h2>
-        {errorMsg && <div className="text-red-600 mb-3">{errorMsg}</div>}
-        {posts.length === 0 && !errorMsg && <p>No hay posts todavía</p>}
+      <Stack spacing={3}>
+         <Typography variant="h5" fontWeight="bold">Posts publicados</Typography>
+        {errorMsg &&  <Typography color="error">{errorMsg}</Typography>}
+        {posts.length === 0 && !errorMsg && <Typography>No hay posts todavía</Typography>}
 
         {posts.map((post: any) => {
           const description = post.text ?? "(sin descripción)";
@@ -83,13 +84,11 @@ const ListaPosts: React.FC<{ mineOnly?: boolean }> = ({ mineOnly = false }) => {
           const isOwn = user && post.author?.username === user.username;
 
           return (
-            <article
+            <Card 
               key={post.id ?? Math.random()}
-              className={`${
-                isOwn ? "bg-blue-50" : "bg-white"
-              } rounded-lg p-4 shadow-sm`}
+             variant="outlined" sx={{ bgcolor: isOwn ? "blue.50" : "background.paper" }}
             >
-              <div className="mb-3">
+              <CardContent>
                 <PostBody
                   post={post}
                   description={description}
@@ -97,38 +96,41 @@ const ListaPosts: React.FC<{ mineOnly?: boolean }> = ({ mineOnly = false }) => {
                   author={author}
                   isOwn={isOwn}
                 />
+                 <Stack direction="row" alignItems="center" spacing={1} mt={1}>
                 <Reaction userId={user?.id} type="post" targetId={post.id}/>
+                  </Stack>
                 <Comments postId={post.id} authorId={user?.id}/>
-              </div>
+              </CardContent>
 
               {medias && medias.length > 0 && (
-                <div className="w-full">
-                  <div className="flex gap-2 overflow-x-auto max-w-full py-1">
+                <Box sx={{ display: "flex", overflowX: "auto", p: 1 }}>
                     {medias.map((m: any, idx: number) => {
                       const url = getMediaUrl(m);
                       const type = (m.type ?? m.media_type)?.toUpperCase?.() || null;
                       if (!url) return null;
                       return (
-                        <div key={idx} className="flex-shrink-0 w-48 overflow-hidden rounded-lg">
-                          {type === 'AUDIO' ? (
-                            <div className="p-3 bg-gray-50 rounded flex items-center">
-                              <audio src={url} controls className="w-full h-auto" />
-                            </div>
-                          ) : type === 'VIDEO' ? (
-                            <video src={url} controls className="w-full h-auto object-cover rounded-lg" />
-                          ) : type === 'IMAGE' || type === 'GIF' ? (
-                            <img src={url} alt={description ?? 'media'} className="w-full h-auto object-cover rounded-lg" />
-                          ) : null}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </article>
+                      <Box key={idx} sx={{ minWidth: 200, mr: 1, borderRadius: 1, overflow: "hidden" }}>
+                      {type === 'AUDIO' ? (
+                        <audio src={url} controls style={{ width: "100%" }} />
+                      ) : type === 'VIDEO' ? (
+                        <video src={url} controls style={{ width: "100%", borderRadius: 8 }} />
+                      ) : type === 'IMAGE' || type === 'GIF' ? (
+                        <CardMedia
+                          component="img"
+                          image={url}
+                          alt={description ?? 'media'}
+                          sx={{ borderRadius: 1 }}
+                        />
+                      ) : null}
+                  </Box>
+                  );
+                })}
+              </Box>
+            )}
+          </Card>
           );
         })}
-      </div>
+      </Stack>
 
   
     </>

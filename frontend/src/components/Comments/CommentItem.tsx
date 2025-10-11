@@ -1,7 +1,7 @@
 
 "use client"
 import {Comment}  from "../../types/comment";
-import { Typography, Box } from "@mui/material";
+import { Typography, Box , Paper} from "@mui/material";
 import CommentForm from "./CommentForm";
 import { CommentFormData } from "@/schemas/commentSchema";
 import { Reaction } from "../Reaction";
@@ -28,28 +28,33 @@ const CommentItem: React.FC<CommentItemProps> = ({comment, onReply})=>{
     }
     const { user } = useAuth();
 return(
-    <Box className="ml-0 md:ml-0">
-      <Box className="border border-gray-200 rounded-xl p-3 mb-2 bg-white shadow-sm hover:shadow-md transition-shadow  duration-200 hover:bg-gray-50">
-     
-        <Box className="flex items-center mt-2 gap-2">
-             <Typography variant="subtitle2" className="font-bold text-gray-800">
-          {comment.author_username || "Usuario anónimo"}
-        </Typography>
-          <Typography variant="body2" className="mt-1 text-gray-700">{comment.text}</Typography>
-      
+    <Box>
+      <Paper
+        elevation={1}
+        sx={{
+          p: 2,
+          mb: 2,
+        }}
+      >
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <Typography variant="subtitle2" fontWeight="bold">
+            {comment.author_username || "Usuario anónimo"}
+          </Typography>
+          <Typography variant="body2">{comment.text}</Typography>
+
+          <Box sx={{ display: "flex", alignItems: "center", mt: 1, gap: 1 }}>
+            <Reaction userId={comment.author_id} targetId={comment.id} type="comment" />
+            <Typography variant="caption" color="text.secondary">
+              {formatDate(comment.created_at)}
+            </Typography>
+          </Box>
+
+          <CommentForm postId={comment.post_id} parentId={comment.id} onSubmit={handleReply} />
         </Box>
-        <Box className="flex items-center">
-         <Reaction userId={comment.author_id} targetId={comment.id} type="comment" />
-        
-          <Typography variant="caption" className="text-gray-500 text-xs"> {formatDate(comment.created_at)}</Typography>
-            
-        </Box>
-     
-        <CommentForm postId={comment.post_id} parentId={comment.id} onSubmit={handleReply} />
-      </Box>
+      </Paper>
 
       {/* Comentarios hijos */}
-      <Box className="pl-4 border-l-2 border-gray-100">
+      <Box sx={{ pl: 3, borderLeft: `2px solid ` }}>
         {comment.children?.map((child) => (
           <CommentItem key={child.id} comment={child} onReply={onReply} />
         ))}

@@ -73,9 +73,9 @@ export default function RootPage() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-gray-600">Cargando...</p>
-      </div>
+      <Box className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Typography className="text-gray-600">Cargando...</Typography>
+      </Box>
     );
 
   if (!user) {
@@ -83,8 +83,8 @@ export default function RootPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <p className="text-gray-600">Redirigiendo...</p>
-    </div>
+    <Box className="min-h-screen flex items-center justify-center bg-gray-50">
+      <Typography className="text-gray-600">Redirigiendo...</Typography>
+    </Box>
   );
 }

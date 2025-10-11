@@ -1,11 +1,12 @@
 import React from 'react'
 import ListaPosts from '@/components/ListaPosts'
+import { Typography, Box } from '@mui/material'
 
 export default function PostsPage() {
   return (
-    <div style={{ padding: 16 }}>
-      <h1>Posts</h1>
+    <Box style={{ padding: 16 }}>
+      <Typography>Posts</Typography>
       <ListaPosts />
-    </div>
+    </Box>
   )
 }

@@ -1,3 +1,4 @@
+"use client"
 import { SunMedium , Moon  } from 'lucide-react';
 import { Button } from '@mui/material';
 import { useThemeContext } from '@/app/context/ThemeContext';

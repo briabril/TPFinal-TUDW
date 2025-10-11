@@ -35,7 +35,8 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-8 relative">
-      <div className="absolute top-4 right-4"><ThemeToggle/></div>
+    
+      <div className="absolute top-3 right-4"><ThemeToggle/></div>
       <h1 className="text-2xl font-bold mb-6">Panel de administración</h1>
       <UserTable users={users} onToggle={toggleUser} />
     </div>

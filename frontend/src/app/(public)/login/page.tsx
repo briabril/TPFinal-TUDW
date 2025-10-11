@@ -51,7 +51,7 @@ export default function LoginPage() {
       px={4}
       sx={{position:"relative", width: '100%'}}
     >
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-3 right-4">
          <ThemeToggle  />
       </div>
     <Container

@@ -9,7 +9,15 @@ import {
 import { Request, Response } from "express";
 
 const MAX_DEPTH = 6;
-type CommentRow = { id: string; parent_id?: string | null; text: string; created_at: Date };
+type CommentRow = {
+  id: string;
+  author_id: string;
+  author_username: string;
+  post_id: string;
+  text: string;
+  parent_id?: string | null;
+  created_at: Date;
+};
 type CommentNode = CommentRow & { children: CommentNode[] };
 
 function buildCommentTree(comments: CommentRow[]): CommentNode[] {
@@ -43,12 +51,7 @@ export const insertComment = async (req: IORequest, res: Response) => {
       return res.status(400).json({ message: "El texto no puede estar vacío" });
     }
 
-    if (!parent_id) {
-      const newComment = await insertCommentDB(author_id, post_id, text, null);
-      
-       req.io?.emit(`new-comment-${post_id}`, newComment);
-      return res.status(201).json(newComment);
-    }
+   
 
     const depth = await getCommentDepth(parent_id);
     if (depth + 1 > MAX_DEPTH) {
@@ -58,6 +61,8 @@ export const insertComment = async (req: IORequest, res: Response) => {
     }
 
     const newComment = await insertCommentDB(author_id, post_id, text, parent_id);
+           req.io?.emit(`new-comment-${post_id}`, newComment);
+
     res.status(201).json(newComment);
   } catch (error) {
     console.error("Error al responder comentario:", error);

@@ -1,30 +1,31 @@
-import { count } from "console";
 import { getPostLikesCount, getCommentLikesCount, toggleCommenLikeDB, togglePostLikeDB } from "../models/reactionModel";
 import { Request, Response } from "express";
 
 export const togglePostLike = async (req: Request, res: Response) =>{
     try{
         const user_id = req.user?.id;
-    const {post_id} =req.body;
-    if(!user_id || !post_id){
+    const {postId} =req.params;
+
+    if(!user_id || !postId){
          return res.status(400).json({ message: "Faltan datos (user_id o post_id)" });
     }
-     const result = await togglePostLikeDB (user_id, post_id);
+     const result = await togglePostLikeDB (user_id, postId);
      return res.status(200).json(result)
     }catch(error: any){
-        console.error("Error al dar like al post");
+        console.error("Error al dar like al post", error.message, error.stack);
         res.status(500).json({message:"Error del servidor"})
     }
 
 }
-export const toggleCommenLike = async (req: Request, res: Response) =>{
+export const toggleCommentLike = async (req: Request, res: Response) =>{
     try{
         const user_id = req.user?.id;
-    const {comment_id} =req.body;
-    if(!user_id || !comment_id){
+    const {commentId} =req.params;
+          console.log("togglePostLike:", { user_id, commentId });
+    if(!user_id || !commentId){
          return res.status(400).json({ message: "Faltan datos (user_id o comment_id)" });
     }
-     const result = await toggleCommenLikeDB (user_id, comment_id);
+     const result = await toggleCommenLikeDB (user_id, commentId);
      return res.status(200).json(result)
     }catch(error: any){
         console.error("Error al dar like al post");
@@ -34,8 +35,8 @@ export const toggleCommenLike = async (req: Request, res: Response) =>{
 }
 export const getPostLikes = async (req: Request, res: Response) =>{
     try{
-        const { post_id} = req.params;
-        const cout = await getPostLikesCount(post_id)
+        const { postId} = req.params;
+        const count = await getPostLikesCount(postId)
         return res.status(200).json({likes: count})
     }catch(error: any){
         console.error("Error al traer la cantidad de likes")
@@ -44,8 +45,8 @@ export const getPostLikes = async (req: Request, res: Response) =>{
 }
 export const getCommentLikes = async (req: Request, res: Response) =>{
     try{
-        const { comment_id} = req.params;
-        const count = await getCommentLikesCount(comment_id)
+        const { commentId} = req.params;
+        const count = await getCommentLikesCount(commentId)
         return res.status(200).json({likes:count})
     }catch(error: any){
         console.error("Error al traer la cantidad de likes")

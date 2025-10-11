@@ -1,9 +1,11 @@
-import ProtectedLayout from "../layout";
+import React from 'react'
+import ListaPosts from '@/components/ListaPosts'
 
 export default function userFeed() {
     return (
-        <div>
-            Feed del usuario
+        <div style={{ padding: 16 }}>
+            <h1>Mi feed</h1>
+            <ListaPosts mineOnly />
         </div>
     )
 }

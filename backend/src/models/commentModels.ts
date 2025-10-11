@@ -3,6 +3,7 @@ import db from "../db";
 export interface Comment {
   id: string;
   author_id: string;
+    author_username: string;
   post_id: string;
   text: string;
   parent_id?: string | null;
@@ -66,10 +67,18 @@ export const updateCommentDB = async (commentId: string, text: string) => {
 export const getCommentsByPostDB = async (postId: string) => {
   const result = await db.query<Comment>(
     `
-    SELECT id, author_id, post_id, text, created_at, parent_id
-    FROM user_comments
-    WHERE post_id = $1
-    ORDER BY created_at ASC
+    SELECT 
+     c.id,
+      c.author_id,
+      u.username AS author_username,
+      c.post_id,
+      c.text,
+      c.created_at,
+      c.parent_id
+    FROM user_comments c
+     JOIN users u ON c.author_id = u.id
+    WHERE c.post_id = $1
+    ORDER BY c.created_at ASC
     `,
     [postId]
   );
@@ -78,7 +87,19 @@ export const getCommentsByPostDB = async (postId: string) => {
 
 export const findCommentDB = async (commentId: string) => {
   const result = await db.query<Comment>(
-    "SELECT * FROM user_comments WHERE id = $1",
+     `
+    SELECT 
+      c.id,
+      c.author_id,
+      u.username AS author_username,
+      c.post_id,
+      c.text,
+      c.created_at,
+      c.parent_id
+    FROM user_comments c
+    JOIN users u ON c.author_id = u.id
+    WHERE c.id = $1
+    `,
     [commentId]
   );
   return result.rows[0];

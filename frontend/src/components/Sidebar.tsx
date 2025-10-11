@@ -61,7 +61,7 @@ export default function Sidebar() {
             <ListItemText primary="Configuración" />
           </ListItemButton>
 
-          <ListItemButton component={Link} href="/post">
+          <ListItemButton component={Link} href="/posts/create">
             <ListItemIcon>
               <PenSquare className="w-4 h-4" />
             </ListItemIcon>

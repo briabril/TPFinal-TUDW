@@ -7,8 +7,8 @@ import toast from "react-hot-toast";
 
 interface PostReactionProps {
   userId?: string ;
-  targetId: string; // puede ser post_id o comment_id
-  type: "post" | "comment"; // para saber qué endpoint usar
+  targetId: string; 
+  type: "post" | "comment"; 
 }
 
 interface ToggleReactionResponse {
@@ -26,10 +26,9 @@ export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
   const toggleReaction = async () => {
     try {
     
-        const endpoint = type === "post" ? ("/api/reactions") : ("/api/reactions/comments")
-        const payload = type === "post" ? {user_id: userId, post_id: targetId} : {user_id: userId, comment_id : targetId}
+        const endpoint = type === "post" ? (`/reactions/post/${targetId}`) : (`/reactions/comment/${targetId}`)
     
-      const result = await api.post<ToggleReactionResponse>(endpoint, payload);
+      const result = await api.post<ToggleReactionResponse>(endpoint, {},{ withCredentials: true });
 
       setLiked(result.data.liked);
       fetchCount(); // actualiza el contador
@@ -40,7 +39,7 @@ export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
 
   const fetchCount = async () => {
     try {
-      const endopoint = type === "post" ? (`/api/reactions/post/${targetId}/likes`) :  (`/api/reactions/comment/${targetId}/likes`)
+      const endopoint = type === "post" ? (`/reactions/post/${targetId}/likes`) :  (`/reactions/comment/${targetId}/likes`)
       const result = await api.get<LikesCountResponse>(
         endopoint
       );
@@ -55,9 +54,9 @@ export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
   }, []);
 
   return (
-    <Button onClick={toggleReaction}>
-      {liked ? <Heart color="red" fill="red" /> : <Heart />}
-      {count > 0 && <span style={{ marginLeft: 5 }}>{count}</span>}
+    <Button onClick={toggleReaction} className="flex items-center">
+      {liked ? <Heart className="text-red-500 size-5" fill="red" /> : <Heart className="text-gray-600 size-5"/>}
+      {count > 0 && <span className="text-gray-600 ml-1 text-xs">{count}</span>}
     </Button>
   );
 };

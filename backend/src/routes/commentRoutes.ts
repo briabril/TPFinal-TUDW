@@ -1,3 +1,4 @@
+// routes/commentRoutes.ts
 import { Router } from "express";
 import {
   insertComment,
@@ -7,12 +8,24 @@ import {
   getCommentsByPost,
 } from "../controllers/commentController";
 import { authenticateJWT } from "../middleware/auth";
+
 const router = Router();
 
+// insertar un comentario
+router.post("/", insertComment);
+// Obtener comentarios de un post
+router.get("/post/:postId", getCommentsByPost);
+
+// Crear un comentario (o respuesta)
 router.post("/post/:postId", authenticateJWT, insertComment);
-router.get("/post/:postId/comments", getCommentsByPost);
+
+// Obtener un comentario específico
 router.get("/:commentId", findComment);
+
+// Actualizar un comentario
 router.put("/:commentId", authenticateJWT, updateComment);
 
+// Eliminar un comentario
 router.delete("/:commentId", authenticateJWT, deleteComment);
+
 export default router;

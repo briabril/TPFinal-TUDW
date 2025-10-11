@@ -70,9 +70,15 @@ const onSubmit = async (data: ProfileData) => {
  try {
       const formData = new FormData();
       formData.append("displayname", data.displayname);
+      if (data.password && data.password.trim() !== '') {
       formData.append("password", data.password);
-      formData.append("new_password", data.new_password);
-      formData.append("bio", data.bio);
+      }
+      if (data.new_password && data.new_password.trim() !== '') {
+        formData.append("new_password", data.new_password);
+      }
+      if (data.bio && data.bio.trim() !== '') {
+        formData.append("bio", data.bio);
+      }
 
       if (data.profile_picture_url instanceof File) {
         formData.append("profile_picture_url", data.profile_picture_url);

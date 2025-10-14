@@ -11,6 +11,7 @@ import postRoutes from "./routes/postRoutes"
 import reactionRoutes from "./routes/reactionRoutes"
 import commentRoutes from "./routes/commentRoutes"
 import followRoutes from "./routes/followRoutes"
+import reportRoutes from "./routes/reportRoutes"
 const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -31,6 +32,7 @@ app.use("/api/follow", followRoutes)
 app.use("/api/posts", postRoutes)
 app.use("/api/comments", commentRoutes)
 app.use("/api/reactions", reactionRoutes)
+app.use("/api/reports", reportRoutes)
 // Servidor HTTP y Socket.IO
 const server = http.createServer(app)
 const io = new SocketIOServer(server, {

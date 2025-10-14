@@ -3,7 +3,15 @@
 import { useState } from "react";
 import api from "@/lib/axios";
 import { User, BlockStatus, FollowStatus } from "@tpfinal/types";
-import { Box, Button, CircularProgress } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Stack,
+  useTheme,
+} from "@mui/material";
+import { alpha } from "@mui/material/styles"; // ✅ Import necesario
+import { PersonAdd, PersonRemove, Block, LockOpen } from "@mui/icons-material";
 
 interface Props {
   profile: User;
@@ -20,10 +28,10 @@ export default function ProfileActions({
   followStatus,
   setFollowStatus,
 }: Props) {
+  const theme = useTheme();
   const [loadingBlock, setLoadingBlock] = useState(false);
   const [loadingFollow, setLoadingFollow] = useState(false);
 
-  // --- BLOQUEO ---
   const handleBlockToggle = async () => {
     setLoadingBlock(true);
     try {
@@ -46,17 +54,14 @@ export default function ProfileActions({
     }
   };
 
-  // --- SEGUIMIENTO ---
   const handleFollowToggle = async () => {
     setLoadingFollow(true);
     try {
       if (followStatus.isFollowing) {
-        // Dejar de seguir
-        await api.delete(`/follow/${profile.id}`, { withCredentials: true });
+        await api.delete(`/follow/${profile.id}`);
         setFollowStatus({ ...followStatus, isFollowing: false });
       } else {
-        // Seguir
-        await api.post(`/follow/${profile.id}`, {}, { withCredentials: true });
+        await api.post(`/follow/${profile.id}`);
         setFollowStatus({ ...followStatus, isFollowing: true });
       }
     } catch (err) {
@@ -67,21 +72,47 @@ export default function ProfileActions({
   };
 
   return (
-    <Box sx={{ display: "flex", gap: 2 }}>
-      {/* Botón de SEGUIR / DEJAR DE SEGUIR */}
+    <Stack
+      direction="row"
+      spacing={2}
+      justifyContent={{ xs: "center", sm: "flex-start" }}
+      sx={{
+        mt: 2,
+        flexWrap: "wrap",
+        "& button": {
+          borderRadius: "20px",
+          minWidth: 130,
+          fontWeight: 600,
+          textTransform: "none",
+          height: 38,
+          transition: "all 0.25s ease",
+        },
+      }}
+    >
       <Button
         variant={followStatus.isFollowing ? "outlined" : "contained"}
         color="primary"
         onClick={handleFollowToggle}
-        disabled={loadingFollow || blockStatus.blockedByYou || blockStatus.blockedByThem}
-        sx={{
-          minWidth: 120,
-          fontWeight: 600,
-          textTransform: "none",
-        }}
-        startIcon={
-          loadingFollow ? <CircularProgress size={18} color="inherit" /> : null
+        disabled={
+          loadingFollow || blockStatus.blockedByYou || blockStatus.blockedByThem
         }
+        startIcon={
+          loadingFollow ? (
+            <CircularProgress size={18} color="inherit" />
+          ) : followStatus.isFollowing ? (
+            <PersonRemove fontSize="small" />
+          ) : (
+            <PersonAdd fontSize="small" />
+          )
+        }
+        sx={{
+          borderColor: theme.palette.primary.main,
+          "&:hover": {
+            backgroundColor: followStatus.isFollowing
+              ? alpha(theme.palette.primary.main, 0.1)
+              : theme.palette.primary.dark,
+          },
+        }}
       >
         {loadingFollow
           ? "Procesando..."
@@ -92,24 +123,34 @@ export default function ProfileActions({
           : "Seguir"}
       </Button>
 
-      {/* Botón de BLOQUEAR / DESBLOQUEAR */}
       <Button
-        variant="contained"
+        variant="outlined"
         color={blockStatus.blockedByYou ? "inherit" : "error"}
         onClick={handleBlockToggle}
         disabled={loadingBlock}
+        startIcon={
+          loadingBlock ? (
+            <CircularProgress size={18} color="inherit" />
+          ) : blockStatus.blockedByYou ? (
+            <LockOpen fontSize="small" />
+          ) : (
+            <Block fontSize="small" />
+          )
+        }
         sx={{
-          minWidth: 120,
-          fontWeight: 600,
-          textTransform: "none",
-          bgcolor: blockStatus.blockedByYou ? "grey.300" : "error.main",
+          bgcolor: blockStatus.blockedByYou
+            ? "grey.100"
+            : alpha(theme.palette.error.main, 0.1),
+          borderColor: theme.palette.error.main,
+          color: blockStatus.blockedByYou
+            ? "text.secondary"
+            : theme.palette.error.main,
           "&:hover": {
-            bgcolor: blockStatus.blockedByYou ? "grey.400" : "error.dark",
+            bgcolor: blockStatus.blockedByYou
+              ? "grey.200"
+              : alpha(theme.palette.error.main, 0.2),
           },
         }}
-        startIcon={
-          loadingBlock ? <CircularProgress size={18} color="inherit" /> : null
-        }
       >
         {loadingBlock
           ? "Procesando..."
@@ -117,6 +158,6 @@ export default function ProfileActions({
           ? "Desbloquear"
           : "Bloquear"}
       </Button>
-    </Box>
+    </Stack>
   );
 }

@@ -29,12 +29,12 @@ export const createPost = async ({ author_id, text, link_url, media_id }:
 
 export const getPosts = async () => {
   const q = `
-    SELECT p.*, u.username, u.displayname,
+    SELECT p.*, u.id as author_id,
   COALESCE(json_agg(json_build_object('url', m.url, 'type', m.type) ORDER BY m.id) FILTER (WHERE m.id IS NOT NULL), '[]') as medias
     FROM post p
     LEFT JOIN users u ON p.author_id = u.id
     LEFT JOIN media m ON m.post_id = p.id
-    GROUP BY p.id, u.username, u.displayname
+    GROUP BY p.id, u.id
     ORDER BY p.created_at DESC
     LIMIT 50`;
   const r = await db.query(q, []);
@@ -43,20 +43,20 @@ export const getPosts = async () => {
     text: row.text,
     link_url: row.link_url,
     created_at: row.created_at,
-    author: { username: row.username, displayname: row.displayname },
+    author: { id: row.author_id },
     medias: row.medias || [],
   }));
 };
 
 export const getPostsByAuthor = async (authorId: string) => {
   const q = `
-    SELECT p.*, u.username, u.displayname, u.id as author_id,
+    SELECT p.*, u.id as author_id,
   COALESCE(json_agg(json_build_object('url', m.url, 'type', m.type) ORDER BY m.id) FILTER (WHERE m.id IS NOT NULL), '[]') as medias
     FROM post p
     LEFT JOIN users u ON p.author_id = u.id
     LEFT JOIN media m ON m.post_id = p.id
     WHERE p.author_id = $1
-    GROUP BY p.id, u.username, u.displayname, u.id
+    GROUP BY p.id, u.id
     ORDER BY p.created_at DESC
     LIMIT 100`;
   const r = await db.query(q, [authorId]);
@@ -65,7 +65,7 @@ export const getPostsByAuthor = async (authorId: string) => {
     text: row.text,
     link_url: row.link_url,
     created_at: row.created_at,
-    author: { username: row.username, displayname: row.displayname, id: row.author_id },
+    author: { id: row.author_id },
     medias: row.medias || [],
   }));
 };
@@ -82,13 +82,13 @@ export const updatePostText = async (postId: string, text: string) => {
 
 export const getPostById = async (postId: string) => {
   const q = `
-    SELECT p.*, u.username, u.displayname, u.id as author_id,
+    SELECT p.*, u.id as author_id,
   COALESCE(json_agg(json_build_object('url', m.url, 'type', m.type) ORDER BY m.id) FILTER (WHERE m.id IS NOT NULL), '[]') as medias
     FROM post p
     LEFT JOIN users u ON p.author_id = u.id
     LEFT JOIN media m ON m.post_id = p.id
     WHERE p.id = $1
-    GROUP BY p.id, u.username, u.displayname, u.id
+    GROUP BY p.id, u.id
     LIMIT 1`;
   const r = await db.query(q, [postId]);
   if (r.rows.length === 0) return null;
@@ -98,7 +98,7 @@ export const getPostById = async (postId: string) => {
     text: row.text,
     link_url: row.link_url,
     created_at: row.created_at,
-    author: { id: row.author_id, username: row.username, displayname: row.displayname },
+    author: { id: row.author_id },
     medias: row.medias || [],
   };
 };

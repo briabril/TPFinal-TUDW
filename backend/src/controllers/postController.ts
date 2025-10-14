@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createMedia, createPost, getPosts, getPostsByAuthor } from "../models/postModel";
+import { createMedia, createPost, getPosts, getPostsByAuthor, getPostById } from "../models/postModel";
 import { uploadBufferToCloudinary, deleteFromCloudinary } from "../utils/cloudinary";
 import db from '../db';
 
@@ -182,3 +182,20 @@ export const updatePostController = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Error al actualizar post' });
   }
 };
+
+
+export const getPostByIdController = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const post = await getPostById(id);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post no encontrado" });
+    }
+
+    res.json({ data: post });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al obtener el post" });
+  }
+}

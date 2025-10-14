@@ -39,9 +39,9 @@ export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
 
   const fetchCount = async () => {
     try {
-      const endopoint = type === "post" ? (`/reactions/post/${targetId}/likes`) :  (`/reactions/comment/${targetId}/likes`)
+      const endpoint = type === "post" ? (`/reactions/post/${targetId}/likes`) :  (`/reactions/comment/${targetId}/likes`)
       const result = await api.get<LikesCountResponse>(
-        endopoint
+        endpoint
       );
       setCount(result.data.likes);
     } catch {
@@ -55,8 +55,8 @@ export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
 
   return (
     <Button onClick={toggleReaction} className="flex items-center">
-      {liked ? <Heart className="text-red-500 size-5" fill="red" /> : <Heart className="text-gray-600 size-5"/>}
-      {count > 0 && <span className="text-gray-600 ml-1 text-xs">{count}</span>}
+      {liked ? <Heart className="text-red-500 size-5" fill="red" /> : <Heart className="text-gray-600 size-6"/>}
+      {count > 0 && <span className="text-gray-600 ml-1 text-s">{count}</span>}
     </Button>
   );
 };

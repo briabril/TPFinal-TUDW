@@ -5,9 +5,10 @@ import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
+import Divider from "@mui/material/Divider";
 import ProfileActions from "./ProfileActions";
+import { alpha } from "@mui/material/styles";
 
-// ✅ Definimos la interfaz Props con los tipos correctos importados del archivo types
 interface Props {
   profile: User;
   isOwnProfile: boolean;
@@ -15,6 +16,7 @@ interface Props {
   setBlockStatus: (status: BlockStatus) => void;
   followStatus: FollowStatus;
   setFollowStatus: (status: FollowStatus) => void;
+  onFollowChange?: () => void;
 }
 
 export default function ProfileHeader({
@@ -26,19 +28,18 @@ export default function ProfileHeader({
   setFollowStatus,
 }: Props) {
   return (
-    <Box
-      sx={{
-        width: "100%",
-        maxWidth: 1000,
-        mx: "auto",
-        py: 4,
-        px: 2,
-      }}
-    >
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={4}
-        alignItems={{ xs: "center", sm: "flex-start" }}
+    <Box sx={{ width: "100%", mb: 6 }}>
+      <Box
+        sx={{
+          height: 150,
+          background: (theme) =>
+            `linear-gradient(135deg, ${theme.palette.primary.main}, ${alpha(
+              theme.palette.primary.dark,
+              0.8
+            )})`,
+          borderRadius: "0 0 24px 24px",
+          position: "relative",
+        }}
       >
         <Avatar
           src={profile.profile_picture_url || undefined}
@@ -46,74 +47,85 @@ export default function ProfileHeader({
           sx={{
             width: 150,
             height: 150,
+            border: "4px solid white",
+            position: "absolute",
+            left: "50%",
+            bottom: -75,
+            transform: "translateX(-50%)",
             bgcolor: "grey.200",
             fontSize: 48,
+            boxShadow: 3,
           }}
         />
-        <Box sx={{ flex: 1 }}>
-          <Stack
-            direction="row"
-            alignItems="center"
-            spacing={2}
-            flexWrap="wrap"
-          >
-            <Typography variant="h5" fontWeight={600}>
-              {profile.username}
-            </Typography>
+      </Box>
 
-            {!isOwnProfile && (
-              <ProfileActions
-                profile={profile}
-                blockStatus={blockStatus}
-                setBlockStatus={setBlockStatus}
-                followStatus={followStatus}
-                setFollowStatus={setFollowStatus}
-              />
-            )}
-          </Stack>
+      <Box
+        sx={{
+          mt: 10,
+          textAlign: "center",
+          maxWidth: 900,
+          mx: "auto",
+          px: 2,
+        }}
+      >
+        <Stack direction="column" alignItems="center" spacing={1}>
+          <Typography variant="h5" fontWeight={700}>
+            {profile.username}
+          </Typography>
 
           {profile.displayname && (
-            <Typography variant="subtitle1" sx={{ mt: 1 }}>
+            <Typography variant="subtitle1" color="text.secondary">
               {profile.displayname}
             </Typography>
           )}
 
-          {profile.bio ? (
-            <Typography variant="body1" sx={{ mt: 1 }}>
-              {profile.bio}
-            </Typography>
-          ) : (
-            <Typography
-              variant="body2"
-              sx={{ mt: 1, fontStyle: "italic", color: "text.disabled" }}
-            >
-              Este usuario no tiene biografía
-            </Typography>
-          )}
-          {isOwnProfile && (
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ mt: 1, display: "block" }}
-            >
-              {profile.email}
-            </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              mt: 0.5,
+              color: profile.bio ? "text.primary" : "text.disabled",
+              fontStyle: profile.bio ? "normal" : "italic",
+            }}
+          >
+            {profile.bio || "Este usuario no tiene biografía"}
+          </Typography>
+
+          {!isOwnProfile && (
+            <ProfileActions
+              profile={profile}
+              blockStatus={blockStatus}
+              setBlockStatus={setBlockStatus}
+              followStatus={followStatus}
+              setFollowStatus={setFollowStatus}
+            />
           )}
 
-          {/* Métricas del perfil */}
-          <Stack direction="row" spacing={3} sx={{ mt: 2 }}>
+          <Stack
+            direction="row"
+            justifyContent="center"
+            spacing={5}
+            sx={{ mt: 2, "& strong": { fontWeight: 600 } }}
+          >
             <Typography variant="body2">
-              <strong>{profile.posts_count ?? 0}</strong> publicaciones
+              <strong>{profile.posts_count ?? 0}</strong>
+              <br />
+              publicaciones
             </Typography>
             <Typography variant="body2">
-              <strong>{profile.followers_count ?? 0}</strong> seguidores
+              <strong>{profile.followers_count ?? 0}</strong>
+              <br />
+              seguidores
             </Typography>
             <Typography variant="body2">
-              <strong>{profile.following_count ?? 0}</strong> seguidos
+              <strong>{profile.following_count ?? 0}</strong>
+              <br />
+              seguidos
             </Typography>
           </Stack>
-        </Box>
-      </Stack>
+        </Stack>
+
+        <Divider sx={{ mt: 5 }} />
+      </Box>
     </Box>
   );
 }

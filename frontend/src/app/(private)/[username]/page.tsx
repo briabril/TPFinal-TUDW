@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { User, BlockStatus, FollowStatus } from "@tpfinal/types";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import BlockStatusMessage from "@/components/profile/BlockStatusMessage";
+import ListaPosts from "@/components/ListaPosts";
 import { Alert, AlertTitle, CircularProgress, Box } from "@mui/material";
 
 export default function ProfilePage() {
@@ -30,18 +31,15 @@ export default function ProfilePage() {
     const fetchProfileData = async () => {
       setLoading(true);
       try {
-        // 🔹 Obtener datos del usuario
-        const res = await api.get<User>(`/users/${username}`, {
+        const res = await api.get<User>(`/users/by-username/${username}`, {
           withCredentials: true,
         });
         const userData = res.data;
         setProfile(userData);
-
-        // 🔹 Si no es tu propio perfil, obtener estado de bloqueo y seguimiento
         if (user && userData.id !== user.id) {
           const [blockRes, followRes] = await Promise.all([
             api.get<BlockStatus>(`/blocks/${userData.id}/status`, { withCredentials: true }),
-            api.get<FollowStatus>(`/follow/${userData.id}/status`, { withCredentials: true }),
+            api.get<FollowStatus>(`/follow/${userData.id}/status`),
           ]);
 
           setBlockStatus(blockRes.data);
@@ -102,9 +100,10 @@ export default function ProfilePage() {
     );
 
   const isOwnProfile = !!(user && profile.id === user.id);
+  console.log(isOwnProfile)
 
   return (
-    <Box className="p-6 flex flex-col items-center gap-4">
+    <Box className="flex flex-col items-center">
       <ProfileHeader
         profile={profile}
         isOwnProfile={isOwnProfile}
@@ -122,7 +121,17 @@ export default function ProfilePage() {
 
       {!blockStatus.blockedByYou &&
         !blockStatus.blockedByThem &&
-        !loading && <p>📸 Aquí irían los posts del usuario</p>}
+        !loading && (
+          <>
+            {
+              isOwnProfile ? (
+                <ListaPosts mineOnly />
+              ) : (
+                <ListaPosts mineOnly />
+              )
+            }
+          </>
+        )}
     </Box>
   );
 }

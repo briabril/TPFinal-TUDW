@@ -28,8 +28,6 @@ CREATE TABLE media (
     height INT
 );
 
-
-
 CREATE TABLE post (
 id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -117,3 +115,14 @@ CREATE TABLE blocks (
 
 CREATE INDEX IF NOT EXISTS idx_blocks_blocker ON blocks(blocker_id);
 CREATE INDEX IF NOT EXISTS idx_blocks_blocked ON blocks(blocked_id);
+
+CREATE TABLE reports (
+id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    reporter_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    target_type VARCHAR(20) NOT NULL CHECK (target_type IN ('post', 'comment')),
+    target_id UUID NOT NULL,
+    reason TEXT,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending', -- pending | reviewed | dismissed
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_reports_target ON reports(target_type, target_id);

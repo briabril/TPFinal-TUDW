@@ -9,6 +9,7 @@ import {
 import { sendVerificationEmail } from "../utils/mailer";
 import { searchUsers } from "../models/userModel";
 import * as BlockModel from "../models/blockModel";
+import * as FollowModel from "../models/followModel"
 const JWT_SECRET = process.env.JWT_SECRET;
 import { updateUserProfile } from "../models/userModel";
 import { getUserById } from "../models/userModel";
@@ -174,6 +175,7 @@ export const logoutUser = (req: Request, res: Response) => {
   });
   res.json({ message: "Logout exitoso" });
 };
+
 export const editProfile = async (req, res) => {
   const userId = req.params.id;
   const { username, displayname, bio, profile_picture_url, password, new_password } = req.body;
@@ -329,23 +331,46 @@ export const searchUsersController = async (req: Request, res: Response) => {
 export const getProfileByUsername = async (req: Request, res: Response) => {
   try {
     const { username } = req.params;
-    const currentUserId = (req as any).user.id;
+    const currentUserId = (req as any).user?.id;
 
     console.log("getProfileByUsername called", { username, currentUserId });
 
     const user = await findUserByUsername(username);
-    console.log("findUserByUsername result:", !!user ? `found id=${user.id}` : "not found");
-    if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
     const blockedByThem = await BlockModel.hasBlocked(user.id, currentUserId);
     if (blockedByThem) {
       return res.status(403).json({ message: "No puedes ver este perfil" });
     }
-    res.json(user);
+
+    const [followers, following, iFollow, followsMe] = await Promise.all([
+      FollowModel.getFollowRelations(user.id, "followers"),
+      FollowModel.getFollowRelations(user.id, "following"),
+      FollowModel.isFollowing(currentUserId, user.id),
+      FollowModel.isFollowing(user.id, currentUserId),
+    ]);
+
+    const profileData = {
+      ...user,
+      followers_count: followers.length,
+      following_count: following.length,
+      followers,
+      following,
+      followStatus: {
+        iFollow,
+        followsMe,
+      },
+    };
+
+    return res.json(profileData);
   } catch (err) {
     console.error("getProfileByUsername error:", err);
     res.status(500).json({ error: "Error al obtener el perfil" });
   }
 };
+
 export const getUser = async (req, res) => {
   try {
     const user = await getUserById(req.params.id);

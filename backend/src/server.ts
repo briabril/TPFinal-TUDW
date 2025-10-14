@@ -4,12 +4,14 @@ const http = require("http");
 const { Server: SocketIOServer } = require("socket.io");
 const cookieParser = require("cookie-parser");
 import userRoutes from "./routes/userRoutes";
-import adminRoutes from "./routes/adminRoutes";
-import blockRoutes from "./routes/blockRoutes";
-import { attachIO } from "./middleware/socket";
-import postRoutes from "./routes/postRoutes";
-import reactionRoutes from "./routes/reactionRoutes";
+import adminRoutes from "./routes/adminRoutes"
+import blockRoutes from "./routes/blockRoutes"
+import { attachIO } from "./middleware/socket"
+import postRoutes from "./routes/postRoutes"
+import reactionRoutes from "./routes/reactionRoutes"
 import commentRoutes from "./routes/commentRoutes"
+import followRoutes from "./routes/followRoutes"
+import reportRoutes from "./routes/reportRoutes"
 const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -21,7 +23,7 @@ app.use(cors({
 
 
 // Servidor HTTP y Socket.IO
-const server = http.createServer(app);
+const server = http.createServer(app)
 const io = new SocketIOServer(server, {
   cors: {
     origin: "http://localhost:3000",

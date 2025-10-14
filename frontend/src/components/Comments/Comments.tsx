@@ -1,34 +1,33 @@
-"use client"
-import { Comment } from "../../../../packages/types";
+"use client";
+import { Comment } from "@tpfinal/types";
 import socket from "@/socket";
 import CommentForm from "./CommentForm";
 import CommentItem from "./CommentItem";
-import { Typography, Box, CircularProgress } from "@mui/material";
+import { Typography, Box, CircularProgress, Divider } from "@mui/material";
 import { useState, useEffect } from "react";
 import { CommentFormData } from "@tpfinal/schemas";
 import api from "@tpfinal/api";
 import toast from "react-hot-toast";
 
 interface CommentProps {
-    postId: string | number;
-    authorId: string;
+  postId: string | number;
+  authorId: string;
 }
-const Comments: React.FC<CommentProps> = ({postId, authorId}) =>{
-      const [comments, setComments] = useState<Comment[]>([]);
 
-    const [loading, setLoading] = useState(false);
+const Comments: React.FC<CommentProps> = ({ postId, authorId }) => {
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const fetchComments = async () => {
     setLoading(true);
-    try{
-        const {data} = await api.get<Comment[]>(`/comments/post/${postId}`);
-    setComments(data);}
-    catch (error){
-        toast.error("Error al cargar comentarios")
-    }finally{
-           setLoading(false);
+    try {
+      const { data } = await api.get<Comment[]>(`/comments/post/${postId}`);
+      setComments(data);
+    } catch (error) {
+      toast.error("Error al cargar comentarios");
+    } finally {
+      setLoading(false);
     }
-
   };
 // Agregar un comentario (nuevo o respuesta)
 function addCommentToTree(tree: Comment[], newComment: Comment): Comment[] {
@@ -128,19 +127,53 @@ useEffect(() => {
     }catch(error){
         toast.error("Error al publicar comentario")
     }
-       
   };
 
   return (
-    <Box className="mt-4">
-      <Typography variant="h6" className="mb-2">Comentarios</Typography>
-      <CommentForm postId={postId} onSubmit={handleSubmit} />
+    <Box
+      sx={{
+        mt: 4,
+        borderTop: "1px solid #e0e0e0",
+        backgroundColor: "transparent",
+      }}
+    >
+      <Typography
+        variant="h6"
+        sx={{
+          fontWeight: 600,
+          mb: 2,
+          color: "text.primary",
+        }}
+      >
+        Comentarios
+      </Typography>
+
+      <Box sx={{ mb: 3 }}>
+        <CommentForm postId={postId} onSubmit={handleSubmit} />
+      </Box>
+
       {loading ? (
-        <CircularProgress size={24} />
+        <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+          <CircularProgress size={28} />
+        </Box>
+      ) : comments.length === 0 ? (
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+          No hay comentarios todavía. ¡Sé el primero en comentar!
+        </Typography>
       ) : (
-        comments.map((c) => <CommentItem key={c.id} comment={c} onReply={handleSubmit} />)
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {comments.map((c, index) => (
+            <Box key={c.id}>
+              <CommentItem comment={c} onReply={handleSubmit} />
+              {index !== comments.length - 1 && (
+                <Divider sx={{ my: 1, opacity: 0.5 }} />
+              )}
+            </Box>
+          ))}
+        </Box>
       )}
     </Box>
   );
 };
+
 export default Comments;

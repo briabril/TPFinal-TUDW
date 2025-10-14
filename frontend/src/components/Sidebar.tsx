@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import {
+  Box,
   Button,
   Divider,
   Avatar,
@@ -10,6 +12,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Typography,
 } from "@mui/material";
 import {
   Home,
@@ -22,102 +25,158 @@ import {
   Flag,
   LogOut,
 } from "lucide-react";
+import UserSearch from "./UserSearch";
 
 export default function Sidebar() {
   const { user, loading, logout } = useAuth();
+  const pathname = usePathname();
+
   if (loading) return <h1 className="text-center py-10 text-lg">Cargando...</h1>;
 
+  // 🔹 Ítems del menú principal
+  const navItems = [
+    { icon: <Home size={18} />, text: "Inicio", path: "/" },
+    { icon: <User size={18} />, text: "Perfil", path: `/${user?.username}` },
+    { icon: <MessageSquare size={18} />, text: "Mensajes", path: "/messages" },
+    { icon: <PenSquare size={18} />, text: "Postear", path: "/posts/create" },
+    { icon: <Settings size={18} />, text: "Configuración", path: "/settings" },
+  ];
+
+  // 🔹 Ítems de administrador
+  const adminItems = [
+    { icon: <LayoutDashboard size={18} />, text: "Panel Admin", path: "/admin/dashboard" },
+    { icon: <Users size={18} />, text: "Gestión de usuarios", path: "/admin/users" },
+    { icon: <Flag size={18} />, text: "Reportes", path: "/admin/reports" },
+  ];
+
+  // 🔹 Renderizado con estilo activo
+  const renderList = (items: any[]) =>
+    items.map(({ icon, text, path }) => {
+      const active = pathname === path;
+      return (
+        <ListItemButton
+          key={path}
+          component={Link}
+          href={path}
+          sx={{
+            borderRadius: 2,
+            mb: 0.5,
+            transition: "all 0.2s ease",
+            backgroundColor: active ? "primary.main" : "transparent",
+            color: active ? "#fff" : "text.primary",
+            "&:hover": {
+              backgroundColor: active
+                ? "primary.dark"
+                : "rgba(25,118,210,0.08)",
+            },
+          }}
+        >
+          <ListItemIcon
+            sx={{ color: active ? "#fff" : "text.secondary", minWidth: 36 }}
+          >
+            {icon}
+          </ListItemIcon>
+          <ListItemText
+            primary={
+              <Typography fontWeight={active ? 600 : 500}>{text}</Typography>
+            }
+          />
+        </ListItemButton>
+      );
+    });
+
   return (
-    <aside className="w-64 min-h-screen shadow p-6 flex flex-col justify-between border-r-2 border-gray-500">
+    <Box
+      sx={{
+        width: 250,
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        borderRight: "1px solid #e0e0e0",
+        backgroundColor: "#fff",
+        boxShadow: "2px 0 8px rgba(0,0,0,0.05)",
+        p: 2,
+        position: "sticky",
+        top: 0,
+      }}
+    >
       <div>
-        <h2 className="font-bold text-2xl mb-8 text-primary">La Red</h2>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: "bold",
+            mb: 2,
+            color: "primary.main",
+            textAlign: "center",
+          }}
+        >
+          La Red
+        </Typography>
 
-        <List>
-          <ListItemButton component={Link} href="/">
-            <ListItemIcon>
-              <Home className="w-4 h-4" />
-            </ListItemIcon>
-            <ListItemText primary="Inicio" />
-          </ListItemButton>
+        <Box sx={{ mb: 2 }}>
+          <UserSearch />
+        </Box>
 
-          <ListItemButton component={Link} href={`/${user?.username}`}>
-            <ListItemIcon>
-              <User className="w-4 h-4" />
-            </ListItemIcon>
-            <ListItemText primary="Perfil" />
-          </ListItemButton>
-
-          <ListItemButton component={Link} href="/messages">
-            <ListItemIcon>
-              <MessageSquare className="w-4 h-4" />
-            </ListItemIcon>
-            <ListItemText primary="Mensajes" />
-          </ListItemButton>
-
-          <ListItemButton component={Link} href="/settings">
-            <ListItemIcon>
-              <Settings className="w-4 h-4" />
-            </ListItemIcon>
-            <ListItemText primary="Configuración" />
-          </ListItemButton>
-
-          <ListItemButton component={Link} href="/posts/create">
-            <ListItemIcon>
-              <PenSquare className="w-4 h-4" />
-            </ListItemIcon>
-            <ListItemText primary="Postear" />
-          </ListItemButton>
-        </List>
+        <List>{renderList(navItems)}</List>
 
         {user?.role === "ADMIN" && (
           <>
             <Divider sx={{ my: 2 }} />
-            <h3 className="text-sm font-semibold mb-2">Admin</h3>
-
-            <List>
-              <ListItemButton component={Link} href="/admin/dashboard">
-                <ListItemIcon>
-                  <LayoutDashboard className="w-4 h-4" />
-                </ListItemIcon>
-                <ListItemText primary="Panel Admin" />
-              </ListItemButton>
-
-              <ListItemButton component={Link} href="/admin/users">
-                <ListItemIcon>
-                  <Users className="w-4 h-4" />
-                </ListItemIcon>
-                <ListItemText primary="Gestión de usuarios" />
-              </ListItemButton>
-
-              <ListItemButton component={Link} href="/admin/reports">
-                <ListItemIcon>
-                  <Flag className="w-4 h-4" />
-                </ListItemIcon>
-                <ListItemText primary="Reportes" />
-              </ListItemButton>
-            </List>
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 600,
+                textTransform: "uppercase",
+                color: "text.secondary",
+                ml: 2,
+              }}
+            >
+              Admin
+            </Typography>
+            <List sx={{ mt: 1 }}>{renderList(adminItems)}</List>
           </>
         )}
       </div>
 
       {user && (
-        <div className="flex items-center justify-between mt-6 p-2 rounded-xl ">
-          <div className="flex items-center gap-2">
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            p: 1.5,
+            borderRadius: 2,
+            bgcolor: "#f9f9f9",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Avatar
               src={user.profile_picture_url ?? undefined}
               alt={user.displayname ?? user.username}
               sx={{ width: 36, height: 36 }}
             />
-            <div>
-              <p className="font-semibold leading-tight">{user.displayname}</p>
-              <p className="text-xs text-gray-500">@{user.username}</p>
-            </div>
-          </div>
-          <Button onClick={logout} size="small" color="error" variant="text">
-            <LogOut className="w-4 h-4" />
+            <Box>
+              <Typography fontWeight={600} lineHeight={1.1}>
+                {user.displayname}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                @{user.username}
+              </Typography>
+            </Box>
+          </Box>
+
+          <Button
+            onClick={logout}
+            size="small"
+            color="error"
+            variant="text"
+            sx={{ minWidth: 0 }}
+          >
+            <LogOut size={18} />
           </Button>
-        </div>
+        </Box>
       )}
-    </aside>
+    </Box>
   );
 }

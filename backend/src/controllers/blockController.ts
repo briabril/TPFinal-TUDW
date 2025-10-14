@@ -1,52 +1,53 @@
-import { Request, Response } from "express";
-import * as BlockModel from "../models/blockModel";
-import db from "../db";
+import { Request, Response } from "express"
+import * as BlockModel from "../models/blockModel"
+import db from "../db"
+import { getUserById } from "../models/userModel"
 
 export async function block(req: Request, res: Response) {
     try {
-        const blockerId = req.user!.id;
-        const targetId = req.params.targetId;
+        const blockerId = req.user!.id
+        const targetId = req.params.targetId
 
-        if (!targetId) return res.status(400).json({ message: "targetId requerido" });
-        if (blockerId === targetId) return res.status(400).json({ message: "No podés bloquearte a vos mismo" });
+        if (!targetId) return res.status(400).json({ message: "targetId required" })
+        if (blockerId === targetId) return res.status(400).json({ message: "You can't block yourself" })
 
-        const userRes = await db.query("SELECT id FROM users WHERE id = $1 LIMIT 1", [targetId]);
-        if (userRes.rowCount === 0) return res.status(404).json({ message: "Usuario objetivo no encontrado" });
+        const targetUser = getUserById(targetId)
+        if (!targetUser) return res.status(404).json({ message: "Target user not found" })
 
-        await BlockModel.blockUser(blockerId, targetId);
-        return res.json({ message: "Usuario bloqueado correctamente" });
+        await BlockModel.blockUser(blockerId, targetId)
+        return res.json({ message: "Usuario bloqueado correctamente" })
     } catch (err) {
-        console.error("block error:", err);
-        return res.status(500).json({ message: "Error al bloquear usuario" });
+        console.error("block error:", err)
+        return res.status(500).json({ message: "Internal Server Error: Problem blocking user" })
     }
 }
 
 export async function unblock(req: Request, res: Response) {
     try {
-        const blockerId = req.user!.id;
-        const targetId = req.params.targetId;
+        const blockerId = req.user!.id
+        const targetId = req.params.targetId
 
-        if (!targetId) return res.status(400).json({ message: "targetId requerido" });
+        if (!targetId) return res.status(400).json({ message: "targetId requerido" })
 
-        await BlockModel.unblockUser(blockerId, targetId);
-        return res.json({ message: "Usuario desbloqueado correctamente" });
+        await BlockModel.unblockUser(blockerId, targetId)
+        return res.json({ message: "Usuario desbloqueado correctamente" })
     } catch (err) {
-        console.error("unblock error:", err);
-        return res.status(500).json({ message: "Error al desbloquear usuario" });
+        console.error("unblock error:", err)
+        return res.status(500).json({ message: "Internal Server Error: Problem unlocking user" })
     }
 }
 
 //Devuelve { blockedByYou, blockedByThem } para la UI 
 export async function status(req: Request, res: Response) {
     try {
-        const viewerId = req.user!.id;
-        const targetId = req.params.targetId;
-        if (!targetId) return res.status(400).json({ message: "targetId requerido" });
+        const viewerId = req.user!.id
+        const targetId = req.params.targetId
+        if (!targetId) return res.status(400).json({ message: "target ID required" })
 
-        const st = await BlockModel.getBlockStatus(viewerId, targetId);
-        return res.json(st);
+        const st = await BlockModel.getBlockStatus(viewerId, targetId)
+        return res.json(st)
     } catch (err) {
-        console.error("status error:", err);
-        return res.status(500).json({ message: "Error al obtener estado de bloqueo" });
+        console.error("status error:", err)
+        return res.status(500).json({ message: "Internal Server Error: Problem obtaining the block status" })
     }
 }

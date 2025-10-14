@@ -1,22 +1,22 @@
 "use client";
 
-import { User } from "@tpfinal/types";
+import { User, BlockStatus, FollowStatus } from "@tpfinal/types";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Grid from "@mui/material/Grid";
+import Stack from "@mui/material/Stack";
+import Divider from "@mui/material/Divider";
 import ProfileActions from "./ProfileActions";
-
-interface BlockStatus {
-  blockedByYou: boolean;
-  blockedByThem: boolean;
-}
+import { alpha } from "@mui/material/styles";
 
 interface Props {
   profile: User;
   isOwnProfile: boolean;
   blockStatus: BlockStatus;
   setBlockStatus: (status: BlockStatus) => void;
+  followStatus: FollowStatus;
+  setFollowStatus: (status: FollowStatus) => void;
+  onFollowChange?: () => void;
 }
 
 export default function ProfileHeader({
@@ -24,107 +24,108 @@ export default function ProfileHeader({
   isOwnProfile,
   blockStatus,
   setBlockStatus,
+  followStatus,
+  setFollowStatus,
 }: Props) {
   return (
-    <Box
-      sx={{
-        width: "100%",
-        maxWidth: 1000,
-        mx: "auto",
-        py: 4,
-        px: 2,
-      }}
-    >
-      <Grid container spacing={4} alignItems="center">
-        {/* Avatar */}
-        <Grid item>
-          <Avatar
-            src={profile.profile_picture_url || undefined}
-            alt={profile.username}
-            sx={{
-              width: 150,
-              height: 150,
-              bgcolor: "grey.200",
-              fontSize: 48,
-            }}
-          />
-        </Grid>
+    <Box sx={{ width: "100%", mb: 6 }}>
+      <Box
+        sx={{
+          height: 150,
+          background: (theme) =>
+            `linear-gradient(135deg, ${theme.palette.primary.main}, ${alpha(
+              theme.palette.primary.dark,
+              0.8
+            )})`,
+          borderRadius: "0 0 24px 24px",
+          position: "relative",
+        }}
+      >
+        <Avatar
+          src={profile.profile_picture_url || undefined}
+          alt={profile.username}
+          sx={{
+            width: 150,
+            height: 150,
+            border: "4px solid white",
+            position: "absolute",
+            left: "50%",
+            bottom: -75,
+            transform: "translateX(-50%)",
+            bgcolor: "grey.200",
+            fontSize: 48,
+            boxShadow: 3,
+          }}
+        />
+      </Box>
 
-        {/* Info principal */}
-        <Grid item xs>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              flexWrap: "wrap",
-            }}
-          >
-            <Typography variant="h5" fontWeight={600}>
-              {profile.username}
-            </Typography>
-
-            {!isOwnProfile && (
-              <ProfileActions
-                profile={profile}
-                blockStatus={blockStatus}
-                setBlockStatus={setBlockStatus}
-              />
-            )}
-          </Box>
+      <Box
+        sx={{
+          mt: 10,
+          textAlign: "center",
+          maxWidth: 900,
+          mx: "auto",
+          px: 2,
+        }}
+      >
+        <Stack direction="column" alignItems="center" spacing={1}>
+          <Typography variant="h5" fontWeight={700}>
+            {profile.username}
+          </Typography>
 
           {profile.displayname && (
-            <Typography variant="subtitle1" sx={{ mt: 1 }}>
+            <Typography variant="subtitle1" color="text.secondary">
               {profile.displayname}
             </Typography>
           )}
 
-          {/* Bio */}
-          {profile.bio ? (
-            <Typography variant="body1" sx={{ mt: 1 }}>
-              {profile.bio}
-            </Typography>
-          ) : (
-            <Typography
-              variant="body2"
-              sx={{ mt: 1, fontStyle: "italic", color: "text.disabled" }}
-            >
-              Este usuario no tiene biografía
-            </Typography>
-          )}
-
-          {/* Email solo si es propio */}
-          {isOwnProfile && (
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ mt: 1, display: "block" }}
-            >
-              {profile.email}
-            </Typography>
-          )}
-
-          {/* Métricas (a futuro, sin lógica aún) */}
-          <Box
+          <Typography
+            variant="body1"
             sx={{
-              display: "flex",
-              gap: 3,
-              mt: 2,
+              mt: 0.5,
+              color: profile.bio ? "text.primary" : "text.disabled",
+              fontStyle: profile.bio ? "normal" : "italic",
             }}
           >
+            {profile.bio || "Este usuario no tiene biografía"}
+          </Typography>
+
+          {!isOwnProfile && (
+            <ProfileActions
+              profile={profile}
+              blockStatus={blockStatus}
+              setBlockStatus={setBlockStatus}
+              followStatus={followStatus}
+              setFollowStatus={setFollowStatus}
+            />
+          )}
+
+          <Stack
+            direction="row"
+            justifyContent="center"
+            spacing={5}
+            sx={{ mt: 2, "& strong": { fontWeight: 600 } }}
+          >
             <Typography variant="body2">
-              <strong>
-                {profile.posts_count ?? 0}</strong> publicaciones
+              <strong>{profile.posts_count ?? 0}</strong>
+              <br />
+              publicaciones
             </Typography>
             <Typography variant="body2">
-              <strong>{profile.followers_count ?? 0}</strong> seguidores
+              <strong>{profile.followers_count ?? 0}</strong>
+              <br />
+              seguidores
             </Typography>
             <Typography variant="body2">
-              <strong>{profile.following_count ?? 0}</strong> seguidos
+              <strong>{profile.following_count ?? 0}</strong>
+              <br />
+              seguidos
             </Typography>
-          </Box>
-        </Grid>
-      </Grid>
+          </Stack>
+        </Stack>
+
+        <Divider sx={{ mt: 5 }} />
+      </Box>
     </Box>
   );
 }

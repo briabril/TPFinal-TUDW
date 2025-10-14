@@ -1,71 +1,156 @@
 "use client";
+import React, { useState } from "react";
+import {
+  Typography,
+  Box,
+  IconButton,
+  TextField,
+  Stack,
+  CardMedia,
+} from "@mui/material";
+import { Save, Close } from "@mui/icons-material";
+import { Media } from "@tpfinal/types";
+import PostActions from "./posts/PostActions";
+import { deletePost, updatePost, reportPost } from "@/services/postService";
 
-import React, { useState } from 'react';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:4000";
-
-export default function PostBody({ post, description, created, author, isOwn }: any) {
+export default function PostBody({ post, description }: any) {
+  const { user } = require("@/context/AuthContext").useAuth?.() || { user: null };
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(description);
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState<{ type: 'error' | 'success' | null; text?: string } | null>(null);
+  const [msg, setMsg] = useState<{ type: "error" | "success" | null; text?: string } | null>(null);
+
+  const isOwn = user && post.author.id === user.id;
+
+  const getMediaUrl = (media?: Media) => media?.url ?? null;
 
   const handleDelete = async () => {
-    if (!confirm('Eliminar post?')) return;
+    if (!confirm("¿Eliminar post?")) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/posts/${post.id}`, { method: 'DELETE', credentials: 'include' });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || json?.message || 'Error eliminando');
-      setMsg({ type: 'success', text: 'Post eliminado' });
+      await deletePost(post.id);
+      setMsg({ type: "success", text: "Post eliminado" });
       window.location.reload();
     } catch (err: any) {
-      console.error(err);
-      setMsg({ type: 'error', text: err?.message || 'Error eliminando post' });
-    } finally { setLoading(false); }
+      setMsg({ type: "error", text: err.response?.data?.error?.message || err.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/posts/${post.id}`, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || json?.message || 'Error actualizando');
-      setMsg({ type: 'success', text: 'Post actualizado' });
+      await updatePost(post.id, { text });
       setEditing(false);
       window.location.reload();
     } catch (err: any) {
-      console.error(err);
-      setMsg({ type: 'error', text: err?.message || 'Error actualizando post' });
-    } finally { setLoading(false); }
+      setMsg({ type: "error", text: err.response?.data?.error?.message || err.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const handleReport = async (reason: string) => {
+    setLoading(true);
+    try {
+      await reportPost(post.id, reason);
+      setMsg({ type: "success", text: "Reporte enviado correctamente" });
+    } catch (err: any) {
+      setMsg({ type: "error", text: err.response?.data?.error?.message || err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const medias = post.medias ?? [];
+  const mediaUrl = medias.length > 0 ? getMediaUrl(medias[0]) : null;
+
   return (
-    <div>
+    <Box sx={{ fontSize: "1.1rem" }}>
       {!editing ? (
         <>
-          <p style={{ margin: '6px 0' }}>{text}</p>
-          <div style={{ fontSize: 12, color: '#666' }}>
-            <span>{author}</span>
-            {created && <span> • {new Date(created).toLocaleString()}</span>}
-          </div>
-          {isOwn && (
-            <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
-              <button onClick={() => setEditing(true)}>Editar</button>
-              <button onClick={handleDelete} disabled={loading}>Eliminar</button>
-            </div>
-          )}
+          <Box
+            sx={{
+              position: "relative",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              mt: 1,
+            }}
+          >
+            <Typography
+              variant="body1"
+              sx={{
+                mb: 2,
+                whiteSpace: "pre-wrap",
+                pr: { xs: 0, sm: 8 },
+                width: "100%",
+                fontSize: "1.1rem",
+                lineHeight: 1.8,
+              }}
+            >
+              {text}
+            </Typography>
+
+            {mediaUrl && (
+              <CardMedia
+                component="img"
+                height="320"
+                image={mediaUrl}
+                alt="imagen del post"
+                sx={{ objectFit: "cover", borderRadius: 2, mb: 1 }}
+              />
+            )}
+
+            <PostActions
+              onEdit={() => setEditing(true)}
+              onDelete={handleDelete}
+              onReport={handleReport}
+              loading={loading}
+              isOwn={isOwn}
+            />
+          </Box>
         </>
       ) : (
-        <div>
-          <textarea value={text} onChange={(e) => setText(e.target.value)} style={{ width: '100%', minHeight: 80 }} />
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-            <button onClick={handleSave} disabled={loading}>Guardar</button>
-            <button onClick={() => { setEditing(false); setText(description); }}>Cancelar</button>
-          </div>
-        </div>
+        <Box>
+          <TextField
+            fullWidth
+            multiline
+            minRows={4}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            sx={{
+              fontSize: "1.1rem",
+              "& .MuiOutlinedInput-root": {
+                fontSize: "1.1rem",
+                lineHeight: 1.6,
+                borderRadius: 2,
+              },
+            }}
+          />
+          <Stack direction="row" spacing={1.5} mt={1.5} sx={{ justifyContent: "flex-end" }}>
+            <IconButton size="medium" onClick={handleSave} disabled={loading}>
+              <Save fontSize="medium" />
+            </IconButton>
+            <IconButton size="medium" onClick={() => setEditing(false)}>
+              <Close fontSize="medium" />
+            </IconButton>
+          </Stack>
+        </Box>
       )}
-      {msg && <div style={{ marginTop: 8, color: msg.type === 'error' ? 'crimson' : 'green' }}>{msg.text}</div>}
-    </div>
+
+      {msg && (
+        <Typography
+          variant="body2"
+          color={msg.type === "error" ? "error" : "success.main"}
+          mt={1.5}
+          display="block"
+          sx={{ fontSize: "0.95rem" }}
+        >
+          {msg.text}
+        </Typography>
+      )}
+    </Box>
   );
 }

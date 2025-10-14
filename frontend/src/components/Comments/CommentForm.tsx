@@ -1,16 +1,15 @@
-import {useForm, Controller} from "react-hook-form";
-import api from "@tpfinal/api";
-import { Comment } from "@tpfinal/types";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { commentSchema, CommentFormData } from "@tpfinal/schemas";
-import { TextField, Button, Box , } from "@mui/material";
+import { TextField, Button, Avatar, Paper, CircularProgress, Box } from "@mui/material";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-interface Props{
-    postId: string | number;
-    parentId?: string | number | null;
-    onSubmit: (data: CommentFormData, parentId?: string | number | null) => void;
+interface Props {
+  postId: string | number;
+  parentId?: string | number | null;
+  onSubmit: (data: CommentFormData, parentId?: string | number | null) => void;
+  avatarUrl?: string;
 }
 const CommentForm: React.FC<Props> = ({ onSubmit, parentId }) => {
   const {

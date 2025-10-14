@@ -1,53 +1,205 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { Card, CardContent, Button, Typography, Stack } from "@mui/material";
+import Link from "next/link";
+import api from "@/lib/axios";
+import {
+  Card,
+  CardContent,
+  Button,
+  Typography,
+  Stack,
+  Box,
+  Chip,
+  Divider,
+  CircularProgress,
+  Paper,
+  Tabs,
+  Tab,
+} from "@mui/material";
+import {
+  ReportProblem,
+  Delete,
+  CheckCircle,
+  OpenInNew,
+} from "@mui/icons-material";
+import { Report } from "@tpfinal/types";
 
 export default function AdminReportsPage() {
-  const [reports, setReports] = useState<any[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+const [tab, setTab] = useState<"pending" | "blocked" | "dismissed">("pending");
 
+
+  // carga los reportes según la pestaña activa
   useEffect(() => {
-    axios.get("/api/reports/pending").then((res) => setReports(res.data));
-  }, []);
+    const fetchReports = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get<Report[]>(`/reports/${tab}`);
+        setReports(res.data);
+      } catch (error) {
+        console.error("Error al obtener reportes:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReports();
+  }, [tab]);
 
-  const handleAction = async (id: number, status: 'reviewed' | 'dismissed') => {
-    await axios.patch(`/api/reports/${id}`, { status });
-    setReports((prev) => prev.filter((r) => r.id !== id));
-  };
+const handleAction = async (id: string, action: "blocked" | "dismissed") => {
+  setActionLoading(id);
+  try {
+    await api.patch(`/reports/${id}`, { status: action });
+    if (action === "blocked") {
+      const report = reports.find(r => r.id === id);
+      if (report?.target_type === "post") {
+        await api.patch(`/posts/block/${report.target_id}`);
+      }
+      // falta logica de bloquear comentarios
+    }
+
+    setReports(prev => prev.filter(r => r.id !== id));
+  } catch (error) {
+    console.error("Error al actualizar reporte:", error);
+  } finally {
+    setActionLoading(null);
+  }
+};
+
 
   return (
-    <Stack spacing={2}>
-      <Typography variant="h4">Reportes pendientes</Typography>
-      {reports.map((report) => (
-        <Card key={report.id}>
-          <CardContent>
-            <Typography>Reportado por: {report.reporter_username}</Typography>
-            <Typography>Tipo: {report.target_type}</Typography>
-            <Typography>ID Contenido: {report.target_id}</Typography>
-            <Typography>Motivo: {report.reason}</Typography>
+    <Stack spacing={3} sx={{ maxWidth: 800, mx: "auto", mt: 4, mb: 6 }}>
+      <Typography variant="h4" fontWeight="bold" textAlign="center">
+        Gestión de Reportes
+      </Typography>
+      <Tabs
+        value={tab}
+        onChange={(_, newValue) => setTab(newValue)}
+        centered
+        textColor="primary"
+        indicatorColor="primary"
+      >
+        <Tab label="Pendientes" value="pending" />
+        <Tab label="Bloqueados" value="blocked" />
+        <Tab label="Descartados" value="dismissed" />
+      </Tabs>
 
-            {/* Aquí podrías renderizar el post directamente usando tu componente de Post */}
-            {/* <Post id={report.target_id}/> */}
+      {loading ? (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "50vh",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      ) : reports.length === 0 ? (
+        <Paper
+          sx={{
+            p: 4,
+            textAlign: "center",
+            color: "text.secondary",
+            borderRadius: 3,
+          }}
+          elevation={0}
+        >
+          <ReportProblem sx={{ fontSize: 40, mb: 1, color: "warning.main" }} />
+          <Typography variant="h6">
+            No hay reportes {tab === "pending" ? "pendientes" : "en esta categoría"} 🎉
+          </Typography>
+        </Paper>
+      ) : (
+        reports.map((report) => (
+          <Card
+            key={report.id}
+            sx={{
+              borderRadius: 3,
+              boxShadow: 3,
+              borderLeft: `6px solid ${
+                report.target_type === "post" ? "#1976d2" : "#9c27b0"
+              }`,
+            }}
+          >
+            <CardContent>
+              <Stack spacing={1.2}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <ReportProblem color="warning" />
+                  <Typography variant="h6" fontWeight="bold">
+                    Reporte #{report.id}
+                  </Typography>
+                </Stack>
 
-            <Stack direction="row" spacing={1} mt={2}>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={() => handleAction(report.id, 'reviewed')}
-              >
-                Eliminar contenido
-              </Button>
-              <Button
-                variant="outlined"
-                onClick={() => handleAction(report.id, 'dismissed')}
-              >
-                Descartar
-              </Button>
-            </Stack>
-          </CardContent>
-        </Card>
-      ))}
+                <Divider sx={{ my: 1 }} />
+
+                <Typography>
+                  <strong>Reportado por:</strong> {report.reporter_username}
+                </Typography>
+
+                <Typography component="div">
+                  <strong>Tipo de contenido:</strong>{" "}
+                  <Chip
+                    label={report.target_type.toUpperCase()}
+                    color={
+                      report.target_type === "post" ? "primary" : "secondary"
+                    }
+                    size="small"
+                  />
+                </Typography>
+
+                <Typography>
+                  <strong>ID del contenido:</strong>{" "}
+                  {report.target_type === "post" ? (
+                    <Link
+                      href={`/posts/${report.target_id}`}
+                      style={{
+                        color: "#1976d2",
+                        textDecoration: "none",
+                        fontWeight: 500,
+                      }}
+                    >
+                      Ver post <OpenInNew fontSize="small" sx={{ ml: 0.5 }} />
+                    </Link>
+                  ) : (
+                    report.target_id
+                  )}
+                </Typography>
+
+                <Typography>
+                  <strong>Motivo:</strong> {report.reason}
+                </Typography>
+
+                {tab === "pending" && (
+                  <Stack direction="row" spacing={1.5} mt={2}>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      startIcon={<Delete />}
+                      onClick={() => handleAction(report.id, "blocked")}
+                      disabled={actionLoading === report.id}
+                    >
+                      Eliminar contenido
+                    </Button>
+
+                    <Button
+                      variant="outlined"
+                      color="success"
+                      startIcon={<CheckCircle />}
+                      onClick={() => handleAction(report.id, "dismissed")}
+                      disabled={actionLoading === report.id}
+                    >
+                      Descartar reporte
+                    </Button>
+                  </Stack>
+                )}
+              </Stack>
+            </CardContent>
+          </Card>
+        ))
+      )}
     </Stack>
   );
 }

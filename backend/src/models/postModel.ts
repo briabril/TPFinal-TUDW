@@ -34,6 +34,7 @@ export const getPosts = async () => {
     FROM post p
     LEFT JOIN users u ON p.author_id = u.id
     LEFT JOIN media m ON m.post_id = p.id
+    WHERE p.is_blocked = FALSE
     GROUP BY p.id, u.id
     ORDER BY p.created_at DESC
     LIMIT 50`;
@@ -101,4 +102,15 @@ export const getPostById = async (postId: string) => {
     author: { id: row.author_id },
     medias: row.medias || [],
   };
+};
+
+export const blockPostById = async (postId: string) => {
+  const q = `
+    UPDATE post
+    SET is_blocked = true, updated_at = NOW()
+    WHERE id = $1
+    RETURNING *;
+  `;
+  const r = await db.query(q, [postId]);
+  return r.rows[0];
 };

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createMedia, createPost, getPosts, getPostsByAuthor, getPostById } from "../models/postModel";
+import { createMedia, createPost, getPosts, getPostsByAuthor, getPostById, blockPostById } from "../models/postModel";
 import { uploadBufferToCloudinary, deleteFromCloudinary } from "../utils/cloudinary";
 import db from '../db';
 
@@ -199,3 +199,20 @@ export const getPostByIdController = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error al obtener el post" });
   }
 }
+
+export const blockPostController = async (req: Request, res: Response) => {
+  try {
+    const postId = req.params.id;
+
+    // opcional: verificar que el post existe antes
+    const post = await getPostById(postId);
+    if (!post) return res.status(404).json({ error: "Post no encontrado" });
+
+    const blockedPost = await blockPostById(postId);
+
+    res.json({ message: "Post bloqueado", post: blockedPost });
+  } catch (err) {
+    console.error("blockPostController error:", err);
+    res.status(500).json({ error: "Error al bloquear el post" });
+  }
+};

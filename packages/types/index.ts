@@ -1,2 +1,3 @@
 export * from "./user"
-export * from "./Post"
+export * from "./post"
+export * from "./report"

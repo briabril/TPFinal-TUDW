@@ -19,22 +19,41 @@ export const create = async (req: Request, res: Response) => {
 };
 
 
-export const getPending = async (req: Request, res: Response) => {
+export const getByStatus = async (req: Request, res: Response) => {
   try {
-    const reports = await ReportModel.getPendingReports();
+    const { status } = req.params;
+
+    if (!['pending', 'blocked', 'dismissed'].includes(status)) {
+      return res.status(400).json({ message: "Estado inválido" });
+    }
+
+    const reports = await ReportModel.getReportsByStatus(status as 'pending' | 'blocked' | 'dismissed');
     res.json(reports);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Error al obtener reportes" });
   }
 };
+
 
 export const updateStatus = async (req: Request, res: Response) => {
   try {
     const { status } = req.body;
     const { id } = req.params;
-    const report = await ReportModel.updateReportStatus(Number(id), status);
+
+    if (!status) {
+      return res.status(400).json({ message: "Falta el campo 'status'" });
+    }
+
+    const report = await ReportModel.updateReportStatus(id, status);
+
+    if (!report) {
+      return res.status(404).json({ message: "Reporte no encontrado" });
+    }
+
     res.json(report);
   } catch (error) {
-    res.status(500).json({ message: "Error al actualizar reporte" });
+    console.error("Error al actualizar reporte:", error);
+    res.status(500).json({ message: "Error interno al actualizar reporte" });
   }
 };

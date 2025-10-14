@@ -64,7 +64,65 @@ export default function PostBody({ post, description }: any) {
   };
 
   const medias = post.medias ?? [];
-  const mediaUrl = medias.length > 0 ? getMediaUrl(medias[0]) : null;
+ 
+  const renderMediaItem = (media: Media, idx: number) => {
+    const url = getMediaUrl(media);
+    if (!url) return null;
+
+    const isAudio = media.type === "AUDIO";
+    const isVideo = media.type === "VIDEO";
+    const containerHeight = isAudio ? 96 : 320;
+
+    return (
+      <Box
+        key={idx}
+        sx={{
+          width: "100%",
+          height: containerHeight,
+          borderRadius: 2,
+          overflow: "hidden",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "background.default",
+        }}
+      >
+        {isVideo ? (
+          <CardMedia
+            component="video"
+            src={url}
+            controls
+            sx={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              backgroundColor: "black",
+            }}
+          />
+        ) : isAudio ? (
+          <CardMedia
+            component="audio"
+            src={url}
+            controls
+            sx={{
+              width: "100%",
+            }}
+          />
+        ) : (
+          <CardMedia
+            component="img"
+            image={url}
+            alt={`media-${idx}`}
+            sx={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+            }}
+          />
+        )}
+      </Box>
+    );
+  };
 
   return (
     <Box sx={{ fontSize: "1.1rem" }}>
@@ -93,14 +151,29 @@ export default function PostBody({ post, description }: any) {
               {text}
             </Typography>
 
-            {mediaUrl && (
-              <CardMedia
-                component="img"
-                height="320"
-                image={mediaUrl}
-                alt="imagen del post"
-                sx={{ objectFit: "cover", borderRadius: 2, mb: 1 }}
-              />
+            {medias.length > 0 && (
+              <Box
+                sx={{
+                  width: "100%",
+                  mt: 1,
+                  display: "grid",
+                  gap: 1,
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    sm: medias.length <= 1 ? "1fr" : "repeat(2, minmax(0, 1fr))",
+                    md:
+                      medias.length >= 4
+                        ? "repeat(2, minmax(0, 1fr))"
+                        : medias.length === 3
+                        ? "repeat(3, minmax(0, 1fr))"
+                        : medias.length === 2
+                        ? "repeat(2, minmax(0, 1fr))"
+                        : "1fr",
+                  },
+                }}
+              >
+                {medias.map((m: Media, i: number) => renderMediaItem(m, i))}
+              </Box>
             )}
 
             <PostActions

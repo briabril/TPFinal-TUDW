@@ -50,3 +50,11 @@ export const getCommentLikesCount  = async (comment_id :string) : Promise<number
     )
     return parseInt(res.rows[0].likes_count, 10)
 }
+export const getCheckLikedPostDB = async (user_id:string | undefined, postId: string) =>{
+    const result = await db.query(`SELECT 1 FROM reaction WHERE user_id= $1 AND post_id = $2`, [user_id, postId]);
+    return result.rowCount
+}
+export const getCheckLikedCommentDB = async (user_id:string | undefined, commentId: string) =>{
+    const result = await db.query(`SELECT 1 FROM reaction WHERE user_id= $1 AND comment_id = $2`, [user_id, commentId])
+    return result.rowCount
+}

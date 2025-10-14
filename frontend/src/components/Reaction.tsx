@@ -48,8 +48,25 @@ export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
       toast.error("Error al obtener los likes");
     }
   };
+  const fetchUserLiked = async () => {
+  try {
+    const endpoint =
+      type === "post"
+        ? `/reactions/post/${targetId}/isLiked`
+        : `/reactions/comment/${targetId}/isLiked`;
+
+    const result = await api.get<ToggleReactionResponse>(endpoint, {
+      withCredentials: true,
+    });
+
+    setLiked(result.data.liked);
+  } catch {
+    setLiked(false);
+  }
+};
 
   useEffect(() => {
+    fetchUserLiked();
     fetchCount();
   }, []);
 

@@ -10,19 +10,19 @@ export const createReport = async (reporterId: number, targetType: 'post' | 'com
   return rows[0];
 };
 
-export const getPendingReports = async () => {
+export const getReportsByStatus = async (status: 'pending' | 'blocked' | 'dismissed') => {
   const query = `
     SELECT r.*, u.username AS reporter_username
     FROM reports r
     JOIN users u ON u.id = r.reporter_id
-    WHERE r.status = 'pending'
+    WHERE r.status = $1
     ORDER BY r.created_at DESC;
   `;
-  const { rows } = await db.query(query);
+  const { rows } = await db.query(query, [status]);
   return rows;
 };
 
-export const updateReportStatus = async (reportId: string | number, status: 'reviewed' | 'dismissed') => {
+export const updateReportStatus = async (reportId: string, status: 'blocked' | 'dismissed') => {
   const query = `
     UPDATE reports
     SET status = $2

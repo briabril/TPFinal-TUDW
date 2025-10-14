@@ -127,7 +127,7 @@ export default function ProfilePage() {
               isOwnProfile ? (
                 <ListaPosts mineOnly />
               ) : (
-                <ListaPosts mineOnly />
+                <p> Por hacer </p>
               )
             }
           </>

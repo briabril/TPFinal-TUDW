@@ -88,7 +88,7 @@ export const getPostById = async (postId: string) => {
     FROM post p
     LEFT JOIN users u ON p.author_id = u.id
     LEFT JOIN media m ON m.post_id = p.id
-    WHERE p.id = $1
+    WHERE p.id = $1 AND is_blocked = FALSE
     GROUP BY p.id, u.id
     LIMIT 1`;
   const r = await db.query(q, [postId]);
@@ -107,7 +107,7 @@ export const getPostById = async (postId: string) => {
 export const blockPostById = async (postId: string) => {
   const q = `
     UPDATE post
-    SET is_blocked = true, updated_at = NOW()
+    SET is_blocked = true
     WHERE id = $1
     RETURNING *;
   `;

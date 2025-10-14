@@ -13,8 +13,6 @@ router.get("/", listPostsController);
 router.get("/mine", authenticateJWT, (req, res) => require("../controllers/postController").myPostsController(req, res));
 router.post("/", authenticateJWT, createPostController);
 
-router.patch("/block/:id", authenticateJWT, blockPostController);
-
 router.get("/:id", authenticateJWT, getPostByIdController);
 router.delete("/:id", authenticateJWT, (req, res) => require("../controllers/postController").deletePostController(req, res));
 router.patch("/:id", authenticateJWT, (req, res) => require("../controllers/postController").updatePostController(req, res));

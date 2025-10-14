@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import api from "@/lib/axios";
+import api from "@tpfinal/api";
 import {
   Card,
   CardContent,
@@ -48,17 +48,11 @@ const [tab, setTab] = useState<"pending" | "blocked" | "dismissed">("pending");
     fetchReports();
   }, [tab]);
 
-const handleAction = async (id: string, action: "blocked" | "dismissed") => {
+const handleAction = async (id: string, target_id: string | number, action: "blocked" | "dismissed") => {
   setActionLoading(id);
   try {
-    await api.patch(`/reports/${id}`, { status: action });
-    if (action === "blocked") {
-      const report = reports.find(r => r.id === id);
-      if (report?.target_type === "post") {
-        await api.patch(`/posts/block/${report.target_id}`);
-      }
-      // falta logica de bloquear comentarios
-    }
+    await api.patch(`/reports/${id}`, { action, target_id });
+
 
     setReports(prev => prev.filter(r => r.id !== id));
   } catch (error) {
@@ -178,7 +172,7 @@ const handleAction = async (id: string, action: "blocked" | "dismissed") => {
                       variant="contained"
                       color="error"
                       startIcon={<Delete />}
-                      onClick={() => handleAction(report.id, "blocked")}
+                      onClick={() => handleAction(report.id, report.target_id, "blocked" )}
                       disabled={actionLoading === report.id}
                     >
                       Eliminar contenido
@@ -188,7 +182,7 @@ const handleAction = async (id: string, action: "blocked" | "dismissed") => {
                       variant="outlined"
                       color="success"
                       startIcon={<CheckCircle />}
-                      onClick={() => handleAction(report.id, "dismissed")}
+                      onClick={() => handleAction(report.id, report.target_id, "dismissed")}
                       disabled={actionLoading === report.id}
                     >
                       Descartar reporte

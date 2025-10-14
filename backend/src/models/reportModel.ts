@@ -22,14 +22,14 @@ export const getReportsByStatus = async (status: 'pending' | 'blocked' | 'dismis
   return rows;
 };
 
-export const updateReportStatus = async (reportId: string, status: 'blocked' | 'dismissed') => {
+export const updateReportStatus = async (reportId: string, action: 'blocked' | 'dismissed') => {
   const query = `
     UPDATE reports
     SET status = $2
     WHERE id = $1
     RETURNING *;
   `;
-  const values = [reportId, status];
+  const values = [reportId, action];
   const { rows } = await db.query(query, values);
   return rows[0];
 };

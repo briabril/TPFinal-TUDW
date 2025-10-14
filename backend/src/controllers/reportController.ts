@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { blockPostById } from "../models/postModel";
 import * as ReportModel from "../models/reportModel";
 
 export const create = async (req: Request, res: Response) => {
@@ -37,19 +38,27 @@ export const getByStatus = async (req: Request, res: Response) => {
 
 
 export const updateStatus = async (req: Request, res: Response) => {
-   console.log("🪵 PATCH /reports/:id");
+  console.log("🪵 PATCH /reports/:id");
   console.log("Params:", req.params);
   console.log("Body:", req.body);
-  console.log("User:", req.user); 
+  console.log("User:", req.user);
   try {
-    const { status } = req.body;
+    console.log("Body: ", req.body)
+    console.log("Params: ", req.params)
+    const { action } = req.body;
+    console.log("STATUS", action)
     const { id } = req.params;
-
-    if (!status) {
+    const { target_id } = req.body
+    console.log("Target Id", target_id)
+    if (!action) {
       return res.status(400).json({ message: "Falta el campo 'status'" });
+      console.log("entró aqui")
     }
 
-    const report = await ReportModel.updateReportStatus(id, status);
+    if (action === 'blocked') {
+      await blockPostById(target_id)
+    }
+    const report = await ReportModel.updateReportStatus(id, action);
 
     if (!report) {
       return res.status(404).json({ message: "Reporte no encontrado" });

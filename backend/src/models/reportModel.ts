@@ -22,7 +22,7 @@ export const getPendingReports = async () => {
   return rows;
 };
 
-export const updateReportStatus = async (reportId: number, status: 'reviewed' | 'dismissed') => {
+export const updateReportStatus = async (reportId: string | number, status: 'reviewed' | 'dismissed') => {
   const query = `
     UPDATE reports
     SET status = $2

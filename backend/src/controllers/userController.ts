@@ -176,7 +176,7 @@ export const logoutUser = (req: Request, res: Response) => {
   res.json({ message: "Logout exitoso" });
 };
 
-export const editProfile = async (req, res) => {
+export const editProfile = async (req: Request, res: Response) => {
   const userId = req.params.id;
   const { username, displayname, bio, profile_picture_url, password, new_password } = req.body;
   try {
@@ -290,7 +290,7 @@ export const editProfile = async (req, res) => {
       user: safeUser 
     });
     
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error al actualizar perfil:", err);
     
     

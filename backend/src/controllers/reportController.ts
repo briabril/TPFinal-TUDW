@@ -29,10 +29,14 @@ export const getPending = async (req: Request, res: Response) => {
 };
 
 export const updateStatus = async (req: Request, res: Response) => {
+   console.log("🪵 PATCH /reports/:id");
+  console.log("Params:", req.params);
+  console.log("Body:", req.body);
+  console.log("User:", req.user); 
   try {
     const { status } = req.body;
     const { id } = req.params;
-    const report = await ReportModel.updateReportStatus(Number(id), status);
+    const report = await ReportModel.updateReportStatus(id, status);
     res.json(report);
   } catch (error) {
     res.status(500).json({ message: "Error al actualizar reporte" });

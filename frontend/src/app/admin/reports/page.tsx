@@ -1,18 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "@tpfinal/api";
 import { Card, CardContent, Button, Typography, Stack } from "@mui/material";
 
 export default function AdminReportsPage() {
   const [reports, setReports] = useState<any[]>([]);
 
   useEffect(() => {
-    axios.get("/api/reports/pending").then((res) => setReports(res.data));
+    api.get("/reports/pending").then((res) => setReports(res.data));
   }, []);
 
   const handleAction = async (id: number, status: 'reviewed' | 'dismissed') => {
-    await axios.patch(`/api/reports/${id}`, { status });
+    await api.patch(`/reports/${id}`, { status });
     setReports((prev) => prev.filter((r) => r.id !== id));
   };
 

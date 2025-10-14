@@ -42,6 +42,8 @@ app.use("/api/blocks", blockRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/reactions", reactionRoutes);
+app.use("/api/reports", reportRoutes);
+app.use("/api/follows", followRoutes)
 // Escuchamos conexión
 io.on("connection", (socket: any) => {
     console.log("✅ Cliente conectado:", socket.id);

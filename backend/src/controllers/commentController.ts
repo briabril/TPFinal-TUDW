@@ -39,11 +39,8 @@ function buildCommentTree(comments: CommentRow[]): CommentNode[] {
 
   return roots;
 }
-// Extendemos Request para tipar io
-interface IORequest extends Request {
-  io: any;
-}
-export const insertComment = async (req: IORequest, res: Response) => {
+
+export const insertComment = async (req: Request, res: Response) => {
   try {
     const { author_id, post_id, text, parent_id } = req.body;
 
@@ -61,7 +58,9 @@ export const insertComment = async (req: IORequest, res: Response) => {
     }
 
     const newComment = await insertCommentDB(author_id, post_id, text, parent_id);
-           req.io?.emit(`new-comment-${post_id}`, newComment);
+
+console.log("📢 Emisión de evento:", `new-comment-${post_id}`);
+req.io?.emit(`new-comment-${post_id}`, newComment);
 
     res.status(201).json(newComment);
   } catch (error) {
@@ -81,7 +80,7 @@ export const updateComment = async (req: Request, res: Response) => {
 
     if (!updated)
       return res.status(404).json({ message: "Comentario no encontrado" });
- 
+  req.io?.emit(`update-comment-${updated.post_id}`, updated);
     res.status(200).json(updated);
   } catch (error) {
     console.error("Error al actualizar comentario:", error);
@@ -92,8 +91,17 @@ export const updateComment = async (req: Request, res: Response) => {
 export const deleteComment = async (req: Request, res: Response) => {
   try {
     const { commentId } = req.params;
-    await deleteCommentDB(commentId);
-    res.status(204).json({message: "Comentario eliminado"});
+      const deleted = await deleteCommentDB(commentId);
+     if (!deleted) {
+  return res.status(404).json({ message: "Comentario no encontrado" });
+}
+
+// Emitir evento
+req.io?.emit(`delete-comment-${deleted.post_id}`, commentId);
+
+// Devuelve 200 en lugar de 204
+res.status(200).json({ message: "Comentario eliminado" });
+
   } catch (error) {
     console.error("Error al eliminar comentario:", error);
     res.status(500).json({ message: "Error interno del servidor" });

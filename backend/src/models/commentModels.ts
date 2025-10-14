@@ -19,13 +19,26 @@ export const insertCommentDB = async (
   text: string,
   parent_id?: string | null
 ): Promise<Comment> => {
-  const result = await db.query<Comment>(
+   const result = await db.query<Comment>(
     `INSERT INTO user_comments (author_id, post_id, text, parent_id)
      VALUES ($1, $2, $3, $4)
      RETURNING id, author_id, post_id, text, parent_id, created_at, updated_at`,
     [author_id, post_id, text, parent_id || null]
   );
-  return result.rows[0];
+
+  const newComment = result.rows[0];
+
+  // Ahora hacemos el JOIN para traer el username
+  const userResult = await db.query<Comment>(
+    `SELECT c.id, c.author_id, u.username AS author_username, c.post_id, c.text, c.parent_id, c.created_at, c.updated_at
+     FROM user_comments c
+     JOIN users u ON c.author_id = u.id
+     WHERE c.id = $1`,
+    [newComment.id]
+  );
+
+  return userResult.rows[0];
+
 };
 
 export const getCommentDepth = async (commentId: string) => {
@@ -50,7 +63,22 @@ export const getCommentDepth = async (commentId: string) => {
 };
 
 export const deleteCommentDB = async (commentId: string) => {
-  await db.query("DELETE FROM user_comments WHERE id = $1", [commentId]);
+    // 1. Buscar el comentario
+  const result = await db.query<Comment>(
+    `SELECT id, author_id, post_id, text, parent_id, created_at, updated_at
+     FROM user_comments
+     WHERE id = $1`,
+    [commentId]
+  );
+  const comment = result.rows[0];
+
+  if (!comment) return null;
+
+  // 2. Eliminarlo
+  await db.query(`DELETE FROM user_comments WHERE id = $1`, [commentId]);
+
+  // 3. Devolverlo para usar en el controlador
+  return comment;
 };
 
 export const updateCommentDB = async (commentId: string, text: string) => {

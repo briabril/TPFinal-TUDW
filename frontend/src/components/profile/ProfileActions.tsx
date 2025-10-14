@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import api from "@/lib/axios";
+
+import api from "@tpfinal/api";
 import { User } from "@tpfinal/types";
 import { Box, Button, CircularProgress } from "@mui/material";
 

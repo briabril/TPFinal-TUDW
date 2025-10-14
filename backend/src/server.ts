@@ -19,16 +19,7 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 
-app.use("/api/users", userRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/blocks", blockRoutes);
-app.use("/api/posts", postRoutes);
-app.use("/api/comments", commentRoutes);
-app.use("/api/reactions", reactionRoutes);
 // Servidor HTTP y Socket.IO
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
@@ -39,11 +30,23 @@ const io = new SocketIOServer(server, {
 });
 // Middleware para agregar io a req
 app.use(attachIO(io));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
+app.use("/api/users", userRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/blocks", blockRoutes);
+app.use("/api/posts", postRoutes);
+app.use("/api/comments", commentRoutes);
+app.use("/api/reactions", reactionRoutes);
 // Escuchamos conexión
-io.on("connection", (socket) => {
-  console.log("Cliente conectado:", socket.id);
-  socket.on("disconnect", () => console.log("Cliente desconectado:", socket.id));
+io.on("connection", (socket: any) => {
+    console.log("✅ Cliente conectado:", socket.id);
+
+  socket.on("disconnect", (reason: any) => {
+    console.log("❌ Cliente desconectado:", socket.id, "Motivo:", reason);
+  });
 });
 
 // Se levanta el servidor

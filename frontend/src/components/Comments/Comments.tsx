@@ -1,12 +1,12 @@
 "use client"
-import { Comment } from "../../types/comment";
+import { Comment } from "../../../../packages/types";
 import socket from "@/socket";
 import CommentForm from "./CommentForm";
 import CommentItem from "./CommentItem";
 import { Typography, Box, CircularProgress } from "@mui/material";
 import { useState, useEffect } from "react";
-import { CommentFormData } from "@/schemas/commentSchema";
-import api from "@/lib/axios";
+import { CommentFormData } from "@tpfinal/schemas";
+import api from "@tpfinal/api";
 import toast from "react-hot-toast";
 
 interface CommentProps {
@@ -30,32 +30,101 @@ const Comments: React.FC<CommentProps> = ({postId, authorId}) =>{
     }
 
   };
+// Agregar un comentario (nuevo o respuesta)
+function addCommentToTree(tree: Comment[], newComment: Comment): Comment[] {
+  if (!newComment.parent_id) {
+    // comentario raíz
+    return [...tree, { ...newComment, children: [] }];
+  }
 
-  useEffect(() => {
-    fetchComments();
+  const addRecursively = (nodes: Comment[]): Comment[] =>
+    nodes.map((node) => {
+      if (node.id === newComment.parent_id) {
+        return {
+          ...node,
+          children: [...(node.children || []), { ...newComment, children: [] }],
+        };
+      }
+      if ((node.children?.length || 0) > 0) {
+        return { ...node, children: addRecursively(node.children || []) };
+      }
+      return node;
+    });
 
-    const eventName = `new-comment-${postId}`;
-    const handleNewComment = (newComment: Comment) => {
-      setComments((prev) => [...prev, newComment]);
-    };
+  return addRecursively(tree);
+}
 
-    socket.on(eventName, handleNewComment);
+// Actualizar un comentario existente
+function updateCommentInTree(tree: Comment[], updatedComment: Comment): Comment[] {
+  const updateRecursively = (nodes: Comment[]): Comment[] =>
+    nodes.map((node) => {
+      if (node.id === updatedComment.id) {
+        return { ...node, text: updatedComment.text };
+      }
+      if ((node.children?.length ||0)> 0) {
+        return { ...node, children: updateRecursively(node.children || []) };
+      }
+      return node;
+    });
 
-    return () => {
-      socket.off(eventName, handleNewComment);
-    };
-  }, [postId]);
+  return updateRecursively(tree);
+}
+
+// Eliminar un comentario (y todos sus hijos)
+function deleteCommentFromTree(tree: Comment[], commentId: string | number): Comment[] {
+  const deleteRecursively = (nodes: Comment[]): Comment[] =>
+    nodes
+      .filter((node) => node.id !== commentId)
+      .map((node) => ({
+        ...node,
+        children: deleteRecursively(node.children || []),
+      }));
+
+  return deleteRecursively(tree);
+}
+
+useEffect(() => {
+  fetchComments();
+
+  const newEvent = `new-comment-${postId}`;
+  const updateEvent = `update-comment-${postId}`;
+  const deleteEvent = `delete-comment-${postId}`;
+
+  const handleNewComment = (newComment: Comment) => {
+    setComments((prev) => addCommentToTree(prev, newComment));
+  };
+
+  const handleUpdateComment = (updated: Comment) => {
+    setComments((prev) => updateCommentInTree(prev, updated));
+  };
+
+  const handleDeleteComment = (deletedId: string | number) => {
+    setComments((prev) => deleteCommentFromTree(prev, deletedId));
+  };
+
+  socket.on(newEvent, handleNewComment);
+  socket.on(updateEvent, handleUpdateComment);
+  socket.on(deleteEvent, handleDeleteComment);
+
+  return () => {
+    socket.off(newEvent, handleNewComment);
+    socket.off(updateEvent, handleUpdateComment);
+    socket.off(deleteEvent, handleDeleteComment);
+  };
+}, [postId]);
+
+
 
   const handleSubmit = async (data: CommentFormData, parentId?: string | number | null) => {
     try{
-        await api.post(
-            "/comments", {
+        const res = await api.post("/comments", {
             author_id: authorId,
             post_id: postId,
             text: data.text,
             parent_id : parentId || null
         },
     {withCredentials: true})
+    return res.data; 
     }catch(error){
         toast.error("Error al publicar comentario")
     }

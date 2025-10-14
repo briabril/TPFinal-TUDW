@@ -1,8 +1,8 @@
 import {useForm, Controller} from "react-hook-form";
-import api from "@/lib/axios";
-import { Comment } from "../../types/comment";
+import api from "@tpfinal/api";
+import { Comment } from "@tpfinal/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { commentSchema, CommentFormData } from "@/schemas/commentSchema";
+import { commentSchema, CommentFormData } from "@tpfinal/schemas";
 import { TextField, Button, Box , } from "@mui/material";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -12,48 +12,44 @@ interface Props{
     parentId?: string | number | null;
     onSubmit: (data: CommentFormData, parentId?: string | number | null) => void;
 }
-const CommentForm: React.FC<Props> =({ onSubmit}) =>{
-      const [textValue, setTextValue] = useState("");
+const CommentForm: React.FC<Props> = ({ onSubmit, parentId }) => {
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CommentFormData>({ resolver: zodResolver(commentSchema) });
+   const handleFormSubmit = async (data: CommentFormData) => {
+  try {
+    await onSubmit(data, parentId); // espera a que el comentario se cree
+    reset({ text: "" }) // limpia el form
+    toast.success("Comentario publicado ✅");
+  } catch (error) {
+    toast.error("Error al publicar comentario");
+  }
+};
 
-    const {
-        control,
-        handleSubmit,
-        reset,
-        formState: {errors}
-    } = useForm<CommentFormData>({resolver: zodResolver(commentSchema)})
-    
-     const handleFormSubmit = (data: CommentFormData) => {
-    onSubmit(data);
-    reset();
-     setTextValue("");
-  };
-    
-    return(
-       <Box className="border border-gray-200 rounded-lg p-3 mb-2" component="form" onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-2 mt-2">
-        <Controller
-         name="text"
+  return (
+    <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} className="border border-gray-200 rounded-lg p-3 mb-2">
+      <Controller
+        name="text"
         control={control}
-     render={({ field }) => (
+        render={({ field }) => (
           <TextField
             {...field}
-            placeholder="Escribe un comentario"
+            placeholder="Escribe un comentario..."
             multiline
             rows={2}
             fullWidth
             variant="outlined"
             size="small"
-            onChange={(e) => {
-              field.onChange(e);
-              setTextValue(e.target.value);
-            }}
             error={!!errors.text}
             helperText={errors.text?.message}
           />
         )}
       />
-    
-       
-      {textValue.trim() && (
+
+      
         <Box className="flex justify-end">
           <Button
             type="submit"
@@ -62,8 +58,9 @@ const CommentForm: React.FC<Props> =({ onSubmit}) =>{
             Publicar
           </Button>
         </Box>
-      )}
-      </Box>
-    )
+    
+    </Box>
+  );
+
 }
 export default CommentForm;

@@ -1,10 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
-import api from "@/lib/axios";
+import api from "@tpfinal/api";
 import Sidebar from "@/components/Sidebar";
 import {useForm} from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod";
-import { editProfilSchema, ProfileData } from "@/schemas/editProfile";
+import { editProfilSchema, ProfileData } from "@tpfinal/schemas";
 import {Button, TextField, Container, Paper, Typography, Box} from "@mui/material"
 import toast from "react-hot-toast";
 export default function EditProfilePage() {

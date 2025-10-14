@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import api from "@/lib/axios";
+import api from "@tpfinal/api";
 import { User } from "@tpfinal/types";
 import ThemeToggle from "@/components/ThemeToggle";
 import UserTable from "@/components/admin/UserTable";

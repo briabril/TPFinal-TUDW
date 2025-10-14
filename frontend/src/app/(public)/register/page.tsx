@@ -2,9 +2,9 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import api from "@/lib/axios";
+import api from "@tpfinal/api";
 import { useRouter } from "next/navigation";
-import { registerSchema, RegisterData } from "@/schemas/registerSchema";
+import { registerSchema, RegisterData } from "@tpfinal/schemas";
 import toast from "react-hot-toast";
 import { Box, Button, Container, TextField, Typography, Paper, Link } from "@mui/material";
 import ThemeToggle from "@/components/ThemeToggle";

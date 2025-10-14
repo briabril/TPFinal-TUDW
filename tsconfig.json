@@ -1,9 +1,23 @@
 {
   "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
-      "@tpfinal/types": ["packages/types"]
+      "@tpfinal/api/*": ["packages/api/*"],
+      "@tpfinal/schemas/*": ["packages/schemas/*"],
+      "@tpfinal/types/*": ["packages/types/*"],
+      "@/*": ["frontend/src/*"]
     }
-  }
+  },
+  "include": ["frontend", "backend", "packages"]
 }
-

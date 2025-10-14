@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@mui/material";
 import { Heart } from "lucide-react";
-import api from "@/lib/axios";
+import api from "@tpfinal/api";
 import toast from "react-hot-toast";
 
 interface PostReactionProps {

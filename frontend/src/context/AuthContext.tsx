@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react"
 import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
-import api from "@/lib/axios"
+import api from "@tpfinal/api"
 import type { User } from "@tpfinal/types"
 
 type AuthContextType = {

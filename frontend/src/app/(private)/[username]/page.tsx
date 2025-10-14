@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import api from "@/lib/axios";
+import api from "@tpfinal/api";
 import { useAuth } from "@/context/AuthContext";
 import { User } from "@tpfinal/types";
 import ProfileHeader from "@/components/profile/ProfileHeader";

@@ -4,15 +4,10 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import api from "@/lib/axios";
 import { useAuth } from "@/context/AuthContext";
-import { User } from "@tpfinal/types";
+import { User, BlockStatus, FollowStatus } from "@tpfinal/types";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import BlockStatusMessage from "@/components/profile/BlockStatusMessage";
-import { Alert, AlertTitle, CircularProgress } from "@mui/material";
-
-interface BlockStatus {
-  blockedByYou: boolean;
-  blockedByThem: boolean;
-}
+import { Alert, AlertTitle, CircularProgress, Box } from "@mui/material";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -25,22 +20,32 @@ export default function ProfilePage() {
     blockedByYou: false,
     blockedByThem: false,
   });
+  const [followStatus, setFollowStatus] = useState<FollowStatus>({
+    isFollowing: false,
+    isFollowedBy: false,
+  });
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfileData = async () => {
+      setLoading(true);
       try {
-        const res = await api.get<User>(`/users/by-username/${username}`, {
+        // 🔹 Obtener datos del usuario
+        const res = await api.get<User>(`/users/${username}`, {
           withCredentials: true,
         });
-        setProfile(res.data);
+        const userData = res.data;
+        setProfile(userData);
 
-        if (user && res.data.id !== user.id) {
-          const statusRes = await api.get<BlockStatus>(
-            `/blocks/${res.data.id}/status`,
-            { withCredentials: true }
-          );
-          setBlockStatus(statusRes.data);
+        // 🔹 Si no es tu propio perfil, obtener estado de bloqueo y seguimiento
+        if (user && userData.id !== user.id) {
+          const [blockRes, followRes] = await Promise.all([
+            api.get<BlockStatus>(`/blocks/${userData.id}/status`, { withCredentials: true }),
+            api.get<FollowStatus>(`/follow/${userData.id}/status`, { withCredentials: true }),
+          ]);
+
+          setBlockStatus(blockRes.data);
+          setFollowStatus(followRes.data);
         }
       } catch (err: any) {
         const status = err.response?.status;
@@ -56,52 +61,59 @@ export default function ProfilePage() {
       }
     };
 
-    if (username) fetchProfile();
+    if (username) fetchProfileData();
   }, [username, user]);
 
   const handleUnblock = async () => {
     if (!profile) return;
-    await api.post(`/blocks/${profile.id}/unblock`, {}, { withCredentials: true });
-    setBlockStatus({ ...blockStatus, blockedByYou: false });
+    try {
+      await api.delete(`/blocks/${profile.id}`, { withCredentials: true });
+      setBlockStatus({ ...blockStatus, blockedByYou: false });
+    } catch (err) {
+      console.error("Error al desbloquear:", err);
+    }
   };
 
   if (loading)
     return (
-      <div className="flex justify-center items-center h-64">
+      <Box className="flex justify-center items-center h-64">
         <CircularProgress />
-      </div>
+      </Box>
     );
 
   if (error)
     return (
-      <div className="p-6">
+      <Box className="p-6">
         <Alert severity="error">
           <AlertTitle>Error</AlertTitle>
           {error}
         </Alert>
-      </div>
+      </Box>
     );
 
   if (!profile)
     return (
-      <div className="p-6">
+      <Box className="p-6">
         <Alert severity="warning">
           <AlertTitle>Atención</AlertTitle>
           No se encontró el perfil.
         </Alert>
-      </div>
+      </Box>
     );
 
   const isOwnProfile = !!(user && profile.id === user.id);
 
   return (
-    <div className="p-6 flex flex-col items-center gap-4">
+    <Box className="p-6 flex flex-col items-center gap-4">
       <ProfileHeader
         profile={profile}
         isOwnProfile={isOwnProfile}
         blockStatus={blockStatus}
         setBlockStatus={setBlockStatus}
+        followStatus={followStatus}
+        setFollowStatus={setFollowStatus}
       />
+
       <BlockStatusMessage
         blockStatus={blockStatus}
         profile={profile}
@@ -110,7 +122,7 @@ export default function ProfilePage() {
 
       {!blockStatus.blockedByYou &&
         !blockStatus.blockedByThem &&
-        !loading && <p>los posts del usuario </p>}
-    </div>
+        !loading && <p>📸 Aquí irían los posts del usuario</p>}
+    </Box>
   );
 }

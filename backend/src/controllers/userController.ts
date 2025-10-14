@@ -9,6 +9,7 @@ import {
 import { sendVerificationEmail } from "../utils/mailer";
 import { searchUsers } from "../models/userModel";
 import * as BlockModel from "../models/blockModel";
+import * as FollowModel from "../models/followModel"
 const JWT_SECRET = process.env.JWT_SECRET;
 import { updateUserProfile } from "../models/userModel";
 import { getUserById } from "../models/userModel";
@@ -336,6 +337,10 @@ export const getProfileByUsername = async (req: Request, res: Response) => {
     const user = await findUserByUsername(username);
     console.log("findUserByUsername result:", !!user ? `found id=${user.id}` : "not found");
     if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+
+    const iFollow = await FollowModel.isFollowing(currentUserId, user.id);
+    const followsMe = await FollowModel.isFollowing(user.id, currentUserId);
+
     const blockedByThem = await BlockModel.hasBlocked(user.id, currentUserId);
     if (blockedByThem) {
       return res.status(403).json({ message: "No puedes ver este perfil" });

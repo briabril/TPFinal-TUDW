@@ -28,7 +28,7 @@ export default function Sidebar() {
   if (loading) return <h1 className="text-center py-10 text-lg">Cargando...</h1>;
 
   return (
-    <aside className="w-64 min-h-screen shadow p-6 flex flex-col justify-between border-r-2 border-gray-500">
+    <aside className="sticky top-0 w-64 h-screen shadow p-6 flex flex-col justify-between bg-white">
       <div>
         <h2 className="font-bold text-2xl mb-8 text-primary">La Red</h2>
 

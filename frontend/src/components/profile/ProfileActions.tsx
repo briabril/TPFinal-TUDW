@@ -2,29 +2,30 @@
 
 import { useState } from "react";
 import api from "@/lib/axios";
-import { User } from "@tpfinal/types";
+import { User, BlockStatus, FollowStatus } from "@tpfinal/types";
 import { Box, Button, CircularProgress } from "@mui/material";
-
-interface BlockStatus {
-  blockedByYou: boolean;
-  blockedByThem: boolean;
-}
 
 interface Props {
   profile: User;
   blockStatus: BlockStatus;
   setBlockStatus: (status: BlockStatus) => void;
+  followStatus: FollowStatus;
+  setFollowStatus: (status: FollowStatus) => void;
 }
 
 export default function ProfileActions({
   profile,
   blockStatus,
   setBlockStatus,
+  followStatus,
+  setFollowStatus,
 }: Props) {
-  const [loading, setLoading] = useState(false);
+  const [loadingBlock, setLoadingBlock] = useState(false);
+  const [loadingFollow, setLoadingFollow] = useState(false);
 
+  // --- BLOQUEO ---
   const handleBlockToggle = async () => {
-    setLoading(true);
+    setLoadingBlock(true);
     try {
       if (blockStatus.blockedByYou) {
         await api.delete(`/blocks/${profile.id}`, { withCredentials: true });
@@ -41,27 +42,62 @@ export default function ProfileActions({
     } catch (err) {
       console.error("Error bloqueando:", err);
     } finally {
-      setLoading(false);
+      setLoadingBlock(false);
+    }
+  };
+
+  // --- SEGUIMIENTO ---
+  const handleFollowToggle = async () => {
+    setLoadingFollow(true);
+    try {
+      if (followStatus.isFollowing) {
+        // Dejar de seguir
+        await api.delete(`/follow/${profile.id}`, { withCredentials: true });
+        setFollowStatus({ ...followStatus, isFollowing: false });
+      } else {
+        // Seguir
+        await api.post(`/follow/${profile.id}`, {}, { withCredentials: true });
+        setFollowStatus({ ...followStatus, isFollowing: true });
+      }
+    } catch (err) {
+      console.error("Error al seguir/dejar de seguir:", err);
+    } finally {
+      setLoadingFollow(false);
     }
   };
 
   return (
     <Box sx={{ display: "flex", gap: 2 }}>
-      {/* Botón de seguir (lógica futura) */}
+      {/* Botón de SEGUIR / DEJAR DE SEGUIR */}
       <Button
-        variant="contained"
+        variant={followStatus.isFollowing ? "outlined" : "contained"}
         color="primary"
-        sx={{ minWidth: 120, fontWeight: 600, textTransform: "none" }}
+        onClick={handleFollowToggle}
+        disabled={loadingFollow || blockStatus.blockedByYou || blockStatus.blockedByThem}
+        sx={{
+          minWidth: 120,
+          fontWeight: 600,
+          textTransform: "none",
+        }}
+        startIcon={
+          loadingFollow ? <CircularProgress size={18} color="inherit" /> : null
+        }
       >
-        Seguir
+        {loadingFollow
+          ? "Procesando..."
+          : blockStatus.blockedByThem
+          ? "No disponible"
+          : followStatus.isFollowing
+          ? "Siguiendo"
+          : "Seguir"}
       </Button>
 
-      {/* Botón de bloquear/desbloquear */}
+      {/* Botón de BLOQUEAR / DESBLOQUEAR */}
       <Button
         variant="contained"
         color={blockStatus.blockedByYou ? "inherit" : "error"}
         onClick={handleBlockToggle}
-        disabled={loading}
+        disabled={loadingBlock}
         sx={{
           minWidth: 120,
           fontWeight: 600,
@@ -72,10 +108,10 @@ export default function ProfileActions({
           },
         }}
         startIcon={
-          loading ? <CircularProgress size={18} color="inherit" /> : null
+          loadingBlock ? <CircularProgress size={18} color="inherit" /> : null
         }
       >
-        {loading
+        {loadingBlock
           ? "Procesando..."
           : blockStatus.blockedByYou
           ? "Desbloquear"

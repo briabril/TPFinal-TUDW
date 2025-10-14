@@ -3,7 +3,7 @@ import Sidebar from "@/components/Sidebar";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import UserSearch from "@/components/UserSearch";
+import { Box, CircularProgress, Typography } from "@mui/material";
 
 export default function PrivateLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -14,8 +14,16 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
       router.replace("/login");
     }
   }, [loading, user, router]);
+  
+  if (loading) return (
+    <Box className="w-full h-screen flex flex-col items-center justify-center gap-4 bg-gray-50">
+      <CircularProgress size={60} thickness={4} />
+      <Typography variant="h6" color="textSecondary">
+        Cargando, por favor espera...
+      </Typography>
+    </Box>
+  );
 
-  if (loading) return <p>Cargando...</p>;
   if (!user) return null;
 
   return (

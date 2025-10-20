@@ -13,6 +13,7 @@ import * as FollowModel from "../models/followModel"
 const JWT_SECRET = process.env.JWT_SECRET;
 import { updateUserProfile } from "../models/userModel";
 import { getUserById } from "../models/userModel";
+import { uploadBufferToCloudinary, deleteFromCloudinary, extractPublicIdFromUrl } from "../utils/cloudinary";
 
 const multer = require('multer');
 const upload = multer({
@@ -20,7 +21,7 @@ const upload = multer({
   limits: {
     fileSize: 8 * 1024 * 1024, // 8MB máximo
   },
-  fileFilter: (req, file, cb) => {
+  fileFilter: (req: Request, file: Express.Multer.File, cb: (error: Error | null, acceptFile?: boolean) => void) => {
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
@@ -130,6 +131,7 @@ export const getMe = async (req: Request, res: Response) => {
       role: user.role,
       status: user.status,
       bio: user.bio,
+      profile_picture_url: user.profile_picture_url,
       profilePicture: user.profile_picture_url,
     });
   } catch (err) {
@@ -268,8 +270,34 @@ export const editProfile = async (req: Request, res: Response) => {
       updateData.bio = bio.trim();
     }
     if (req.file) {
-      
-      updateData.profile_picture_url = `ARCHIVO_SUBIDO_${Date.now()}.${req.file.originalname}`;
+      try {
+        const baseFolder = process.env.CLOUDINARY_FOLDER
+          ? `${process.env.CLOUDINARY_FOLDER}/user/profilePicture`
+          : "user/profilePicture";
+        const publicId = `${userId}-${Date.now()}`;
+        const uploadResult = await uploadBufferToCloudinary(req.file.buffer, baseFolder, publicId);
+        const secureUrl: string | undefined = uploadResult?.secure_url || uploadResult?.url;
+
+        if (!secureUrl) {
+          return res.status(503).json({ error: "No se pudo subir la imagen de perfil." });
+        }
+
+        if (user.profile_picture_url) {
+          const previousPublicId = extractPublicIdFromUrl(user.profile_picture_url);
+          if (previousPublicId) {
+            try {
+              await deleteFromCloudinary(previousPublicId, "image");
+            } catch (cleanupErr) {
+              console.warn("No se pudo eliminar la foto de perfil anterior", cleanupErr);
+            }
+          }
+        }
+
+        updateData.profile_picture_url = secureUrl;
+      } catch (uploadErr) {
+        console.error("Error al subir imagen de perfil:", uploadErr);
+        return res.status(503).json({ error: "Error al subir la imagen de perfil. Intenta más tarde." });
+      }
     }
     if (new_password && new_password.trim() !== '') {
       updateData.password_hash = await bcrypt.hash(new_password, 10);
@@ -371,7 +399,7 @@ export const getProfileByUsername = async (req: Request, res: Response) => {
   }
 };
 
-export const getUser = async (req, res) => {
+export const getUser = async (req: Request, res: Response) => {
   try {
     const user = await getUserById(req.params.id);
     if (!user) return res.status(404).json({ error: "Usuario no encontrado" });

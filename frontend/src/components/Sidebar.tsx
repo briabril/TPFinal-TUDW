@@ -38,7 +38,7 @@ export default function Sidebar() {
     { icon: <Home size={18} />, text: "Inicio", path: "/" },
     { icon: <User size={18} />, text: "Perfil", path: `/${user?.username}` },
     { icon: <MessageSquare size={18} />, text: "Mensajes", path: "/messages" },
-    { icon: <PenSquare size={18} />, text: "Postear", path: "/posts/create" },
+    { icon: <PenSquare size={18} />, text: "Postear", path: "/feed#crear-post" },
     { icon: <Settings size={18} />, text: "Configuración", path: "/settings" },
   ];
 
@@ -52,7 +52,8 @@ export default function Sidebar() {
   // 🔹 Renderizado con estilo activo
   const renderList = (items: any[]) =>
     items.map(({ icon, text, path }) => {
-      const active = pathname === path;
+  const basePath = typeof path === "string" ? path.split("#")[0] : path;
+  const active = pathname === basePath;
       return (
         <ListItemButton
           key={path}
@@ -94,7 +95,6 @@ export default function Sidebar() {
         flexDirection: "column",
         justifyContent: "space-between",
         borderRight: "1px solid #e0e0e0",
-        backgroundColor: "#fff",
         boxShadow: "2px 0 8px rgba(0,0,0,0.05)",
         p: 2,
         position: "sticky",
@@ -147,7 +147,6 @@ export default function Sidebar() {
             justifyContent: "space-between",
             p: 1.5,
             borderRadius: 2,
-            bgcolor: "#f9f9f9",
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>

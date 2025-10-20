@@ -20,7 +20,12 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
-const ListaPosts: React.FC<{ mineOnly?: boolean }> = ({ mineOnly = false }) => {
+type ListaPostsProps = {
+  mineOnly?: boolean;
+  reloadKey?: number;
+};
+
+const ListaPosts: React.FC<ListaPostsProps> = ({ mineOnly = false, reloadKey }) => {
   const { user } = require("@/context/AuthContext").useAuth?.() || { user: null };
   const [posts, setPosts] = useState<Post[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -42,7 +47,7 @@ const ListaPosts: React.FC<{ mineOnly?: boolean }> = ({ mineOnly = false }) => {
     };
 
     fetchPosts();
-  }, [mineOnly]);
+  }, [mineOnly, reloadKey]);
 
   return (
     <Stack spacing={5}>

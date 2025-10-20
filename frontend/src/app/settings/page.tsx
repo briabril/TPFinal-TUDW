@@ -2,28 +2,32 @@
 import { useState, useEffect } from "react";
 import api from "@tpfinal/api";
 import Sidebar from "@/components/Sidebar";
-import {useForm} from "react-hook-form"
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { editProfilSchema, ProfileData } from "@tpfinal/schemas";
-import {Button, TextField, Container, Paper, Typography, Box} from "@mui/material"
+import { Button, TextField, Container, Paper, Typography, Box } from "@mui/material";
 import toast from "react-hot-toast";
+import { useAuth } from "@/context/AuthContext";
+import type { User } from "@tpfinal/types";
 export default function EditProfilePage() {
-  const{
+  const { setUser } = useAuth();
+
+  const {
     register,
     handleSubmit,
     setValue,
     watch,
-    formState: {errors, isSubmitting},
+    formState: { errors, isSubmitting },
   } = useForm<ProfileData>({
     resolver: zodResolver(editProfilSchema),
-  defaultValues: {
-    displayname: "",
-    bio: "",
-    password: "",
-    new_password: "",
-    profile_picture_url: undefined,
-  },
-});
+    defaultValues: {
+      displayname: "",
+      bio: "",
+      password: "",
+      new_password: "",
+      profile_picture_url: undefined,
+    },
+  });
   const [userId, setUserId] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
@@ -36,24 +40,15 @@ export default function EditProfilePage() {
     async function fetchMe() {
       setLoading(true);
       try {
-        const res = await api.get("http://localhost:4000/api/users/me", {
+        const res = await api.get<User>("/users/me", {
           withCredentials: true
         });
-    
-        type User = {
-          id: string;
-          username: string;
-          displayname: string;
-          bio?: string;
-          profilePicture?: string;
-        };
-        const user = res.data as User;
-            setUserId(user.id);
-setValue("displayname", user.displayname || "");
-setValue("bio", user.bio || "");
-        
-        setUserId(user.id);
-       
+
+        const fetchedUser = res.data;
+        setUserId(fetchedUser.id);
+        setValue("displayname", fetchedUser.displayname || "");
+        setValue("bio", fetchedUser.bio || "");
+        setUser(fetchedUser);
       } catch (err: any) {
         toast.error(err?.response?.data?.error || "No autenticado"
         );
@@ -61,7 +56,7 @@ setValue("bio", user.bio || "");
       setLoading(false);
     }
     fetchMe();
-  }, [setValue]);
+  }, [setValue, setUser]);
 
   
 // Actualizar los datos del usuario
@@ -80,14 +75,32 @@ const onSubmit = async (data: ProfileData) => {
         formData.append("bio", data.bio);
       }
 
-      if (data.profile_picture_url instanceof File) {
-        formData.append("profile_picture_url", data.profile_picture_url);
+      const profilePictureField = data.profile_picture_url as unknown;
+      const profileFile =
+        profilePictureField instanceof FileList
+          ? profilePictureField.item(0)
+          : Array.isArray(profilePictureField)
+          ? profilePictureField[0]
+          : profilePictureField instanceof File
+          ? profilePictureField
+          : null;
+
+      if (profileFile instanceof File) {
+        formData.append("profile_picture_url", profileFile);
       }
 
-      const res = await api.put(`/users/${userId}`, formData, {
+      const res = await api.put<{ user: User }>(`/users/${userId}`, formData, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });
+
+      const updatedUser = res.data?.user;
+      if (updatedUser) {
+        setUser(updatedUser);
+        setValue("displayname", updatedUser.displayname ?? "");
+        setValue("bio", updatedUser.bio ?? "");
+        setValue("profile_picture_url", undefined);
+      }
 
       toast.success("¡Perfil actualizado correctamente!");
     } catch (err: any) {
@@ -110,13 +123,13 @@ const onSubmit = async (data: ProfileData) => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{minHeight: "100vh",
-        display: "flex",
-        flexDirection: "row", 
-         justifyContent: "space-between", 
-    alignItems: "flex-start", 
+  <Container maxWidth="lg" sx={{ minHeight: "100vh",
+    display: "flex",
+    flexDirection: "row", 
+     justifyContent: "space-between", 
+  alignItems: "flex-start", 
 
-       }}>
+     }}>
  <Sidebar />
  <Paper
         elevation={6}

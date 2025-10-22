@@ -78,7 +78,7 @@ const ListPostss: React.FC<{ mineOnly?: boolean }> = ({ mineOnly = false }) => {
             }}
           >
             <CardContent sx={{ px: 0, py: 0 }}>
-              <AuthorHeader authorId={post.author.id} />
+              <AuthorHeader authorId={post.author_id} />
               <Box sx={{ px: 2, py: 0 }}>
                 <PostBody
                   post={post}

@@ -47,7 +47,7 @@ app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/reactions", reactionRoutes);
 app.use("/api/reports", reportRoutes);
-app.use("/api/follows", followRoutes)
+app.use("/api/follow", followRoutes)
 app.use("/api/feed", feedRoutes);
 io.on("connection", (socket: any) => {
     console.log("✅ Cliente conectado:", socket.id);

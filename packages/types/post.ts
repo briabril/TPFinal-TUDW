@@ -8,8 +8,7 @@ export interface Post {
   text: string;
   link_url?: string | null;
   created_at: string;
-  author: {
-    id: string
-  };
+  author_id: string;
   medias: Media[];
+   comments_count: number;
 }

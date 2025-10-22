@@ -43,7 +43,7 @@ export default function AuthorHeader({ authorId }: AuthorHeaderProps) {
       }}
     >
       <Avatar
-        src={author.profile_picture_url || "/default-avatar.png"}
+        src={author.profile_picture_url || "../../default-avatar-icon.jpg"}
         alt={author.displayname || author.username}
         sx={{
           width: 56,

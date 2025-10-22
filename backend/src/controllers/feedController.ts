@@ -1,21 +1,9 @@
 import { Request, Response } from "express";
-import { getHybridFeed, getPersonalizedFeed } from "../models/feedModel";
+import { getPersonalizedFeed } from "../models/feedModel";
 import { updateUserFeed } from "../jobs/updateUserFeed";
 import db from "../db";
 import cron from "node-cron";
-
-export const getFeed = async (req: Request, res: Response) => {
-  try {
-    const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
-
-    const feed = await getHybridFeed(userId, 20);
-    res.json({ success: true, data: feed });
-  } catch (error) {
-    console.error("Error al obtener feed", error)
-    res.status(500).json({ success: false, message: "Error al obtener feed", error})
-  }
-};
+;
 
 export const getPersonalizedFeedController = async (req: Request, res: Response) => {
   try {

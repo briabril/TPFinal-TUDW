@@ -41,7 +41,7 @@ const {user} = useAuth();
     >
       <Stack direction="row" spacing={1.5}>
         <Avatar
-          src={user?.profile_picture_url || "/default-avatar.png"}
+          src={user?.profile_picture_url || "../../default-avatar-icon.jpg"}
           sx={{ width: 36, height: 36 }}
         />
 

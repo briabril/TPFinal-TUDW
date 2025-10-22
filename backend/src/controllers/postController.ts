@@ -114,6 +114,7 @@ export const listPostsController = async (req: Request, res: Response) => {
   try {
     const posts = await getPosts();
     res.json({ data: posts });
+    console.log(posts)
   } catch (err) {
     console.error("listPosts error:", err);
     res.status(500).json({ error: "Error al obtener posts" });

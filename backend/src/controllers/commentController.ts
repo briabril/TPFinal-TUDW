@@ -7,7 +7,6 @@ import {
   getCommentsByPostDB,
 } from "../models/commentModels";
 import { Request, Response } from "express";
-import { updatePostMetric } from "../models/postMetricsModel";
 import { adaptUserPreferences } from "../../utils/userPreferences";
 const MAX_DEPTH = 6;
 type CommentRow = {
@@ -59,14 +58,8 @@ export const insertComment = async (req: Request, res: Response) => {
     }
 
     const newComment = await insertCommentDB(author_id, post_id, text, parent_id);
-     await updatePostMetric(post_id, "comments_count", 1);
 console.log("📢 Emisión de evento:", `new-comment-${post_id}`);
 req.io?.emit(`new-comment-${post_id}`, newComment);
- const field = "comments_count";
-       const increment = 1;
-req.io?.emit("metrics_updated", { post_id, field, change: increment });
-await adaptUserPreferences(author_id, post_id, "comment");
-
     res.status(201).json(newComment);
   } catch (error) {
     console.error("Error al responder comentario:", error);
@@ -97,10 +90,7 @@ export const deleteComment = async (req: Request, res: Response) => {
   try {
     const { commentId, post_id } = req.params;
       const deleted = await deleteCommentDB(commentId);
-       await updatePostMetric(post_id, "comments_count", -1);
-       const field = "comments_count";
-       const increment = -1;
-       req.io?.emit("metrics_updated", { post_id, field, change: increment });
+      
      if (!deleted) {
   return res.status(404).json({ message: "Comentario no encontrado" });
 }

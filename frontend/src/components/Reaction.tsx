@@ -77,7 +77,7 @@ export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
         sx={{
           p: 0.6,
           color: liked ? "error.main" : "text.secondary",
-          "&:hover": { color: liked ? "error.main" : "#1d9bf0" },
+          "&:hover": { color: liked ? "error.main" : "#f40000" },
           transition: "color 0.2s ease",
         }}
       >

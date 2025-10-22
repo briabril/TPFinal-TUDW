@@ -30,10 +30,13 @@ export const createPost = async ({ author_id, text, link_url, media_id }:
 export const getPosts = async () => {
   const q = `
     SELECT p.*, u.id as author_id,
-  COALESCE(json_agg(json_build_object('url', m.url, 'type', m.type) ORDER BY m.id) FILTER (WHERE m.id IS NOT NULL), '[]') as medias
+  COALESCE(json_agg(json_build_object('url', m.url, 'type', m.type) ORDER BY m.id) FILTER (WHERE m.id IS NOT NULL), '[]') as medias,
+   COUNT(uc.id) AS comments_count
     FROM post p
     LEFT JOIN users u ON p.author_id = u.id
     LEFT JOIN media m ON m.post_id = p.id
+        LEFT JOIN user_comments uc ON uc.post_id = p.id
+
     WHERE p.is_blocked = FALSE
     GROUP BY p.id, u.id
     ORDER BY p.created_at DESC
@@ -46,6 +49,7 @@ export const getPosts = async () => {
     created_at: row.created_at,
     author: { id: row.author_id },
     medias: row.medias || [],
+    comments_count: Number(row.comments_count) || 0,
   }));
 };
 

@@ -14,32 +14,36 @@ export interface Comment {
 
 const MAX_DEPTH = 6;
 
+
 export const insertCommentDB = async (
   author_id: string,
   post_id: string,
   text: string,
   parent_id?: string | null
 ): Promise<Comment> => {
-   const result = await db.query<Comment>(
-    `INSERT INTO user_comments (author_id, post_id, text, parent_id, author_avatar)
-     VALUES ($1, $2, $3, $4, (SELECT profile_picture_url FROM users WHERE id = $1))
-     RETURNING id, author_id, post_id, text, parent_id, created_at, updated_at, SELECT (username FROM users WHERE id = $1) AS author_username, author_avatar`,
+  // Insertamos el comentario
+  const result = await db.query<Comment>(
+    `
+    INSERT INTO user_comments (author_id, post_id, text, parent_id, author_avatar)
+    VALUES ($1, $2, $3, $4, (SELECT profile_picture_url FROM users WHERE id = $1))
+    RETURNING id, author_id, post_id, text, parent_id, created_at, updated_at, author_avatar
+    `,
     [author_id, post_id, text, parent_id || null]
   );
 
-  const newComment = result.rows[0];
+  const comment = result.rows[0];
 
-  // Ahora hacemos el JOIN para traer el username
-  const userResult = await db.query<Comment>(
-    `SELECT c.id, c.author_id, u.username AS author_username, c.post_id, c.text, c.parent_id, c.created_at, c.updated_at
-     FROM user_comments c
-     JOIN users u ON c.author_id = u.id
-     WHERE c.id = $1`,
-    [newComment.id]
+  // Traemos el username del autor
+  const userResult = await db.query<{ username: string }>(
+    `SELECT username FROM users WHERE id = $1`,
+    [author_id]
   );
 
-  return userResult.rows[0];
-
+  // 3Combinamos todo
+  return {
+    ...comment,
+    author_username: userResult.rows[0]?.username || "Unknown",
+  } as Comment;
 };
 
 export const getCommentDepth = async (commentId: string) => {

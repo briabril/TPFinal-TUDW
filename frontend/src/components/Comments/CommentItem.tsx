@@ -13,9 +13,11 @@ import { useState } from "react";
 interface CommentItemProps {
   comment: Comment;
   onReply: (data: CommentFormData, parentId?: string | number | null) => void;
+    onEdit?: (updated: Comment) => void;
+  onDelete?: (commentId: string | number) => void;
 }
 
-const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply }) => {
+const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply, onEdit, onDelete }) => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(comment.text);
@@ -39,16 +41,20 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply }) => {
     }
     const d = Math.floor(diff / 86400);
     if (d < 7) return `${d} día${d > 1 ? "s" : ""}`;
+    return date.toLocaleDateString();
   };
 
-  const handleEditSubmit = async (comment: Comment) => {
+  const handleEditSubmit = async () => {
     try {
       if (!editedText.trim()) {
         toast.error("El comentario no puede estar vacío");
         return;
       }
-      await api.put(`/comments/${comment.id}`, { text: editedText });
-       comment.text = editedText;
+   const { data: updated } = await api.put(`/comments/${comment.id}`, {
+      text: editedText,
+    });
+
+    onEdit?.(updated);
         setIsEditing(false);
           toast.success("Comentario actualizado ✏️");
     } catch (error: any) {
@@ -57,11 +63,12 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply }) => {
     }
   };
 
-  const handleDelete = async (comment: Comment) => {
+  const handleDelete = async () => {
     if (!confirm("¿Seguro que querés eliminar este comentario?")) return;
 
     try {
       await api.delete(`/comments/${comment.id}`, { withCredentials: true });
+      onDelete?.(comment.id);
      toast.success("Comentario eliminado 🗑️");
     } catch (error: any) {
       toast.error("Error al eliminar el comentario");
@@ -76,11 +83,11 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply }) => {
 
   return (
     <Box sx={{mt: 1}}>
-      <Paper elevation={0} sx={{ p: 2, display: "flex", borderColor: "divider" , borderBottom: `1px solid  ${theme.palette.divider}`}}>
+      <Paper elevation={0} sx={{ p: 2, display: "flex" , gap:2, borderBottom: `1px solid  ${theme.palette.divider}`}}>
        
         <Avatar alt={comment.author_username || "usuario"}
-          src={comment.author_avatar || "../../../public/default-avatar-iconjpg.jpg"}
-          sx={{widht: 30, heigth: 30}}/>
+          src={comment.author_avatar || "../../default-avatar-icon.jpg"}
+          sx={{width: 30, height: 30}}/>
         <Box sx={{ flexGrow: 1, pl:1}}>
          <Stack direction="row" alignItems="center" spacing={1}>
              <Typography variant="subtitle2" fontWeight="bold">
@@ -106,7 +113,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply }) => {
                 <Button
                   variant="contained"
                   size="small"
-                  onClick={() => handleEditSubmit(comment)} 
+                  onClick={handleEditSubmit} 
                 >
                   Guardar
                 </Button>
@@ -128,21 +135,22 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply }) => {
           )}
           <Stack direction="row" alignItems="center" spacing={1} mt={1}>
             <Reaction userId={comment.author_id} targetId={comment.id} type="comment" />
-            <IconButton size="small" onClick={()=> setShowReply((prev)=> !prev)} sx={{color: "text.secondary"}}><MessageCircle size={16}/></IconButton>
+            <IconButton size="small" onClick={()=> setShowReply((prev)=> !prev)} sx={{color: "text.secondary", "&:hover":{color:"#00d600"}}}><MessageCircle size={16}/></IconButton>
         
             {user?.id === comment.author_id && (
               <>
                 <IconButton
                 size="small"
                   onClick={() =>  setIsEditing(true)}
-                  sx={{color: "text.secondary"}}
+                  sx={{color: "text.secondary", "&:hover":{color:"#1966ff"}}}
+                  
                 >
-                 <Edit2 size={16}/>
+                 <Edit2 size={16} />
                 </IconButton>
                 <IconButton
                   size="small"
-                  sx={{color: "text.secondary"}}
-                  onClick={() => handleDelete(comment)}
+                  sx={{color: "text.secondary" , "&:hover":{color:"#e00000"}}}
+                  onClick={ handleDelete}
                 >
                 <Trash2 size={16}/>
                 </IconButton>
@@ -163,7 +171,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply }) => {
 
       {/* Comentarios hijos */}
      {(comment.children?.length ?? 0) > 0 && (
-  <Box sx={{ mt: 1, pl: 4, borderLeft: `2px solid ${theme.palette.divider}` }}>
+  <Box sx={{ mt: 1, pl: 4, borderLeft: `2px solid ${theme.palette.divider}` ,  backgroundColor: theme.palette.action.hover,}}>
     
       <Button
         size="small"
@@ -179,7 +187,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply }) => {
       </Button>
    
 
-    <Collapse in={showReplies} timeout="auto" unmountOnExit sx={{ mt: 1 }}>
+    <Collapse in={showReplies} timeout={300} unmountOnExit sx={{ mt: 1 }}>
       {comment.children?.map((child) => (
         <CommentItem key={child.id} comment={child} onReply={onReply} />
       ))}

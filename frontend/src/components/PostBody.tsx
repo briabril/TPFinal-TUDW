@@ -20,7 +20,7 @@ export default function PostBody({ post, description }: any) {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ type: "error" | "success" | null; text?: string } | null>(null);
 
-  const isOwn = user && post.author.id === user.id;
+  const isOwn = user && post.author_id === user.id;
 
   const getMediaUrl = (media?: Media) => media?.url ?? null;
 

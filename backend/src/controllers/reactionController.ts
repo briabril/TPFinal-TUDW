@@ -1,7 +1,5 @@
 import { getPostLikesCount, getCommentLikesCount, toggleCommenLikeDB, togglePostLikeDB, getCheckLikedCommentDB, getCheckLikedPostDB} from "../models/reactionModel";
 import { Request, Response } from "express";
-import { updatePostMetric } from "../models/postMetricsModel";
-import { adaptUserPreferences } from "../../utils/userPreferences";
 export const togglePostLike = async (req: Request, res: Response) =>{
     try{
         const user_id = req.user?.id;
@@ -11,11 +9,7 @@ export const togglePostLike = async (req: Request, res: Response) =>{
          return res.status(400).json({ message: "Faltan datos (user_id o post_id)" });
     }
      const result = await togglePostLikeDB (user_id, postId);
-      const field = "likes_count";
-    const increment = result.liked ? 1 : -1;
-     req.io?.emit("metrics_updated", { postId, field, change: increment });
-     await adaptUserPreferences(user_id, postId, "like");
-
+    
      return res.status(200).json(result)
     }catch(error: any){
         console.error("Error al dar like al post", error.message, error.stack);
@@ -27,7 +21,6 @@ export const toggleCommentLike = async (req: Request, res: Response) =>{
     try{
         const user_id = req.user?.id;
     const {commentId} =req.params;
-          console.log("togglePostLike:", { user_id, commentId });
     if(!user_id || !commentId){
          return res.status(400).json({ message: "Faltan datos (user_id o comment_id)" });
     }

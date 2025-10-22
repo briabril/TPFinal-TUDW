@@ -6,10 +6,16 @@ import PostBody from "./PostBody";
 import { Reaction } from "./Reaction";
 import {
   Card,
+    CardHeader,
   CardContent,
   Typography,
   Stack,
   Box,
+  CardMedia,
+  CardActions,
+  Avatar,
+  IconButton,
+
 } from "@mui/material";
 import api from "@tpfinal/api";
 import { Post } from "@tpfinal/types";
@@ -20,7 +26,7 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
-const ListaPosts: React.FC<{ mineOnly?: boolean }> = ({ mineOnly = false }) => {
+const ListPostss: React.FC<{ mineOnly?: boolean }> = ({ mineOnly = false }) => {
   const { user } = require("@/context/AuthContext").useAuth?.() || { user: null };
   const [posts, setPosts] = useState<Post[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -28,7 +34,7 @@ const ListaPosts: React.FC<{ mineOnly?: boolean }> = ({ mineOnly = false }) => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const endpoint = mineOnly ? "/posts/mine" : "/posts";
+        const endpoint = mineOnly ? "/posts/mine" : `/feed/${user.id}`;
         const { data } = await api.get<ApiResponse<Post[]>>(endpoint);
         console.log(data.data)
         setPosts(data.data || []);
@@ -106,7 +112,7 @@ const ListaPosts: React.FC<{ mineOnly?: boolean }> = ({ mineOnly = false }) => {
                     color="primary"
                     sx={{ fontWeight: 800, "&:hover": { textDecoration: "underline" } }}
                   >
-                    Comentarios
+                    Comentarios ({post.comments_count || 0})
                   </Typography>
                 </Link>
               </Stack>
@@ -118,4 +124,4 @@ const ListaPosts: React.FC<{ mineOnly?: boolean }> = ({ mineOnly = false }) => {
   );
 };
 
-export default ListaPosts;
+export default ListPostss;

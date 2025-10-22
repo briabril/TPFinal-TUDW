@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Button } from "@mui/material";
+import { IconButton, Typography, Stack, Button } from "@mui/material";
 import { Heart } from "lucide-react";
 import api from "@tpfinal/api";
 import toast from "react-hot-toast";
@@ -71,9 +71,23 @@ export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
   }, []);
 
   return (
-    <Button onClick={toggleReaction} className="flex items-center">
-      {liked ? <Heart className="text-red-500 size-5" fill="red" /> : <Heart className="text-gray-600 size-6"/>}
-      {count > 0 && <span className="text-gray-600 ml-1 text-s">{count}</span>}
-    </Button>
+    <Stack direction="row" alignItems="center" spacing={0.5}>
+      <IconButton
+        onClick={toggleReaction}
+        sx={{
+          p: 0.6,
+          color: liked ? "error.main" : "text.secondary",
+          "&:hover": { color: liked ? "error.main" : "#1d9bf0" },
+          transition: "color 0.2s ease",
+        }}
+      >
+        <Heart size={18} fill={liked ? "red" : "none"} />
+      </IconButton>
+      {count > 0 && (
+        <Typography variant="body2" color="text.secondary">
+          {count}
+        </Typography>
+      )}
+    </Stack>
   );
 };

@@ -10,5 +10,5 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*.ts", "src", "src/types"]
+  "include": ["src/**/*.ts", "src", "src/types", "utils/userPreferences.ts", "ml"]
 }

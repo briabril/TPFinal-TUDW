@@ -1,6 +1,7 @@
 import { getPostLikesCount, getCommentLikesCount, toggleCommenLikeDB, togglePostLikeDB, getCheckLikedCommentDB, getCheckLikedPostDB} from "../models/reactionModel";
 import { Request, Response } from "express";
-
+import { updatePostMetric } from "../models/postMetricsModel";
+import { adaptUserPreferences } from "../../utils/userPreferences";
 export const togglePostLike = async (req: Request, res: Response) =>{
     try{
         const user_id = req.user?.id;
@@ -10,6 +11,11 @@ export const togglePostLike = async (req: Request, res: Response) =>{
          return res.status(400).json({ message: "Faltan datos (user_id o post_id)" });
     }
      const result = await togglePostLikeDB (user_id, postId);
+      const field = "likes_count";
+    const increment = result.liked ? 1 : -1;
+     req.io?.emit("metrics_updated", { postId, field, change: increment });
+     await adaptUserPreferences(user_id, postId, "like");
+
      return res.status(200).json(result)
     }catch(error: any){
         console.error("Error al dar like al post", error.message, error.stack);
@@ -61,7 +67,9 @@ export const checkUserCommentLike = async ( req: Request, res:Response) =>{
       return res.status(400).json({ liked: false });
     }
         const result = await getCheckLikedCommentDB(user_id, commentId)
-        return res.status(200).json({liked: result> 0})
+ const liked = result !== null && result !== undefined && result > 0;
+
+    return res.status(200).json({ liked });        
     }catch(error){
         console.error("Error al traer los likes", error)
         res.status(500).json({message: "Error del servidor"})
@@ -75,8 +83,11 @@ export const checkUserPostLike = async ( req: Request,res: Response) =>{
       return res.status(400).json({ liked: false });
     }
         const result = await getCheckLikedPostDB(user_id, postId)
-        return res.status(200).json({liked: result > 0})
-    }catch(error){
+ const liked = result !== null && result !== undefined && result > 0;
+
+    return res.status(200).json({ liked });
+
+}catch(error){
         console.error("Error al traer los likes", error)
             res.status(500).json({ liked: false });
     }

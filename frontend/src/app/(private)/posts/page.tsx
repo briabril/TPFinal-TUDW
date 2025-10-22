@@ -1,5 +1,5 @@
 import React from 'react'
-import ListaPosts from '@/components/ListaPosts'
+import ListaPosts from '@/components/ListPosts'
 import { Typography, Box } from '@mui/material'
 
 export default function PostsPage() {

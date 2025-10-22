@@ -12,6 +12,8 @@ import reactionRoutes from "./routes/reactionRoutes"
 import commentRoutes from "./routes/commentRoutes"
 import followRoutes from "./routes/followRoutes"
 import reportRoutes from "./routes/reportRoutes"
+import feedRoutes from "./routes/feedRoutes";
+import recommendationRoutes from "./routes/recomendationRoutes";
 const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -35,6 +37,8 @@ app.use(attachIO(io));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+// Servir la carpeta con el modelo ML
+app.use("/api/recommendations", recommendationRoutes);
 
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
@@ -44,6 +48,7 @@ app.use("/api/comments", commentRoutes);
 app.use("/api/reactions", reactionRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/follows", followRoutes)
+app.use("/api/feed", feedRoutes);
 io.on("connection", (socket: any) => {
     console.log("✅ Cliente conectado:", socket.id);
 

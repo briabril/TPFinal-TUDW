@@ -4,6 +4,7 @@ export interface Comment {
   id: string;
   author_id: string;
     author_username: string;
+     author_avatar: string | null;
   post_id: string;
   text: string;
   parent_id?: string | null;
@@ -20,9 +21,9 @@ export const insertCommentDB = async (
   parent_id?: string | null
 ): Promise<Comment> => {
    const result = await db.query<Comment>(
-    `INSERT INTO user_comments (author_id, post_id, text, parent_id)
-     VALUES ($1, $2, $3, $4)
-     RETURNING id, author_id, post_id, text, parent_id, created_at, updated_at`,
+    `INSERT INTO user_comments (author_id, post_id, text, parent_id, author_avatar)
+     VALUES ($1, $2, $3, $4, (SELECT profile_picture_url FROM users WHERE id = $1))
+     RETURNING id, author_id, post_id, text, parent_id, created_at, updated_at, SELECT (username FROM users WHERE id = $1) AS author_username, author_avatar`,
     [author_id, post_id, text, parent_id || null]
   );
 

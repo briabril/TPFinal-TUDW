@@ -130,7 +130,7 @@ export const getMe = async (req: Request, res: Response) => {
       role: user.role,
       status: user.status,
       bio: user.bio,
-      profilePicture: user.profile_picture_url,
+      profile_picture_url: user.profile_picture_url,
     });
   } catch (err) {
     res.status(401).json({ error: "Token inválido" });
@@ -371,7 +371,7 @@ export const getProfileByUsername = async (req: Request, res: Response) => {
   }
 };
 
-export const getUser = async (req, res) => {
+export const getUser = async (req: Request, res: Response) => {
   try {
     const user = await getUserById(req.params.id);
     if (!user) return res.status(404).json({ error: "Usuario no encontrado" });

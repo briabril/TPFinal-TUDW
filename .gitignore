@@ -2,6 +2,7 @@
 
 # dependencies
 /backend/dist
+node_modules
 /node_modules
 /app/frontend/node_modules
 /app/backend/node_modules

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import ListaPosts from "@/components/ListaPosts";
+import ListaPosts from "@/components/ListPosts";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Box, Typography } from "@mui/material";
 

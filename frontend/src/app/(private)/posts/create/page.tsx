@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import CrearPost from "@/components/CrearPost";
+import CrearPost from "@/components/CreatePost";
 import { Container, Box, Typography } from "@mui/material";
 import ThemeToggle from "@/components/ThemeToggle";
 export default function CreatePostPage() {

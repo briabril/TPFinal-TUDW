@@ -100,7 +100,6 @@ export default function ProfilePage() {
     );
 
   const isOwnProfile = !!(user && profile.id === user.id);
-  console.log(isOwnProfile)
 
   return (
     <Box className="flex flex-col items-center">

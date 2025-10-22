@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { updateUserStatus, findUserById } from "../models/userModel";
+import { updateUserStatus, getUserById } from "../models/userModel";
 import { sendStatusChangeEmail } from "../utils/mailer";
 
 export const toggleUserStatus = async (req: Request, res: Response) => {
@@ -7,7 +7,7 @@ export const toggleUserStatus = async (req: Request, res: Response) => {
         const { userId } = req.params
         console.log("ID en adminController: ", userId)
         //buscar usuario
-        const user = await findUserById(userId)
+        const user = await getUserById(userId)
         console.log("User en adminController: ", user)
         if (!user) return res.status(404).json({ message: "Usuario no encontrado" })
 

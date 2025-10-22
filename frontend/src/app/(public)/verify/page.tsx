@@ -14,7 +14,7 @@ export default function VerifyPage() {
 
     (async () => {
       try {
-        const res = await fetch(`http://localhost:4000/api/users/verify?token=${token}`, {
+        const res = await fetch(`http://localhost:4000/api/auth/verify?token=${token}`, {
           method: "GET",
         });
         const data = await res.json();

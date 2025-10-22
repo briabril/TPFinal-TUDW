@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await api.get<User>("/users/me", { withCredentials: true });
+                const res = await api.get<User>("/auth/me", { withCredentials: true });
                 setUser(res.data);
             } catch {
                 setUser(null);
@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const logout = async () => {
         try {
-            await api.post("/users/logout", {}, { withCredentials: true });
+            await api.post("/auth/logout", {}, { withCredentials: true });
             setUser(null);
             toast.success("👋 Sesión cerrada");
             router.push("/login");

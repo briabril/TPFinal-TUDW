@@ -22,7 +22,7 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterData) => {
     try {
-      await api.post("/users/register", data);
+      await api.post("/auth/register", data);
       toast.success("Registro exitoso 🎉 Revisa tu correo");
       router.push("/checkEmail");
     } catch (err: any) {

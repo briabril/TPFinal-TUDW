@@ -4,6 +4,7 @@ const http = require("http");
 const { Server: SocketIOServer } = require("socket.io");
 const cookieParser = require("cookie-parser");
 import userRoutes from "./routes/userRoutes";
+import authRoutes from "./routes/authRoutes"
 import adminRoutes from "./routes/adminRoutes"
 import blockRoutes from "./routes/blockRoutes"
 import { attachIO } from "./middleware/socket"
@@ -36,6 +37,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+app.use("/api/auth", authRoutes)
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/blocks", blockRoutes);
@@ -43,7 +45,7 @@ app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/reactions", reactionRoutes);
 app.use("/api/reports", reportRoutes);
-app.use("/api/follows", followRoutes)
+app.use("/api/follow", followRoutes)
 io.on("connection", (socket: any) => {
     console.log("✅ Cliente conectado:", socket.id);
 

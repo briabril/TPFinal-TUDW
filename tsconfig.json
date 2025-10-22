@@ -17,7 +17,16 @@
       "@tpfinal/schemas/*": ["packages/schemas/*"],
       "@tpfinal/types/*": ["packages/types/*"],
       "@/*": ["frontend/src/*"]
-    }
+    },
+    "typeRoots": [
+      "./node_modules/@types",
+      "./packages/types"
+    ]
   },
-  "include": ["frontend", "backend", "packages"]
+  "include": [
+    "frontend",
+    "backend",
+    "packages",
+    "packages/types/global.d.ts"
+  ]
 }

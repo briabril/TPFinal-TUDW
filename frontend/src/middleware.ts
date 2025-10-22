@@ -44,7 +44,7 @@ export default async function middleware(req: NextRequest) {
 
   // si hay token se consulta al backend por el usuario
   try {
-    const res = await fetch(`${apiUrl}/users/me`, {
+    const res = await fetch(`${apiUrl}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     })
@@ -70,35 +70,6 @@ export default async function middleware(req: NextRequest) {
     homeUrl.pathname = "/";
     return NextResponse.redirect(homeUrl);
   }
-
-
-
-  // Proteger rutas que empiezan con /admin
-  // if (currentPath.startsWith("/admin")) {
-  //   if (!token) {
-  //     return NextResponse.redirect(new URL("/unauthorized", req.url));
-  //   }
-
-  //   try {
-  //     const res = await fetch(`${apiUrl}/users/me`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //       cache: "no-store",
-  //     });
-
-  //     if (!res.ok) {
-  //       return NextResponse.redirect(new URL("/unauthorized", req.url));
-  //     }
-
-  //     const user = await res.json();
-
-  //     if (user.role !== "ADMIN") {
-  //       return NextResponse.redirect(new URL("/unauthorized", req.url));
-  //     }
-  //   } catch (err) {
-  //     return NextResponse.redirect(new URL("/unauthorized", req.url));
-  //   }
-  // }
-
   return NextResponse.next();
 }
 

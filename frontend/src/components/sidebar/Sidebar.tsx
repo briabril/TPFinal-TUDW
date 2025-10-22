@@ -25,7 +25,7 @@ import {
   Flag,
   LogOut,
 } from "lucide-react";
-import UserSearch from "./UserSearch";
+import UserSearch from "../UserSearch";
 
 export default function Sidebar() {
   const { user, loading, logout } = useAuth();
@@ -33,7 +33,6 @@ export default function Sidebar() {
 
   if (loading) return <h1 className="text-center py-10 text-lg">Cargando...</h1>;
 
-  // 🔹 Ítems del menú principal
   const navItems = [
     { icon: <Home size={18} />, text: "Inicio", path: "/" },
     { icon: <User size={18} />, text: "Perfil", path: `/${user?.username}` },
@@ -42,14 +41,12 @@ export default function Sidebar() {
     { icon: <Settings size={18} />, text: "Configuración", path: "/settings" },
   ];
 
-  // 🔹 Ítems de administrador
   const adminItems = [
     { icon: <LayoutDashboard size={18} />, text: "Panel Admin", path: "/admin/dashboard" },
     { icon: <Users size={18} />, text: "Gestión de usuarios", path: "/admin/users" },
     { icon: <Flag size={18} />, text: "Reportes", path: "/admin/reports" },
   ];
 
-  // 🔹 Renderizado con estilo activo
   const renderList = (items: any[]) =>
     items.map(({ icon, text, path }) => {
       const active = pathname === path;

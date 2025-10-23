@@ -1,5 +1,6 @@
 import db from "../db";
 import { randomUUID } from "crypto";
+import { classifyPostText } from "../services/classifier";
 
 export const createMedia = async (url: string, type: string, size: number, uploaderId?: string, post_id?: string | null) => {
   const id = randomUUID();
@@ -24,6 +25,20 @@ export const createPost = async ({ author_id, text, link_url, media_id }:
   if (media_id) {
     await db.query(`UPDATE media SET post_id = $1 WHERE id = $2`, [r.rows[0].id, media_id]);
   }
+if (text || text.trim().length > 5) {
+    const topics = await classifyPostText(text);
+ 
+    for (const t of topics) {
+      await db.query(
+        `INSERT INTO post_topics (post_id, topic_id)
+         SELECT $1, id FROM topics WHERE name = $2
+         ON CONFLICT DO NOTHING`,
+        [r.rows[0].id, t.label]
+      );
+    }
+}
+
+  
   return r.rows[0];
 };
 

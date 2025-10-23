@@ -21,7 +21,6 @@ export const insertCommentDB = async (
   text: string,
   parent_id?: string | null
 ): Promise<Comment> => {
-  // Insertamos el comentario
   const result = await db.query<Comment>(
     `
     INSERT INTO user_comments (author_id, post_id, text, parent_id, author_avatar)
@@ -33,18 +32,35 @@ export const insertCommentDB = async (
 
   const comment = result.rows[0];
 
-  // Traemos el username del autor
+  // Registrar interacción
+  await db.query(`
+    INSERT INTO user_interactions (user_id, post_id, interaction_type, created_at)
+    VALUES ($1, $2, 'comment', NOW())
+    ON CONFLICT (user_id, post_id, interaction_type) DO UPDATE SET created_at = NOW();
+  `, [author_id, post_id]);
+
+  // Agregar interés por los temas del post
+  await db.query(`
+    INSERT INTO user_interests (user_id, topic_id, weight)
+    SELECT $1, pt.topic_id, 1.0
+    FROM post_topics pt
+    WHERE pt.post_id = $2
+    ON CONFLICT (user_id, topic_id)
+    DO UPDATE SET weight = user_interests.weight + 1.0;
+  `, [author_id, post_id]);
+
+  // Obtener username del autor
   const userResult = await db.query<{ username: string }>(
     `SELECT username FROM users WHERE id = $1`,
     [author_id]
   );
 
-  // 3Combinamos todo
   return {
     ...comment,
     author_username: userResult.rows[0]?.username || "Unknown",
   } as Comment;
 };
+
 
 export const getCommentDepth = async (commentId: string) => {
   const result = await db.query<{ depth: number }>(

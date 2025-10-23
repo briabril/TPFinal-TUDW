@@ -11,13 +11,32 @@ export const togglePostLikeDB = async (user_id: string, post_id: string) : Promi
     const existing = await db.query<Reaction>(`
         SELECT 1 FROM reaction WHERE user_id = $1 and post_id = $2
         `, [user_id, post_id]);
-    if(existing.rowCount>0){
+
+          const hasReaction = existing?.rowCount && existing.rowCount > 0;
+
+    if(hasReaction){
         await db.query<Reaction>(`DELETE FROM reaction WHERE user_id = $1 AND post_id = $2`, [user_id, post_id]);
-         return {liked: false}
+        await db.query(
+      `DELETE FROM user_interactions WHERE user_id = $1 AND post_id = $2 AND interaction_type = 'like'`,
+      [user_id, post_id]
+    );
+        return {liked: false}
     }else{
         await db.query<Reaction>(
             `INSERT INTO reaction (user_id, post_id) VALUES ($1, $2)`, [user_id, post_id]
         )
+          await db.query(
+      `INSERT INTO user_interactions (user_id, post_id, interaction_type) VALUES ($1, $2, 'like')`,
+      [user_id, post_id]
+    );
+      await db.query(`
+  INSERT INTO user_interests (user_id, topic_id, weight)
+  SELECT $1, pt.topic_id, 1.0
+  FROM post_topics pt
+  WHERE pt.post_id = $2
+  ON CONFLICT (user_id, topic_id)
+  DO UPDATE SET weight = user_interests.weight + 1.0;
+`, [user_id, post_id]);
         return {liked: true}
     }   
 }
@@ -26,13 +45,23 @@ export const toggleCommenLikeDB = async (user_id: string, comment_id: string) : 
     const existing = await db.query<Reaction>(`
         SELECT 1 FROM reaction WHERE user_id = $1 and comment_id = $2
         `, [user_id, comment_id]);
-    if(existing.rowCount>0){
+                  const hasReaction = existing?.rowCount && existing.rowCount > 0;
+
+    if(hasReaction){
         await db.query<Reaction>(`DELETE FROM reaction WHERE user_id = $1 AND comment_id = $2`, [user_id, comment_id]);
-         return {liked: false}
+          await db.query(
+      `DELETE FROM user_interactions WHERE user_id = $1 AND comment_id = $2 AND interaction_type = 'like'`,
+      [user_id, comment_id]
+    ); 
+        return {liked: false}
     }else{
         await db.query<Reaction>(
             `INSERT INTO reaction (user_id, comment_id) VALUES ($1, $2)`, [user_id, comment_id]
         )
+          await db.query(
+      `INSERT INTO user_interactions (user_id, comment_id, interaction_type) VALUES ($1, $2, 'like')`,
+      [user_id, comment_id]
+    );
         return {liked: true}
     }   
 }

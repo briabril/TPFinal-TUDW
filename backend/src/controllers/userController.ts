@@ -4,7 +4,7 @@ import * as bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
 import {
   createUserPendingVerification, createEmailVerification, findUserByEmail,
-  findUserByEmailOrUsername, getAllUsers, activateUser, findVerificationByToken, markVerificationUsed, findUserByUsername
+  findUserByEmailOrUsername, getAllUsers, activateUser, findVerificationByToken, findUserById, markVerificationUsed, findUserByUsername
 } from "../models/userModel";
 import { sendVerificationEmail } from "../utils/mailer";
 import { searchUsers } from "../models/userModel";
@@ -97,8 +97,8 @@ export const loginUser = async (req: Request, res: Response) => {
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: "2h" })
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
       maxAge: 2 * 60 * 60 * 1000
     })
       .json({ message: "Login exitoso" })
@@ -119,7 +119,7 @@ export const getMe = async (req: Request, res: Response) => {
     if (!token) return res.status(401).json({ error: "No autenticado" });
 
     const decoded: any = jwt.verify(token, JWT_SECRET!);
-    const user = await findUserByEmail(decoded.email);
+    const user = await findUserById(decoded.id);
     if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
     res.json({

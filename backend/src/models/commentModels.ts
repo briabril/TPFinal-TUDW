@@ -1,15 +1,5 @@
 import db from "../db";
-
-export interface Comment {
-  id: string;
-  author_id: string;
-    author_username: string;
-  post_id: string;
-  text: string;
-  parent_id?: string | null;
-  created_at: Date;
-  updated_at?: Date;
-}
+import { Comment } from "@tpfinal/types/comment";
 
 const MAX_DEPTH = 6;
 
@@ -20,9 +10,9 @@ export const insertCommentDB = async (
   parent_id?: string | null
 ): Promise<Comment> => {
    const result = await db.query<Comment>(
-    `INSERT INTO user_comments (author_id, post_id, text, parent_id)
-     VALUES ($1, $2, $3, $4)
-     RETURNING id, author_id, post_id, text, parent_id, created_at, updated_at`,
+    ` INSERT INTO user_comments (author_id, post_id, text, parent_id, author_avatar)
+    VALUES ($1, $2, $3, $4, (SELECT profile_picture_url FROM users WHERE id = $1))
+    RETURNING id, author_id, post_id, text, parent_id, created_at, updated_at, author_avatar`,
     [author_id, post_id, text, parent_id || null]
   );
 
@@ -34,12 +24,17 @@ export const insertCommentDB = async (
      FROM user_comments c
      JOIN users u ON c.author_id = u.id
      WHERE c.id = $1`,
-    [newComment.id]
+    [author_id]
   );
 
-  return userResult.rows[0];
+  return {
+    ...newComment,
+    author_username: userResult.rows[0]?.username || "Unknown",
+  } as Comment;
 
 };
+
+
 
 export const getCommentDepth = async (commentId: string) => {
   const result = await db.query<{ depth: number }>(

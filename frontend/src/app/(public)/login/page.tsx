@@ -116,6 +116,23 @@ export default function LoginPage() {
             {isSubmitting ? "Ingresando..." : "Ingresar"}
           </Button>
         </Box>
+          <Button
+     variant="contained"
+     color="inherit"
+     
+     onClick={() => (window.location.href = "http://localhost:4000/auth/google")}
+     startIcon={<img src="/google-icon.png" alt="Google" width={20} height={20} />}
+     sx={{
+       borderColor: "#ccc",
+       textTransform: "none",
+       fontWeight: 500,
+       display: "flex",
+       alignItems: "center",
+       justifyContent: "center",
+     }}
+   >
+     Iniciar sesión con Google
+   </Button>
         <Typography variant="body2" align="center" color="text.secondary">
           ¿No tienes cuenta?{" "}
           <Link

@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { User, BlockStatus, FollowStatus } from "@tpfinal/types";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import BlockStatusMessage from "@/components/profile/BlockStatusMessage";
-import ListaPosts from "@/components/ListaPosts";
+import ListaPosts from "@/components/posts/PostList";
 import { Alert, AlertTitle, CircularProgress, Box } from "@mui/material";
 
 export default function ProfilePage() {

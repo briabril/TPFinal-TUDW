@@ -90,9 +90,8 @@ export default function Sidebar() {
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        borderRight: "1px solid #e0e0e0",
-        backgroundColor: "#fff",
-        boxShadow: "2px 0 8px rgba(0,0,0,0.05)",
+        backgroundColor: "background.default",
+        boxShadow: "2px 0 8px rgba(255, 255, 255, 0.05)",
         p: 2,
         position: "sticky",
         top: 0,
@@ -144,7 +143,7 @@ export default function Sidebar() {
             justifyContent: "space-between",
             p: 1.5,
             borderRadius: 2,
-            bgcolor: "#f9f9f9",
+            bgcolor: "background.default",
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>

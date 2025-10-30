@@ -48,9 +48,10 @@ export default function EditProfilePage() {
       try {
         const res = await api.get("/countries/list");
         const resData = res.data;
+
         const countryOptions = resData.map((country: any) => ({
           label: country.name,
-          value: country.iso2,
+          value: country.code,
         }));
         setCountries(countryOptions);
       } catch (err: any) {
@@ -61,6 +62,7 @@ export default function EditProfilePage() {
     fetchCountries();
   }, []);
 
+ 
   useEffect(() => {
     if (!countryIso) {
       setCities([]);

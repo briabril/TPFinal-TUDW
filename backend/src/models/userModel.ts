@@ -92,8 +92,8 @@ export const getAllUsers = async (): Promise<User[]> => {
 
 export const updateUserProfile = async (
   id: string,
-  { username, displayname, bio, profile_picture_url, password_hash }:
-  { username?: string; displayname?: string; bio?: string; profile_picture_url?: string; password_hash?: string; }
+  { username, displayname, bio, profile_picture_url, password_hash, country_iso, city }:
+  { username?: string; displayname?: string; bio?: string; profile_picture_url?: string; password_hash?: string; country_iso?:string, city?:string}
 ) => {
   const fields = [];
   const values: any[] = [id];
@@ -107,6 +107,14 @@ export const updateUserProfile = async (
     fields.push(`displayname = COALESCE($${idx++}, displayname)`);
     values.push(displayname);
   }
+  if (country_iso !== undefined) {
+  fields.push(`country_iso = COALESCE($${idx++}, country_iso)`);
+  values.push(country_iso);
+}
+  if (city !== undefined) {
+  fields.push(`city = COALESCE($${idx++}, city)`);
+  values.push(city);
+}
   if (bio !== undefined) {
     fields.push(`bio = COALESCE($${idx++}, bio)`);
     values.push(bio);

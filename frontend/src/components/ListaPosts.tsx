@@ -35,7 +35,6 @@ const ListaPosts: React.FC<ListaPostsProps> = ({ mineOnly = false, reloadKey }) 
       try {
         const endpoint = mineOnly ? "/posts/mine" : "/posts";
         const { data } = await api.get<ApiResponse<Post[]>>(endpoint);
-        console.log(data.data)
         setPosts(data.data || []);
         setErrorMsg(null);
       } catch (error: any) {

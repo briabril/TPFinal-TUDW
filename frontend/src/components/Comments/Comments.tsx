@@ -125,7 +125,7 @@ useEffect(() => {
             parent_id : parentId || null
         },
     {withCredentials: true})
-    return res.data; 
+    return res.data;
     }catch(error){
         toast.error("Error al publicar comentario")
     }
@@ -166,7 +166,8 @@ useEffect(() => {
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {comments.map((c, index) => (
             <Box key={c.id}>
-              <CommentItem comment={c} onReply={handleSubmit} />
+              <CommentItem comment={c} onReply={handleSubmit} onEdit={(updated) => setComments((prev) => updateCommentInTree(prev, updated))}
+  onDelete={(id) => setComments((prev) => deleteCommentFromTree(prev, id))}/>
               {index !== comments.length - 1 && (
                 <Divider sx={{ my: 1, opacity: 0.5 }} />
               )}

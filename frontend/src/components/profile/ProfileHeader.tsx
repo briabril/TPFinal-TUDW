@@ -8,7 +8,8 @@ import Stack from "@mui/material/Stack";
 import Divider from "@mui/material/Divider";
 import ProfileActions from "./ProfileActions";
 import { alpha } from "@mui/material/styles";
-
+import { useState, useEffect } from "react";
+import api from "@tpfinal/api";
 interface Props {
   profile: User;
   isOwnProfile: boolean;
@@ -27,6 +28,21 @@ export default function ProfileHeader({
   followStatus,
   setFollowStatus,
 }: Props) {
+
+  const [flag, setFlag] = useState<string | null>(null);
+
+    useEffect(() => {
+    async function fetchFlag() {
+      if (!profile.country_iso) return;
+      try {
+        const res = await api.get(`/countries/${profile.country_iso}/flag`);
+        setFlag(res.data.flag);
+      } catch (err) {
+        console.error("Error al traer la bandera:", err);
+      }
+    }
+    fetchFlag();
+  }, [profile.country_iso]);
   return (
     <Box sx={{ width: "100%", mb: 6 }}>
       <Box
@@ -99,7 +115,22 @@ export default function ProfileHeader({
               setFollowStatus={setFollowStatus}
             />
           )}
-
+{profile.city || profile.country_iso ? (
+  <Typography variant="body2" color="text.secondary" display="flex" sx={{ mt: 0.5, justifyContent: "center", alignItems: "center"}}>
+    {profile.city && <>{profile.city}{profile.country_iso && ", "}</>}
+    {profile.country_iso && (
+      <>
+      
+        { /* opcional: mostrar bandera si tenés flagUrl en profile */ }
+        {flag ? (
+          <img src={flag} alt={profile.country_iso} style={{width:18, marginLeft:6}}/>
+        ) : (
+          <strong>{profile.country_iso}</strong>
+        )}
+      </>
+    )}
+  </Typography>
+) : null}
           <Stack
             direction="row"
             justifyContent="center"

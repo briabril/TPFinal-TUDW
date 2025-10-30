@@ -4,6 +4,7 @@ import { VerifyCallback } from "passport-oauth2";
 import dotenv from "dotenv";
 import db from "../db";
 import crypto from "crypto";
+import bcrypt from "bcrypt";
 import type { User } from "@tpfinal/types";
 dotenv.config();
 
@@ -29,10 +30,11 @@ passport.use(
 
         if (!email) return done(new Error("No email returned from Google"), undefined);
 
+        // Revisar de que exista el usuario en la DB
         const existing = await db.query("SELECT * FROM users WHERE email = $1", [email]);
         if (existing.rows.length > 0) return done(null, existing.rows[0]);
 
-        // generar username único
+        // Generar username único
         const baseUsername = email.split("@")[0].slice(0, 30);
         let i = 0;
         let candidate = baseUsername;
@@ -43,11 +45,15 @@ passport.use(
           i++;
           candidate = `${baseUsername}${i}`.slice(0, 30);
         }
+          // Generar contraseña aleatoria que no se usa
+        const randomPassword = crypto.randomBytes(20).toString("hex"); 
+        const passwordHash = await bcrypt.hash(randomPassword, 10);
 
+        // Crear nuevo usuario
         const newUser = await db.query(
           `INSERT INTO users (email, username, displayname, profile_picture_url, password_hash)
-           VALUES ($1, $2, $3, $4, NULL) RETURNING *`,
-          [email, candidate, name, picture]
+           VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+          [email, candidate, name, picture, passwordHash]
         );
 
         return done(null, newUser.rows[0]);

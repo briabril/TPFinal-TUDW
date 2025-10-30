@@ -131,6 +131,8 @@ export const getMe = async (req: Request, res: Response) => {
       status: user.status,
       bio: user.bio,
       profilePicture: user.profile_picture_url,
+      country_iso: user.country_iso,
+      city: user.city
     });
   } catch (err) {
     res.status(401).json({ error: "Token inválido" });
@@ -178,35 +180,23 @@ export const logoutUser = (req: Request, res: Response) => {
 
 export const editProfile = async (req: Request, res: Response) => {
   const userId = req.params.id;
-  const { username, displayname, bio, profile_picture_url, password, new_password } = req.body;
+  const { displayname, bio, profile_picture_url, password, new_password, city, country_iso } = req.body;
   try {
     const currentUser = (req as any).user;
     if (currentUser.id !== userId && currentUser.role !== 'ADMIN') {
       return res.status(403).json({ error: "No tienes permisos para editar este perfil" });
     }
 
+       if (country_iso && country_iso.length !==2) {
+    return res.status(400).json({ error: "country_iso debe tener entre 2 caracteres (ISO)" });
+  }
+  if (city && city.length > 100) {
+    return res.status(400).json({ error: "ciudad demasiado larga" });
+  }
     // Obtener usuario actual para verificar contraseña
     const user = await getUserById(userId);
     if (!user) {
       return res.status(404).json({ error: "Usuario no encontrado" });
-    }
-
-    // Validaciones de campos
-    if (username !== undefined && username.trim() !== '') {
-      if (typeof username !== 'string') {
-        return res.status(400).json({ error: "El nombre de usuario debe ser texto" });
-      }
-      if (username.length > 30) {
-        return res.status(400).json({ error: "El nombre de usuario no puede exceder 30 caracteres" });
-      }
-      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-        return res.status(400).json({ error: "El nombre de usuario solo puede contener letras, números y guiones bajos" });
-      }
-      
-      const existingUser = await findUserByUsername(username);
-      if (existingUser && existingUser.id !== userId) {
-        return res.status(409).json({ error: "Este nombre de usuario ya está en uso" });
-      }
     }
 
     if (displayname !== undefined) {
@@ -258,9 +248,7 @@ export const editProfile = async (req: Request, res: Response) => {
 
     let updateData: any = {};
     
-    if (username !== undefined && username.trim() !== '') {
-      updateData.username = username.trim();
-    }
+  
     if (displayname !== undefined) {
       updateData.displayname = displayname.trim();
     }
@@ -274,6 +262,12 @@ export const editProfile = async (req: Request, res: Response) => {
     if (new_password && new_password.trim() !== '') {
       updateData.password_hash = await bcrypt.hash(new_password, 10);
     }
+    if(city !== undefined){
+      updateData.city = city.trim();
+    }
+     if (country_iso !== undefined){
+      updateData.country_iso = country_iso.trim().toUpperCase();
+     }
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({ error: "No se proporcionaron campos para actualizar" });
     }
@@ -333,7 +327,7 @@ export const getProfileByUsername = async (req: Request, res: Response) => {
     const { username } = req.params;
     const currentUserId = (req as any).user?.id;
 
-    console.log("getProfileByUsername called", { username, currentUserId });
+   
 
     const user = await findUserByUsername(username);
     if (!user) {

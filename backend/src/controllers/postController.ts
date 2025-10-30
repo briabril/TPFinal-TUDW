@@ -67,7 +67,6 @@ export const createPostController = [
         try {
           for (let i = 0; i < files.length; i++) {
             const f = files[i];
-            console.log("createPost: uploading file (post exists)", { originalname: f.originalname, mimetype: f.mimetype, size: f.size, index: i });
             const result = await uploadBufferToCloudinary(f.buffer, folder);
             const mediaUrl = result?.secure_url || null;
             const resultResourceType = result?.resource_type;

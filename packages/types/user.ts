@@ -12,6 +12,8 @@ export interface User {
   posts_count?: number;
   followers_count?: number;
   following_count?: number;
+  city?: string;
+  country_iso?: string;
 }
 
 export interface DbUser extends User {

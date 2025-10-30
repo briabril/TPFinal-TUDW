@@ -15,7 +15,7 @@ import commentRoutes from "./routes/commentRoutes"
 import followRoutes from "./routes/followRoutes"
 import reportRoutes from "./routes/reportRoutes"
 import passport from "./config/passport";
-import path from "path";
+import countryRoutes from "./routes/countryRoutes";
 const app = express();
 const PORT = process.env.PORT || 4000;
 
@@ -94,7 +94,7 @@ app.use("/api/comments", commentRoutes);
 app.use("/api/reactions", reactionRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/follows", followRoutes);
-
+app.use("/api/countries", countryRoutes);
 
 // Socket.IO
 io.on("connection", (socket: any) => {

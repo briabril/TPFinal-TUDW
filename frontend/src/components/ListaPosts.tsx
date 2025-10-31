@@ -80,11 +80,9 @@ type ListaPostsProps = {
       {posts.map((post) => {
         const description = post.text ?? "(sin descripción)";
         const created = post.created_at ?? post.created_at ?? "";
-        // If the post has weather attached, build an Unsplash/Source query to fetch a contextual background image
   const pAny: any = post as any;
   const weatherMain = pAny?.weather?.current?.weather?.[0]?.main;
   const weatherDesc = pAny?.weather?.current?.weather?.[0]?.description;
-        // WeatherBackground will fetch and render an appropriate background image when `post.weather` is present.
 
         return (
           <Card

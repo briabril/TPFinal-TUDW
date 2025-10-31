@@ -38,7 +38,6 @@ export default function AuthorHeader({ authorId, weather }: AuthorHeaderProps) {
         p: 1.5,
         borderRadius: 3,
         backgroundColor: "rgba(0, 0, 0, 0.02)",
-        // reserve space on the right so the weather badge doesn't overlap the post menu
         pr: 8,
         "&:hover": {
           backgroundColor: "rgba(0, 0, 0, 0.04)",

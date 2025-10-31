@@ -8,8 +8,17 @@ import { Box, Typography } from "@mui/material";
 
 export default function UserFeed() {
   const [reloadKey, setReloadKey] = useState(0);
+  const [freshPost, setFreshPost] = useState<any | null>(null);
 
-  const handlePostCreated = () => setReloadKey((prev) => prev + 1);
+  const handlePostCreated = (createdPost?: any) => {
+    if (createdPost) {
+      setFreshPost(createdPost);
+      // also trigger a refresh to sync with backend
+      setReloadKey((prev) => prev + 1);
+    } else {
+      setReloadKey((prev) => prev + 1);
+    }
+  };
 
   return (
     <Box
@@ -44,7 +53,7 @@ export default function UserFeed() {
           <CrearPost onCreated={handlePostCreated} />
         </Box>
         <Box sx={{ width: "100%" }}>
-          <ListaPosts reloadKey={reloadKey} />
+          <ListaPosts reloadKey={reloadKey} prependPost={freshPost} />
         </Box>
       </Box>
     </Box>

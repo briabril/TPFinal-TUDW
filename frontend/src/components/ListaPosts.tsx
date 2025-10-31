@@ -14,6 +14,8 @@ import {
 import api from "@tpfinal/api";
 import { Post } from "@tpfinal/types";
 import AuthorHeader from "./posts/AuthorHeader";
+import WeatherBackground from "./common/WeatherBackground";
+import { useMemo } from "react";
 
 export interface ApiResponse<T> {
   data: T;
@@ -23,9 +25,10 @@ export interface ApiResponse<T> {
 type ListaPostsProps = {
   mineOnly?: boolean;
   reloadKey?: number;
+  prependPost?: any | null;
 };
 
-const ListaPosts: React.FC<ListaPostsProps> = ({ mineOnly = false, reloadKey }) => {
+  const ListaPosts: React.FC<ListaPostsProps> = ({ mineOnly = false, reloadKey, prependPost = null }) => {
   const { user } = require("@/context/AuthContext").useAuth?.() || { user: null };
   const [posts, setPosts] = useState<Post[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -35,7 +38,16 @@ const ListaPosts: React.FC<ListaPostsProps> = ({ mineOnly = false, reloadKey }) 
       try {
         const endpoint = mineOnly ? "/posts/mine" : "/posts";
         const { data } = await api.get<ApiResponse<Post[]>>(endpoint);
-        setPosts(data.data || []);
+        let fetched = data.data || [];
+        if (prependPost && prependPost.id) {
+          const exists = fetched.find((p: any) => p.id === prependPost.id);
+          if (!exists) {
+            fetched = [prependPost, ...fetched];
+          } else {
+            fetched = fetched.map((p: any) => (p.id === prependPost.id ? prependPost : p));
+          }
+        }
+        setPosts(fetched);
         setErrorMsg(null);
       } catch (error: any) {
         console.error("Error al obtener posts:", error);
@@ -48,6 +60,16 @@ const ListaPosts: React.FC<ListaPostsProps> = ({ mineOnly = false, reloadKey }) 
     fetchPosts();
   }, [mineOnly, reloadKey]);
 
+
+  useEffect(() => {
+    if (!prependPost || !prependPost.id) return;
+    setPosts((current) => {
+      const exists = current.find((p) => p.id === prependPost.id);
+      if (exists) return current;
+      return [prependPost, ...current];
+    });
+  }, [prependPost]);
+
   return (
     <Stack spacing={5}>
       {errorMsg && <Typography color="error">{errorMsg}</Typography>}
@@ -58,6 +80,11 @@ const ListaPosts: React.FC<ListaPostsProps> = ({ mineOnly = false, reloadKey }) 
       {posts.map((post) => {
         const description = post.text ?? "(sin descripción)";
         const created = post.created_at ?? post.created_at ?? "";
+        // If the post has weather attached, build an Unsplash/Source query to fetch a contextual background image
+  const pAny: any = post as any;
+  const weatherMain = pAny?.weather?.current?.weather?.[0]?.main;
+  const weatherDesc = pAny?.weather?.current?.weather?.[0]?.description;
+        // WeatherBackground will fetch and render an appropriate background image when `post.weather` is present.
 
         return (
           <Card
@@ -69,14 +96,18 @@ const ListaPosts: React.FC<ListaPostsProps> = ({ mineOnly = false, reloadKey }) 
               boxShadow: 3,
               transition: "transform 0.25s ease, box-shadow 0.25s ease",
               "&:hover": { transform: "translateY(-4px)", boxShadow: 6 },
-              bgcolor: "background.paper",
-              maxWidth: 800, 
-              mx: "auto", 
+              bgcolor: "transparent",
+              position: 'relative',
+              maxWidth: 800,
+              mx: "auto",
               mt: 4,
             }}
           >
-            <CardContent sx={{ px: 0, py: 0 }}>
-              <AuthorHeader authorId={post.author.id} />
+            <CardContent sx={{ px: 0, py: 0, position: 'relative', zIndex: 2 }}>
+              <WeatherBackground weather={(post as any).weather} className="post-header-bg" imageOpacity={0.50}>
+                <AuthorHeader authorId={post.author.id} weather={(post as any).weather} />
+              </WeatherBackground>
+
               <Box sx={{ px: 2, py: 0 }}>
                 <PostBody
                   post={post}

@@ -12,14 +12,14 @@ export const createMedia = async (url: string, type: string, size: number, uploa
   return r.rows[0];
 };
 
-export const createPost = async ({ author_id, text, link_url, media_id }:
-  { author_id: string; text: string; link_url?: string | null; media_id?: string | null }) => {
+export const createPost = async ({ author_id, text, link_url, media_id, weather }:
+  { author_id: string; text: string; link_url?: string | null; media_id?: string | null; weather?: any | null }) => {
   const id = randomUUID();
   const q = `
-    INSERT INTO post (id, author_id, text, link_url, created_at, updated_at)
-    VALUES ($1, $2, $3, $4, NOW(), NOW())
+    INSERT INTO post (id, author_id, text, link_url, weather, created_at, updated_at)
+    VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
     RETURNING *`;
-  const r = await db.query(q, [id, author_id, text, link_url]);
+  const r = await db.query(q, [id, author_id, text, link_url, weather ? JSON.stringify(weather) : null]);
   
   if (media_id) {
     await db.query(`UPDATE media SET post_id = $1 WHERE id = $2`, [r.rows[0].id, media_id]);
@@ -43,6 +43,7 @@ export const getPosts = async () => {
     id: row.id,
     text: row.text,
     link_url: row.link_url,
+    weather: row.weather || null,
     created_at: row.created_at,
     author: { id: row.author_id },
     medias: row.medias || [],
@@ -65,6 +66,7 @@ export const getPostsByAuthor = async (authorId: string) => {
     id: row.id,
     text: row.text,
     link_url: row.link_url,
+    weather: row.weather || null,
     created_at: row.created_at,
     author: { id: row.author_id },
     medias: row.medias || [],
@@ -94,10 +96,11 @@ export const getPostById = async (postId: string) => {
   const r = await db.query(q, [postId]);
   if (r.rows.length === 0) return null;
   const row = r.rows[0];
-  return {
+    return {
     id: row.id,
     text: row.text,
     link_url: row.link_url,
+    weather: row.weather || null,
     created_at: row.created_at,
     author: { id: row.author_id },
     medias: row.medias || [],

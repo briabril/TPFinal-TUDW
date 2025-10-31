@@ -44,18 +44,25 @@ export const createPostController = [
       const authorId = (req as any).user?.id;
       if (!authorId) return res.status(401).json({ error: "No autenticado" });
 
-      const { text, link_url } = req.body;
+  const { text, link_url } = req.body;
 
       const files = (req as any).files as any[] | undefined;
       const folder = process.env.CLOUDINARY_FOLDER ? `${process.env.CLOUDINARY_FOLDER}/posts` : "posts";
 
     
+      // parse weather from request (if present)
+      let weatherObj = null;
+      try {
+        if (req.body.weather) weatherObj = typeof req.body.weather === 'string' ? JSON.parse(req.body.weather) : req.body.weather;
+      } catch (e) { weatherObj = null; }
+
       let post: any = null;
       try {
         post = await createPost({
           author_id: authorId,
           text: text || "",
           link_url: link_url || null,
+          weather: weatherObj,
         });
       } catch (postErr) {
         console.error('createPost: failed to create post', postErr);
@@ -101,6 +108,7 @@ export const createPostController = [
         }
       }
 
+      // Respond with created post (post.weather should be persisted now) and uploaded medias
       return res.status(201).json({ message: 'Post creado', post, medias: uploadedMedias });
     } catch (err) {
       console.error("createPost error:", err);

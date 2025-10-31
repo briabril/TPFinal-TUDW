@@ -32,7 +32,8 @@ export default function PostActions({
     };
 
     return (
-        <Box sx={{ position: "absolute", top: -76, right: 0 }}>
+        // Place the actions above other header elements so the menu remains clickable
+        <Box sx={{ position: "absolute", top: -76, right: 0, zIndex: 10 }}>
             <IconButton onClick={handleMenuOpen}>
                 <MoreVert />
             </IconButton>

@@ -8,7 +8,10 @@
     "moduleResolution": "node",
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@types/*": ["../packages/types/*"]
+    }
   },
-  "include": ["src/**/*.ts", "src", "src/types"]
+  "include": ["src/**/*.ts", "src", "../packages/types", "scripts"]
 }

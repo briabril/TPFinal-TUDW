@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import api from "@tpfinal/api";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/sidebar/Sidebar";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { editProfilSchema, ProfileData } from "@tpfinal/schemas";
@@ -86,7 +86,7 @@ export default function EditProfilePage() {
     async function fetchMe() {
       setLoading(true);
       try {
-        const res = await api.get("/users/me", { withCredentials: true });
+        const res = await api.get("/auth/me", { withCredentials: true });
         const user = res.data;
         setUserId(user.id);
         setValue("displayname", user.displayname || "");

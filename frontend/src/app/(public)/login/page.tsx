@@ -25,8 +25,8 @@ export default function LoginPage() {
 
   const onSubmit = async (data: loginData) => {
     try {
-      await api.post("/users/login", data, { withCredentials: true });
-      const me = await api.get<User>("/users/me", { withCredentials: true });
+      await api.post("/auth/login", data, { withCredentials: true });
+      const me = await api.get<User>("/auth/me", { withCredentials: true });
       setUser(me.data);
       toast.success("Login exitoso 🎉");
 

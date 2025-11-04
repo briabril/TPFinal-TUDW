@@ -1,14 +1,14 @@
 import express from "express";
-import { getCountryList, getCitiesByCountry , getCountryFlag } from "../controllers/countryController";
+import { getCountryFlagController, getCitiesByCountry , getCountryListController } from "../controllers/countryController";
 
 const router = express.Router();
 
 
 
-router.get("/list", getCountryList);
+router.get("/list", getCountryListController);
 
 router.get("/:iso/city", getCitiesByCountry );
 
-router.get("/:iso/flag", getCountryFlag );
+router.get("/:iso/flag", getCountryFlagController );
 
 export default router;

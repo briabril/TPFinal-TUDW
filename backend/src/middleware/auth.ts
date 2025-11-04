@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
-import { User } from "../../../packages/types/user";
+import { User } from "@tpfinal/types";
 import db from "../db";
 
 declare global {

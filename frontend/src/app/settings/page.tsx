@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import api from "@tpfinal/api";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/sidebar/Sidebar";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { editProfilSchema, ProfileData } from "@tpfinal/schemas";
@@ -48,9 +48,10 @@ export default function EditProfilePage() {
       try {
         const res = await api.get("/countries/list");
         const resData = res.data;
+
         const countryOptions = resData.map((country: any) => ({
           label: country.name,
-          value: country.iso2,
+          value: country.code,
         }));
         setCountries(countryOptions);
       } catch (err: any) {
@@ -61,6 +62,7 @@ export default function EditProfilePage() {
     fetchCountries();
   }, []);
 
+ 
   useEffect(() => {
     if (!countryIso) {
       setCities([]);
@@ -84,7 +86,7 @@ export default function EditProfilePage() {
     async function fetchMe() {
       setLoading(true);
       try {
-        const res = await api.get("/users/me", { withCredentials: true });
+        const res = await api.get("/auth/me", { withCredentials: true });
         const user = res.data;
         setUserId(user.id);
         setValue("displayname", user.displayname || "");

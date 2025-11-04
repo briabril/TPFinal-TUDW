@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Typography,
   Box,
@@ -7,11 +7,16 @@ import {
   TextField,
   Stack,
   CardMedia,
+  Button,
+  CircularProgress,
+  Tooltip,
 } from "@mui/material";
-import { Save, Close } from "@mui/icons-material";
+import { Save, Close, Translate, Language } from "@mui/icons-material";
 import { Media } from "@tpfinal/types";
-import PostActions from "./posts/PostActions";
+import PostActions from "./PostActions";
 import { deletePost, updatePost, reportPost } from "@/services/postService";
+
+import useTranslation from "@/hooks/useTranslation"; // <- importa el hook
 
 export default function PostBody({ post, description }: any) {
   const { user } = require("@/context/AuthContext").useAuth?.() || { user: null };
@@ -19,8 +24,25 @@ export default function PostBody({ post, description }: any) {
   const [text, setText] = useState(description);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ type: "error" | "success" | null; text?: string } | null>(null);
-
   const isOwn = user && post.author.id === user.id;
+
+  const { translated, sourceLang, loading: tlLoading, error: tlError, translate, clear } = useTranslation();
+
+  const postId = post.id.toString();
+
+  // decidir si mostrar boton traducir: si browser lang != detected source lang OR no detected yet
+  // Pero para detectamos el idioma al traducir (DeepL nos devuelve detected_source_language).
+  // Mostramos boton siempre si no está traducido y no coincide el idioma del navegador.
+
+  const browserLang = (typeof navigator !== "undefined" ? (navigator.language || (navigator.languages && navigator.languages[0])) : "en")?.slice(0,2).toUpperCase() || "EN";
+
+  const showTranslateButton = useMemo(() => {
+    // Si ya hay traducción y no hay error -> no mostrar
+    if (translated) return false;
+    // if we know sourceLang and it equals browserLang => no need to translate
+    if (sourceLang && sourceLang.toUpperCase() === browserLang) return false;
+    return true;
+  }, [translated, sourceLang, browserLang]);
 
   const getMediaUrl = (media?: Media) => media?.url ?? null;
 
@@ -64,7 +86,7 @@ export default function PostBody({ post, description }: any) {
   };
 
   const medias = post.medias ?? [];
- 
+
   const renderMediaItem = (media: Media, idx: number) => {
     const url = getMediaUrl(media);
     if (!url) return null;
@@ -124,6 +146,15 @@ export default function PostBody({ post, description }: any) {
     );
   };
 
+  // actions for translate button
+  const handleTranslateClick = async () => {
+    await translate({ text: description, postId });
+  };
+
+  const handleClearTranslation = () => {
+    clear();
+  };
+
   return (
     <Box sx={{ fontSize: "1.1rem" }}>
       {!editing ? (
@@ -148,7 +179,7 @@ export default function PostBody({ post, description }: any) {
                 lineHeight: 1.8,
               }}
             >
-              {text}
+              {translated ?? text}
             </Typography>
 
             {medias.length > 0 && (
@@ -176,13 +207,52 @@ export default function PostBody({ post, description }: any) {
               </Box>
             )}
 
-            <PostActions
-              onEdit={() => setEditing(true)}
-              onDelete={handleDelete}
-              onReport={handleReport}
-              loading={loading}
-              isOwn={isOwn}
-            />
+            <Stack direction="row" spacing={1} sx={{ mt: 1, alignItems: "center" }}>
+              <PostActions
+                onEdit={() => setEditing(true)}
+                onDelete={handleDelete}
+                onReport={handleReport}
+                loading={loading}
+                isOwn={isOwn}
+              />
+
+              {/* Translate button area */}
+              {showTranslateButton && (
+                <Tooltip title="Traducir al idioma de tu navegador">
+                  <span>
+                    <IconButton onClick={handleTranslateClick} disabled={tlLoading}>
+                      {tlLoading ? <CircularProgress size={18} /> : <Translate />}
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              )}
+
+              {/* If is translated, show a small control to revert */}
+              {translated && (
+                <>
+                  <Tooltip title={`Detectado: ${sourceLang ?? "—"}`}>
+                    <IconButton aria-label="source-language">
+                      <Language />
+                    </IconButton>
+                  </Tooltip>
+                  <Button size="small" variant="outlined" onClick={handleClearTranslation}>
+                    Ver original
+                  </Button>
+                </>
+              )}
+            </Stack>
+
+            {/* Show translation error or info */}
+            {tlError && (
+              <Typography variant="caption" color="error" mt={1}>
+                {tlError}
+              </Typography>
+            )}
+            {sourceLang && !translated && (
+              <Typography variant="caption" color="text.secondary" mt={1}>
+                Idioma detectado: {sourceLang}
+              </Typography>
+            )}
           </Box>
         </>
       ) : (

@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { User, BlockStatus, FollowStatus } from "@tpfinal/types";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import BlockStatusMessage from "@/components/profile/BlockStatusMessage";
-import ListaPosts from "@/components/ListaPosts";
+import PostList from "@/components/posts/PostList";
 import { Alert, AlertTitle, CircularProgress, Box } from "@mui/material";
 
 export default function ProfilePage() {
@@ -125,7 +125,7 @@ export default function ProfilePage() {
           <>
             {
               isOwnProfile ? (
-                <ListaPosts mineOnly />
+                <PostList mineOnly />
               ) : (
                 <p> Por hacer </p>
               )

@@ -1,21 +1,8 @@
-import { Request, Response } from "express";
-import axios from "axios";
+import { Request, Response } from "express"; 
+import axios from "axios"
+import { getFullCountryInfo, getCapital , getCountryFlag, getCountriesList} from "../services/countryService"; 
 
 const BASE_URL = "https://countriesnow.space/api/v0.1";
-
-export const getCountryList = async (req: Request, res: Response) => {
-  try {
-    const response = await axios.get(`${BASE_URL}/countries/positions`);
-    const countries = response.data.data.map((c: any) => ({
-      name: c.name,
-      iso2: c.iso2,
-    }));
-    res.json(countries);
-  } catch (error: any) {
-    console.error("Error al obtener países:", error.message);
-    res.status(500).json({ error: "Error al obtener la lista de países" });
-  }
-};
 
 export const getCitiesByCountry = async (req:Request, res: Response) => {
   const { iso } = req.params;
@@ -30,27 +17,26 @@ export const getCitiesByCountry = async (req:Request, res: Response) => {
     res.status(500).json({ error: "Error al obtener ciudades" });
   }
 };
+export const getFullCountry = async (req: Request, res: Response) => 
+  { try { const iso = (req.params.iso || "").toUpperCase(); if (!iso || iso.length !== 2) 
+    return res.status(400).json({ error: "El ISO requiere 2 letras" }); 
+    const info = await getFullCountryInfo(iso); res.json({ iso, info }); 
+  } 
+    catch (err: any) { console.error("SOAP error:", err); 
+      res.status(500).json({ message: "Error del SOAP", details: err.message || err }); } }
 
-export const getCountryFlag = async (req: Request, res: Response) => {
-  const iso = req.params.iso.toUpperCase();
+  export const getCapitalCountry = async (req: Request, res: Response) => { 
+    try { const capital = await getCapital(req.params.iso); 
+      res.json({ iso: req.params.iso.toUpperCase(), capital }); 
+    } catch (err) { res.status(500).json({ message: "Error del SOAP", err }); } }
 
-  try {
-    const response = await axios.get(`${BASE_URL}/countries/flag/images`);
-    const countries = response.data.data;
+    export const getCountryFlagController = async (req: Request, res: Response) => { 
+      try { const flag = await getCountryFlag(req.params.iso); 
+        res.json({ iso: req.params.iso.toUpperCase(), flag }); 
+      } catch (err) { res.status(500).json({ message: "Error del SOAP", err }); } }
 
-    const country = countries.find((c: any) => c.iso2 === iso);
+    export const getCountryListController = async (req: Request, res: Response) => { 
+      try { const mapped = await getCountriesList(); res.json(mapped); 
 
-    if (!country) {
-      return res.status(404).json({ error: "País no encontrado" });
-    }
-
-    res.json({
-      iso: country.iso2,
-      name: country.name,
-      flag: country.flag, 
-    });
-  } catch (error: any) {
-    console.error("Error al obtener bandera:", error.message);
-    res.status(500).json({ error: "Error al obtener bandera del país" });
-  }
-};
+        } catch (err: any) { console.error("Error del SOAP:", err); 
+          res.status(500).json({ error: "Error al traer los países", details: err.message }); } }

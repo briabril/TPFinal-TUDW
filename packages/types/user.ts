@@ -20,6 +20,13 @@ export interface DbUser extends User {
   password_hash: string;
 }
 
+export interface PostUser {
+  id: string
+  username: string
+  displayname: string
+  profile_picture_url?: string
+}
+
 // Estado de bloqueo entre dos usuarios
 export interface BlockStatus {
   blockedByYou: boolean;

@@ -1,29 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Avatar, Box, Typography, Stack, Divider } from "@mui/material";
-import { User } from "@tpfinal/types";
-import api from "@tpfinal/api";
+import { Avatar, Box, Typography, Stack } from "@mui/material";
+import { Author } from "@tpfinal/types";
 
 interface AuthorHeaderProps {
-  authorId: string;
+  author: Author; // autor original
+  sharedBy?: Author | null; // usuario que compartió, si aplica
 }
 
-export default function AuthorHeader({ authorId }: AuthorHeaderProps) {
-  const [author, setAuthor] = useState<User | null>(null);
-
-  useEffect(() => {
-    const fetchAuthor = async () => {
-      try {
-        const { data } = await api.get<User>(`/users/by-id/${authorId}`);
-        setAuthor(data);
-      } catch (error) {
-        console.error("Error al obtener el autor:", error);
-      }
-    };
-    if (authorId) fetchAuthor();
-  }, [authorId]);
-
+export default function AuthorHeader({ author, sharedBy }: AuthorHeaderProps) {
   if (!author) return null;
 
   return (
@@ -42,6 +27,7 @@ export default function AuthorHeader({ authorId }: AuthorHeaderProps) {
         },
       }}
     >
+      {/* Avatar del autor original */}
       <Avatar
         src={author.profile_picture_url || "/default-avatar.png"}
         alt={author.displayname || author.username}
@@ -52,7 +38,9 @@ export default function AuthorHeader({ authorId }: AuthorHeaderProps) {
           boxShadow: 1,
         }}
       />
+
       <Box>
+        {/* Nombre principal: autor original */}
         <Typography
           variant="h6"
           fontWeight={600}
@@ -60,6 +48,7 @@ export default function AuthorHeader({ authorId }: AuthorHeaderProps) {
         >
           {author.displayname || author.username}
         </Typography>
+
         <Typography
           variant="body2"
           color="text.secondary"
@@ -67,6 +56,20 @@ export default function AuthorHeader({ authorId }: AuthorHeaderProps) {
         >
           @{author.username}
         </Typography>
+
+        {/* Si el post fue compartido */}
+        {sharedBy && (
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mt: 0.5 }}
+          >
+            Compartido por{" "}
+            <strong>
+              {sharedBy.displayname || sharedBy.username}
+            </strong>
+          </Typography>
+        )}
       </Box>
     </Stack>
   );

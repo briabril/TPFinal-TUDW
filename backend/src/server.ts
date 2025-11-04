@@ -5,6 +5,8 @@ const { Server: SocketIOServer } = require("socket.io");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 import type { Request, Response } from "express";
+import translationRoutes from "./routes/translationRoutes";
+import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import adminRoutes from "./routes/adminRoutes"
 import blockRoutes from "./routes/blockRoutes"
@@ -71,7 +73,7 @@ app.get(
     // cookie httpOnly 
     res.cookie("token", token, {
       httpOnly: true,
-      sameSite: "none", // ⚠️ IMPORTANTE para cross-origin
+      sameSite: "none",
   path: "/",
       secure: true,
     });
@@ -86,12 +88,14 @@ const io = new SocketIOServer(server, {
 app.use(attachIO(io));
 
 // Rutas principales
+app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/blocks", blockRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/reactions", reactionRoutes);
+app.use("/api/translate", translationRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/follows", followRoutes);
 app.use("/api/countries", countryRoutes);

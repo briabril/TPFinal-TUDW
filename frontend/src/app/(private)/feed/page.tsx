@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import ListaPosts from "@/components/ListaPosts";
+import PostsList from "@/components/posts/PostList";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Box, Typography } from "@mui/material";
 
@@ -38,7 +38,7 @@ export default function UserFeed() {
           alignItems: "center",
         }}
       >
-        <ListaPosts />
+        <PostsList />
       </Box>
     </Box>
   );

@@ -25,7 +25,7 @@ import {
   Flag,
   LogOut,
 } from "lucide-react";
-import UserSearch from "./UserSearch";
+import UserSearch from "../UserSearch";
 
 export default function Sidebar() {
   const { user, loading, logout } = useAuth();

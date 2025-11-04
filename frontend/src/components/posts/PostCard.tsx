@@ -77,6 +77,7 @@ export default function PostCard({ post }: { post: Post }) {
                   isOwn={isOwn}
                 />
               }
+              postId={post.id}
             />
             <Box sx={{ px: 2 }}>
               <PostBody

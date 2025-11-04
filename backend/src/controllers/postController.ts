@@ -50,13 +50,20 @@ export const createPostController = [
       const folder = process.env.CLOUDINARY_FOLDER ? `${process.env.CLOUDINARY_FOLDER}/posts` : "posts"
 
     
-      let post: any = null
+      // parse weather from request (if present)
+      let weatherObj = null;
+      try {
+        if (req.body.weather) weatherObj = typeof req.body.weather === 'string' ? JSON.parse(req.body.weather) : req.body.weather;
+      } catch (e) { weatherObj = null; }
+
+      let post: any = null;
       try {
         post = await createPost({
           author_id: authorId,
           text: text || "",
           link_url: link_url || null,
-        })
+          weather: weatherObj,
+        });
       } catch (postErr) {
         console.error('createPost: failed to create post', postErr)
         return res.status(500).json({ error: 'Error al crear el post' })
@@ -101,7 +108,7 @@ export const createPostController = [
         }
       }
 
-      return res.status(201).json({ message: 'Post creado', post, medias: uploadedMedias })
+      return res.status(201).json({ message: 'Post creado', post, medias: uploadedMedias });
     } catch (err) {
       console.error("createPost error:", err)
       return res.status(500).json({ error: "Error al crear el post" })

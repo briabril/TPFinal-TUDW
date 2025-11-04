@@ -1,11 +1,24 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import PostsList from "@/components/posts/PostList";
 import ThemeToggle from "@/components/ThemeToggle";
+import CrearPost from "@/components/CrearPost";
 import { Box, Typography } from "@mui/material";
 
 export default function UserFeed() {
+  const [reloadKey, setReloadKey] = useState(0);
+  const [freshPost, setFreshPost] = useState<any | null>(null);
+
+  const handlePostCreated = (createdPost?: any) => {
+    if (createdPost) {
+      setFreshPost(createdPost);
+      setReloadKey((prev) => prev + 1);
+    } else {
+      setReloadKey((prev) => prev + 1);
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -22,11 +35,7 @@ export default function UserFeed() {
       <Box sx={{ position: "absolute", top: 16, right: 32 }}>
         <ThemeToggle />
       </Box>
-      <Typography
-        variant="h4"
-        fontWeight={600}
-        sx={{ mb: 4, textAlign: "center" }}
-      >
+      <Typography variant="h4" fontWeight={600} sx={{ mb: 4, textAlign: "center" }}>
         Mi Feed
       </Typography>
       <Box
@@ -36,9 +45,15 @@ export default function UserFeed() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          gap: 4,
         }}
       >
-        <PostsList />
+        <Box id="crear-post" sx={{ width: "100%" }}>
+          <CrearPost onCreated={handlePostCreated} />
+        </Box>
+        <Box sx={{ width: "100%" }}>
+          <PostsList {...({ reloadKey, prependPost: freshPost } as any)} />
+        </Box>
       </Box>
     </Box>
   );

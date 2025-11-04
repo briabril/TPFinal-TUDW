@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -26,6 +27,7 @@ import {
   LogOut,
 } from "lucide-react";
 import UserSearch from "../UserSearch";
+import { fetchWeatherByCity } from "@/services/weatherService";
 
 export default function Sidebar() {
   const { user, loading, logout } = useAuth();
@@ -33,12 +35,29 @@ export default function Sidebar() {
 
   if (loading) return <h1 className="text-center py-10 text-lg">Cargando...</h1>;
 
+  const [weather, setWeather] = React.useState<any | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        if (user?.city && user?.country_iso) {
+          const w = await fetchWeatherByCity(user.city, user.country_iso);
+          if (mounted) setWeather(w);
+        }
+      } catch (e) {
+        console.warn('sidebar weather fetch failed', e);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [user?.city, user?.country_iso]);
+
   // 🔹 Ítems del menú principal
   const navItems = [
     { icon: <Home size={18} />, text: "Inicio", path: "/" },
     { icon: <User size={18} />, text: "Perfil", path: `/${user?.username}` },
     { icon: <MessageSquare size={18} />, text: "Mensajes", path: "/messages" },
-    { icon: <PenSquare size={18} />, text: "Postear", path: "/posts/create" },
+    { icon: <PenSquare size={18} />, text: "Postear", path: "/feed#crear-post" },
     { icon: <Settings size={18} />, text: "Configuración", path: "/settings" },
   ];
 
@@ -52,7 +71,8 @@ export default function Sidebar() {
   // 🔹 Renderizado con estilo activo
   const renderList = (items: any[]) =>
     items.map(({ icon, text, path }) => {
-      const active = pathname === path;
+  const basePath = typeof path === "string" ? path.split("#")[0] : path;
+  const active = pathname === basePath;
       return (
         <ListItemButton
           key={path}
@@ -94,7 +114,6 @@ export default function Sidebar() {
         flexDirection: "column",
         justifyContent: "space-between",
         borderRight: "1px solid #e0e0e0",
-        backgroundColor: "#fff",
         boxShadow: "2px 0 8px rgba(0,0,0,0.05)",
         p: 2,
         position: "sticky",
@@ -143,38 +162,55 @@ export default function Sidebar() {
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
+            flexDirection: "column",
+            alignItems: "stretch",
             justifyContent: "space-between",
             p: 1.5,
             borderRadius: 2,
-            bgcolor: "#f9f9f9",
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Avatar
-              src={user.profile_picture_url ?? undefined}
-              alt={user.displayname ?? user.username}
-              sx={{ width: 36, height: 36 }}
-            />
-            <Box>
-              <Typography fontWeight={600} lineHeight={1.1}>
-                {user.displayname}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                @{user.username}
-              </Typography>
+          
+          {weather?.current && (
+            <Box sx={{ mb: 1 }}>
+              
+              <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+                
+                <Box sx={{ backgroundColor: 'rgba(0,0,0,0.03)', borderRadius: 1, px: 0.8, py: 0.3 }}>
+                  <Typography variant="caption" fontWeight={700}>
+                    {Math.round(weather.current.temp)}° • {weather.current.weather?.[0]?.description}
+                  </Typography>
+                </Box>
+              </Box>
             </Box>
-          </Box>
+          )}
 
-          <Button
-            onClick={logout}
-            size="small"
-            color="error"
-            variant="text"
-            sx={{ minWidth: 0 }}
-          >
-            <LogOut size={18} />
-          </Button>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Avatar
+                src={user.profile_picture_url ?? undefined}
+                alt={user.displayname ?? user.username}
+                sx={{ width: 36, height: 36 }}
+              />
+              <Box>
+                <Typography fontWeight={600} lineHeight={1.1}>
+                  {user.displayname}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  @{user.username}
+                </Typography>
+              </Box>
+            </Box>
+
+            <Button
+              onClick={logout}
+              size="small"
+              color="error"
+              variant="text"
+              sx={{ minWidth: 0 }}
+            >
+              <LogOut size={18} />
+            </Button>
+          </Box>
         </Box>
       )}
     </Box>

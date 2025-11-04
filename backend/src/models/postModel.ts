@@ -12,14 +12,14 @@ export const createMedia = async (url: string, type: string, size: number, uploa
   return r.rows[0];
 };
 
-export const createPost = async ({ author_id, text, link_url, media_id }:
-  { author_id: string; text: string; link_url?: string | null; media_id?: string | null }) => {
+export const createPost = async ({ author_id, text, link_url, media_id, weather }:
+  { author_id: string; text: string; link_url?: string | null; media_id?: string | null; weather?: any | null }) => {
   const id = randomUUID();
   const q = `
-    INSERT INTO post (id, author_id, text, link_url, created_at, updated_at)
-    VALUES ($1, $2, $3, $4, NOW(), NOW())
+    INSERT INTO post (id, author_id, text, link_url, weather, created_at, updated_at)
+    VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
     RETURNING *`;
-  const r = await db.query(q, [id, author_id, text, link_url]);
+  const r = await db.query(q, [id, author_id, text, link_url, weather ? JSON.stringify(weather) : null]);
   
   if (media_id) {
     await db.query(`UPDATE media SET post_id = $1 WHERE id = $2`, [r.rows[0].id, media_id]);
@@ -33,7 +33,8 @@ export const getPosts = async () => {
       p.id,
       p.text,
       p.link_url,
-      p.created_at,
+  p.created_at,
+  p.weather,
       json_build_object(
         'id', u.id,
         'username', u.username,
@@ -77,11 +78,18 @@ export const getPosts = async () => {
     WHERE p.is_blocked = FALSE
       AND (p.shared_post_id IS NULL OR (sp.id IS NOT NULL AND sp.is_blocked = FALSE))
     ORDER BY p.created_at DESC
-    LIMIT 50;
-  `;
-
-  const r = await db.query(q);
-  return r.rows;
+    LIMIT 50`;
+  const r = await db.query(q, []);
+  return r.rows.map(row => ({
+    id: row.id,
+    text: row.text,
+    link_url: row.link_url,
+    weather: row.weather ? (typeof row.weather === 'string' ? JSON.parse(row.weather) : row.weather) : null,
+    created_at: row.created_at,
+    author: row.author || null,
+    medias: row.medias || [],
+    shared_post: row.shared_post || null,
+  }));
 };
 
 export const getPostsByAuthor = async (authorId: string) => {
@@ -141,6 +149,7 @@ export const getPostsByAuthor = async (authorId: string) => {
     id: row.id,
     text: row.text,
     link_url: row.link_url,
+    weather: row.weather ? (typeof row.weather === 'string' ? JSON.parse(row.weather) : row.weather) : null,
     created_at: row.created_at,
     author: row.author,
     medias: row.medias || [],
@@ -169,8 +178,14 @@ export const updatePostText = async (postId: string, text: string) => {
 
 export const getPostById = async (postId: string) => {
   const q = `
-    SELECT p.*, u.id as author_id,
-  COALESCE(json_agg(json_build_object('url', m.url, 'type', m.type) ORDER BY m.id) FILTER (WHERE m.id IS NOT NULL), '[]') as medias
+    SELECT p.id, p.text, p.link_url, p.created_at, p.weather, p.shared_post_id,
+      json_build_object(
+        'id', u.id,
+        'username', u.username,
+        'displayname', u.displayname,
+        'profile_picture_url', u.profile_picture_url
+      ) AS author,
+      COALESCE(json_agg(json_build_object('url', m.url, 'type', m.type) ORDER BY m.id) FILTER (WHERE m.id IS NOT NULL), '[]') as medias
     FROM post p
     LEFT JOIN users u ON p.author_id = u.id
     LEFT JOIN media m ON m.post_id = p.id
@@ -185,12 +200,13 @@ export const getPostById = async (postId: string) => {
     const check = await db.query(`SELECT 1 FROM post WHERE id = $1 AND is_blocked = FALSE`, [row.shared_post_id]);
     if ((check?.rowCount ?? 0) === 0) return null;
   }
-  return {
+    return {
     id: row.id,
     text: row.text,
     link_url: row.link_url,
+    weather: row.weather ? (typeof row.weather === 'string' ? JSON.parse(row.weather) : row.weather) : null,
     created_at: row.created_at,
-    author: { id: row.author_id },
+    author: row.author || null,
     medias: row.medias || [],
   };
 };

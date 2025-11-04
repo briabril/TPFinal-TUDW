@@ -79,6 +79,7 @@ const PostDetail = () => {
               isOwn={isOwn}
             />
           }
+          postId={post.id}
         />
         <PostBody post={post} description={post.text ?? ""} />
         <Comments postId={post.id} authorId={post.author.id} />

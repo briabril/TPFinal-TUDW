@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { editProfilSchema, ProfileData } from "@tpfinal/schemas";
 import { Button, TextField, Container, Paper, Typography, Box } from "@mui/material";
 import toast from "react-hot-toast";
+import { useAuth } from "@/context/AuthContext";
 import Autocomplete from "@mui/material/Autocomplete";
 
 export default function EditProfilePage() {
@@ -32,6 +33,7 @@ export default function EditProfilePage() {
 
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const { setUser } = useAuth();
 
   const bioValue = watch("bio") || "";
   const bioLength = bioValue.length;
@@ -110,14 +112,25 @@ export default function EditProfilePage() {
       if (data.password && data.password.trim() !== "") formData.append("password", data.password);
       if (data.new_password && data.new_password.trim() !== "") formData.append("new_password", data.new_password);
       if (data.bio && data.bio.trim() !== "") formData.append("bio", data.bio);
-      if (data.profile_picture_url instanceof File) formData.append("profile_picture_url", data.profile_picture_url);
+      // `profile_picture_url` puede venir como File o FileList (por cómo maneja el input).
+      if (data.profile_picture_url instanceof File) {
+        formData.append("profile_picture_url", data.profile_picture_url);
+      } else if (data.profile_picture_url instanceof FileList && data.profile_picture_url.length > 0) {
+        formData.append("profile_picture_url", data.profile_picture_url[0]);
+      }
       if (data.city) formData.append("city", data.city);
       if (data.country_iso) formData.append("country_iso", data.country_iso.toUpperCase());
 
-      await api.put(`/users/${userId}`, formData, {
-        withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      // No forzamos Content-Type: axios/Browser lo establecerá con el boundary correcto
+      const res = await api.put(`/users/${userId}`, formData, { withCredentials: true });
+
+      const updatedUser = res.data?.user;
+      if (updatedUser) {
+        setUser(updatedUser);
+        setValue("displayname", updatedUser.displayname ?? "");
+        setValue("bio", updatedUser.bio ?? "");
+        setValue("profile_picture_url", undefined);
+      }
 
       toast.success("¡Perfil actualizado correctamente!");
     } catch (err: any) {

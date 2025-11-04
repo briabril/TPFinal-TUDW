@@ -29,45 +29,127 @@ export const createPost = async ({ author_id, text, link_url, media_id }:
 
 export const getPosts = async () => {
   const q = `
-    SELECT p.*, u.id as author_id,
-  COALESCE(json_agg(json_build_object('url', m.url, 'type', m.type) ORDER BY m.id) FILTER (WHERE m.id IS NOT NULL), '[]') as medias
+    SELECT 
+      p.id,
+      p.text,
+      p.link_url,
+      p.created_at,
+      json_build_object(
+        'id', u.id,
+        'username', u.username,
+        'displayname', u.displayname,
+        'profile_picture_url', u.profile_picture_url
+      ) AS author,
+
+      COALESCE(
+        (
+          SELECT json_agg(jsonb_build_object('url', m.url, 'type', m.type))
+          FROM media m
+          WHERE m.post_id = p.id
+        ),
+        '[]'
+      ) AS medias,
+
+      CASE WHEN sp.id IS NOT NULL THEN json_build_object(
+        'id', sp.id,
+        'text', sp.text,
+        'link_url', sp.link_url,
+        'created_at', sp.created_at,
+        'author', json_build_object(
+          'id', spu.id,
+          'username', spu.username,
+          'displayname', spu.displayname,
+          'profile_picture_url', spu.profile_picture_url
+        ),
+        'medias', COALESCE((
+          SELECT json_agg(jsonb_build_object('url', sm.url, 'type', sm.type))
+          FROM media sm
+          WHERE sm.post_id = sp.id
+        ), '[]')
+      )
+      ELSE NULL END AS shared_post
+
     FROM post p
     LEFT JOIN users u ON p.author_id = u.id
-    LEFT JOIN media m ON m.post_id = p.id
+    LEFT JOIN post sp ON p.shared_post_id = sp.id
+    LEFT JOIN users spu ON sp.author_id = spu.id
     WHERE p.is_blocked = FALSE
-    GROUP BY p.id, u.id
     ORDER BY p.created_at DESC
-    LIMIT 50`;
-  const r = await db.query(q, []);
-  return r.rows.map(row => ({
-    id: row.id,
-    text: row.text,
-    link_url: row.link_url,
-    created_at: row.created_at,
-    author: { id: row.author_id },
-    medias: row.medias || [],
-  }));
+    LIMIT 50;
+  `;
+
+  const r = await db.query(q);
+  return r.rows;
 };
 
 export const getPostsByAuthor = async (authorId: string) => {
   const q = `
-    SELECT p.*, u.id as author_id,
-  COALESCE(json_agg(json_build_object('url', m.url, 'type', m.type) ORDER BY m.id) FILTER (WHERE m.id IS NOT NULL), '[]') as medias
+    SELECT 
+      p.*,
+      json_build_object(
+        'id', u.id,
+        'username', u.username,
+        'displayname', u.displayname,
+        'profile_picture_url', u.profile_picture_url
+      ) AS author,
+
+      COALESCE(
+        json_agg(
+          DISTINCT jsonb_build_object('url', m.url, 'type', m.type)
+        ) FILTER (WHERE m.id IS NOT NULL),
+        '[]'
+      ) AS medias,
+
+      sp.id AS shared_post_id,
+      sp.text AS shared_post_text,
+      sp.link_url AS shared_post_link,
+      sp.created_at AS shared_post_created_at,
+
+      json_build_object(
+        'id', spu.id,
+        'username', spu.username,
+        'displayname', spu.displayname,
+        'profile_picture_url', spu.profile_picture_url
+      ) AS shared_author,
+
+      COALESCE(
+        json_agg(
+          DISTINCT jsonb_build_object('url', sm.url, 'type', sm.type)
+        ) FILTER (WHERE sm.id IS NOT NULL),
+        '[]'
+      ) AS shared_medias
+
     FROM post p
     LEFT JOIN users u ON p.author_id = u.id
     LEFT JOIN media m ON m.post_id = p.id
-    WHERE p.author_id = $1
-    GROUP BY p.id, u.id
+    LEFT JOIN post sp ON p.shared_post_id = sp.id
+    LEFT JOIN users spu ON sp.author_id = spu.id
+    LEFT JOIN media sm ON sm.post_id = sp.id
+    WHERE p.author_id = $1 AND p.is_blocked = FALSE
+    GROUP BY p.id, u.id, sp.id, spu.id
     ORDER BY p.created_at DESC
-    LIMIT 100`;
+    LIMIT 100;
+  `;
+
   const r = await db.query(q, [authorId]);
+
   return r.rows.map(row => ({
     id: row.id,
     text: row.text,
     link_url: row.link_url,
     created_at: row.created_at,
-    author: { id: row.author_id },
+    author: row.author,
     medias: row.medias || [],
+    shared_post: row.shared_post_id
+      ? {
+          id: row.shared_post_id,
+          text: row.shared_post_text,
+          link_url: row.shared_post_link,
+          created_at: row.shared_post_created_at,
+          author: row.shared_author,
+          medias: row.shared_medias || [],
+        }
+      : null,
   }));
 };
 
@@ -113,4 +195,28 @@ export const blockPostById = async (postId: string) => {
   `;
   const r = await db.query(q, [postId]);
   return r.rows[0];
+};
+
+export const sharePost = async (author_id: string, original_post_id: string, text?: string | null) => {
+  const id = randomUUID();
+  const q = `
+    INSERT INTO post (id, author_id, text, shared_post_id, created_at, updated_at)
+    VALUES ($1, $2, $3, $4, NOW(), NOW())
+    RETURNING *;
+  `;
+  const r = await db.query(q, [id, author_id, text || null, original_post_id]);
+  return r.rows[0];
+};
+
+export const hasUserSharedPost = async (author_id: string, original_post_id: string) => {
+  const q = `
+    SELECT 1 
+    FROM post 
+    WHERE author_id = $1 
+      AND shared_post_id = $2
+      AND is_blocked = FALSE
+    LIMIT 1;
+  `;
+  const r = await db.query(q, [author_id, original_post_id]);
+  return r.rowCount > 0;
 };

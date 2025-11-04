@@ -10,13 +10,14 @@ import {
   Button,
   CircularProgress,
   Tooltip,
+  Link,
 } from "@mui/material";
-import { Save, Close, Translate, Language } from "@mui/icons-material";
+import { Save, Close, Translate, Language, Share } from "@mui/icons-material";
 import { Media } from "@tpfinal/types";
 import PostActions from "./PostActions";
+import { Reaction } from "../Reaction";
 import { deletePost, updatePost, reportPost } from "@/services/postService";
-
-import useTranslation from "@/hooks/useTranslation"; // <- importa el hook
+import useTranslation from "@/hooks/useTranslation";
 
 export default function PostBody({ post, description }: any) {
   const { user } = require("@/context/AuthContext").useAuth?.() || { user: null };
@@ -25,21 +26,17 @@ export default function PostBody({ post, description }: any) {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ type: "error" | "success" | null; text?: string } | null>(null);
   const isOwn = user && post.author.id === user.id;
-
   const { translated, sourceLang, loading: tlLoading, error: tlError, translate, clear } = useTranslation();
 
   const postId = post.id.toString();
 
-  // decidir si mostrar boton traducir: si browser lang != detected source lang OR no detected yet
-  // Pero para detectamos el idioma al traducir (DeepL nos devuelve detected_source_language).
-  // Mostramos boton siempre si no está traducido y no coincide el idioma del navegador.
-
-  const browserLang = (typeof navigator !== "undefined" ? (navigator.language || (navigator.languages && navigator.languages[0])) : "en")?.slice(0,2).toUpperCase() || "EN";
+  const browserLang =
+    (typeof navigator !== "undefined"
+      ? navigator.language || (navigator.languages && navigator.languages[0])
+      : "en")?.slice(0, 2).toUpperCase() || "EN";
 
   const showTranslateButton = useMemo(() => {
-    // Si ya hay traducción y no hay error -> no mostrar
     if (translated) return false;
-    // if we know sourceLang and it equals browserLang => no need to translate
     if (sourceLang && sourceLang.toUpperCase() === browserLang) return false;
     return true;
   }, [translated, sourceLang, browserLang]);
@@ -93,14 +90,12 @@ export default function PostBody({ post, description }: any) {
 
     const isAudio = media.type === "AUDIO";
     const isVideo = media.type === "VIDEO";
-    const containerHeight = isAudio ? 96 : 320;
 
     return (
       <Box
         key={idx}
         sx={{
           width: "100%",
-          height: containerHeight,
           borderRadius: 2,
           overflow: "hidden",
           display: "flex",
@@ -116,20 +111,13 @@ export default function PostBody({ post, description }: any) {
             controls
             sx={{
               width: "100%",
-              height: "100%",
+              height: { xs: 200, sm: 320 },
               objectFit: "contain",
               backgroundColor: "black",
             }}
           />
         ) : isAudio ? (
-          <CardMedia
-            component="audio"
-            src={url}
-            controls
-            sx={{
-              width: "100%",
-            }}
-          />
+          <CardMedia component="audio" src={url} controls sx={{ width: "100%" }} />
         ) : (
           <CardMedia
             component="img"
@@ -137,7 +125,7 @@ export default function PostBody({ post, description }: any) {
             alt={`media-${idx}`}
             sx={{
               width: "100%",
-              height: "100%",
+              height: { xs: 200, sm: 320 },
               objectFit: "contain",
             }}
           />
@@ -146,7 +134,6 @@ export default function PostBody({ post, description }: any) {
     );
   };
 
-  // actions for translate button
   const handleTranslateClick = async () => {
     await translate({ text: description, postId });
   };
@@ -156,104 +143,109 @@ export default function PostBody({ post, description }: any) {
   };
 
   return (
-    <Box sx={{ fontSize: "1.1rem" }}>
+    <Box sx={{ fontSize: "1.1rem", width: "100%", px: { xs: 1, sm: 2 } }}>
       {!editing ? (
         <>
-          <Box
-            sx={{
-              position: "relative",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-              mt: 1,
-            }}
-          >
-            <Typography
-              variant="body1"
+          {/* Si es un post compartido */}
+          {post.shared_post && (
+            <Box
               sx={{
+                borderLeft: "4px solid #1976d2",
+                borderRadius: 2,
+                p: { xs: 1.5, sm: 2 },
+                mt: 2,
                 mb: 2,
-                whiteSpace: "pre-wrap",
-                pr: { xs: 0, sm: 8 },
-                width: "100%",
-                fontSize: "1.1rem",
-                lineHeight: 1.8,
+                bgcolor: "background.paper",
+                boxShadow: 1,
               }}
             >
-              {translated ?? text}
-            </Typography>
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={0.5}
+                alignItems={{ xs: "flex-start", sm: "center" }}
+                mb={1}
+              >
+                <Share fontSize="small" color="primary" />
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ wordBreak: "break-word" }}
+                >
+                  Compartido de{" "}
+                  <strong>
+                    {post.shared_post.author?.username ||
+                      post.shared_post.author?.displayname ||
+                      "usuario desconocido"}
+                  </strong>
+                </Typography>
+              </Stack>
 
-            {medias.length > 0 && (
-              <Box
+              <Typography
+                variant="body1"
                 sx={{
-                  width: "100%",
-                  mt: 1,
-                  display: "grid",
-                  gap: 1,
-                  gridTemplateColumns: {
-                    xs: "1fr",
-                    sm: medias.length <= 1 ? "1fr" : "repeat(2, minmax(0, 1fr))",
-                    md:
-                      medias.length >= 4
-                        ? "repeat(2, minmax(0, 1fr))"
-                        : medias.length === 3
-                        ? "repeat(3, minmax(0, 1fr))"
-                        : medias.length === 2
-                        ? "repeat(2, minmax(0, 1fr))"
-                        : "1fr",
-                  },
+                  whiteSpace: "pre-wrap",
+                  fontStyle: "italic",
+                  color: "text.secondary",
+                  fontSize: { xs: "0.95rem", sm: "1rem" },
                 }}
               >
-                {medias.map((m: Media, i: number) => renderMediaItem(m, i))}
-              </Box>
-            )}
+                {post.shared_post.text}
+              </Typography>
+            </Box>
+          )}
 
-            <Stack direction="row" spacing={1} sx={{ mt: 1, alignItems: "center" }}>
-              <PostActions
-                onEdit={() => setEditing(true)}
-                onDelete={handleDelete}
-                onReport={handleReport}
-                loading={loading}
-                isOwn={isOwn}
-              />
+          {/* Texto del post */}
+          <Typography
+            variant="body1"
+            sx={{
+              mb: 2,
+              whiteSpace: "pre-wrap",
+              width: "100%",
+              fontSize: { xs: "1rem", sm: "1.1rem" },
+              lineHeight: 1.8,
+              wordBreak: "break-word",
+            }}
+          >
+            {translated ?? text}
+          </Typography>
 
-              {/* Translate button area */}
-              {showTranslateButton && (
-                <Tooltip title="Traducir al idioma de tu navegador">
-                  <span>
-                    <IconButton onClick={handleTranslateClick} disabled={tlLoading}>
-                      {tlLoading ? <CircularProgress size={18} /> : <Translate />}
-                    </IconButton>
-                  </span>
-                </Tooltip>
-              )}
+          {/* Medias */}
+          {medias.length > 0 && (
+            <Box
+              sx={{
+                width: "100%",
+                mt: 1,
+                display: "grid",
+                gap: 1,
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm:
+                    medias.length === 2
+                      ? "repeat(2, 1fr)"
+                      : medias.length >= 3
+                        ? "repeat(3, 1fr)"
+                        : "1fr",
+                },
+              }}
+            >
+              {medias.map((m: Media, i: number) => renderMediaItem(m, i))}
+            </Box>
+          )}
 
-              {/* If is translated, show a small control to revert */}
-              {translated && (
-                <>
-                  <Tooltip title={`Detectado: ${sourceLang ?? "—"}`}>
-                    <IconButton aria-label="source-language">
-                      <Language />
-                    </IconButton>
-                  </Tooltip>
-                  <Button size="small" variant="outlined" onClick={handleClearTranslation}>
-                    Ver original
-                  </Button>
-                </>
-              )}
+          {/* Acciones */}
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={1}
+            sx={{ mt: 1, alignItems: { xs: "stretch", sm: "center" } }}
+          >
+            <PostActions
+              onEdit={() => setEditing(true)}
+              onDelete={handleDelete}
+              onReport={handleReport}
+              loading={loading}
+              isOwn={isOwn}
+            />
             </Stack>
-
-            {/* Show translation error or info */}
-            {tlError && (
-              <Typography variant="caption" color="error" mt={1}>
-                {tlError}
-              </Typography>
-            )}
-            {sourceLang && !translated && (
-              <Typography variant="caption" color="text.secondary" mt={1}>
-                Idioma detectado: {sourceLang}
-              </Typography>
-            )}
-          </Box>
         </>
       ) : (
         <Box>
@@ -264,10 +256,9 @@ export default function PostBody({ post, description }: any) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             sx={{
-              fontSize: "1.1rem",
+              fontSize: { xs: "1rem", sm: "1.1rem" },
               "& .MuiOutlinedInput-root": {
-                fontSize: "1.1rem",
-                lineHeight: 1.6,
+                fontSize: { xs: "1rem", sm: "1.1rem" },
                 borderRadius: 2,
               },
             }}
@@ -289,11 +280,81 @@ export default function PostBody({ post, description }: any) {
           color={msg.type === "error" ? "error" : "success.main"}
           mt={1.5}
           display="block"
-          sx={{ fontSize: "0.95rem" }}
+          sx={{ fontSize: { xs: "0.85rem", sm: "0.95rem" } }}
         >
           {msg.text}
         </Typography>
       )}
+
+      <Stack
+        direction={{ xs: "row", sm: "row" }}
+        alignItems="center"
+        spacing={1.5}
+        sx={{
+          p: 1.5,
+          mt: 1,
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+        }}
+      >
+        <Stack direction="row" alignItems="center" spacing={1}>
+          {/* Reacciones */}
+          <Reaction userId={user?.id} type="post" targetId={post.id} />
+
+          {/* Traducción junto a reacciones */}
+          {showTranslateButton && (
+            <Tooltip title="Traducir al idioma de tu navegador">
+              <span>
+                <IconButton onClick={handleTranslateClick} disabled={tlLoading}>
+                  {tlLoading ? <CircularProgress size={18} /> : <Translate />}
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
+
+          {translated && (
+            <>
+              <Tooltip title={`Detectado: ${sourceLang ?? "—"}`}>
+                <IconButton aria-label="source-language">
+                  <Language />
+                </IconButton>
+              </Tooltip>
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={handleClearTranslation}
+                sx={{
+                  fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                  textTransform: "none",
+                }}
+              >
+                Ver original
+              </Button>
+            </>
+          )}
+        </Stack>
+
+        {/* Link a comentarios */}
+        <Link
+          href={`/posts/${post.id}`}
+          style={{
+            textDecoration: "none",
+            color: "inherit",
+          }}
+        >
+          <Typography
+            variant="body2"
+            color="primary"
+            sx={{
+              fontWeight: 800,
+              fontSize: { xs: "0.85rem", sm: "0.95rem" },
+              "&:hover": { textDecoration: "underline" },
+            }}
+          >
+            Comentarios
+          </Typography>
+        </Link>
+      </Stack>
     </Box>
   );
 }

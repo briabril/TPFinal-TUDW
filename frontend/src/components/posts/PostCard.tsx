@@ -1,16 +1,18 @@
 "use client";
-import { Card, CardContent, Stack, Typography, Box } from "@mui/material";
+import { Card, CardContent, Box } from "@mui/material";
 import AuthorHeader from "./AuthorHeader";
 import PostBody from "./PostBody";
-import { Reaction } from "../Reaction";
-import Link from "next/link";
+import SharedPost from "./SharedPost";
 import { Post } from "@tpfinal/types";
 import { useAuth } from "@/context/AuthContext";
 
 export default function PostCard({ post }: { post: Post }) {
+  console.log(post)
   const { user } = useAuth();
   const description = post.text ?? "(sin descripción)";
   const created = post.created_at ?? "";
+
+  const isShared = !!post.shared_post;
 
   return (
     <Card
@@ -27,34 +29,17 @@ export default function PostCard({ post }: { post: Post }) {
       }}
     >
       <CardContent sx={{ px: 0, py: 0 }}>
-        <AuthorHeader authorId={post.author.id} />
-        <Box sx={{ px: 2 }}>
-          <PostBody post={post} description={description} />
-        </Box>
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={2}
-          sx={{ p: 1.5 }}
-        >
-          <Reaction userId={user?.id} type="post" targetId={post.id} />
-          <Link
-            href={`/posts/${post.id}`}
-            style={{
-              textDecoration: "none",
-              color: "inherit",
-              marginLeft: "auto",
-            }}
-          >
-            <Typography
-              variant="body2"
-              color="primary"
-              sx={{ fontWeight: 800, "&:hover": { textDecoration: "underline" } }}
-            >
-              Comentarios
-            </Typography>
-          </Link>
-        </Stack>
+        {/* 🔹 Si es un post compartido → mostrar SharedPost */}
+        {isShared ? (
+          <SharedPost post={post} />
+        ) : (
+          <>
+            <AuthorHeader author={post.author} />
+            <Box sx={{ px: 2 }}>
+              <PostBody post={post} description={description} />
+            </Box>
+          </>
+        )}
       </CardContent>
     </Card>
   );

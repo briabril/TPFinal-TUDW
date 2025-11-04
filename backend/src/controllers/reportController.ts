@@ -70,3 +70,25 @@ export const updateStatus = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error interno al actualizar reporte" });
   }
 };
+
+export const revertReport = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { target_id } = req.body;
+
+    if (!target_id) return res.status(400).json({ message: 'Falta target_id' });
+
+  // Only applicable for post targets — if needed, extend for comments
+  const { unblockPostById } = require('../models/postModel');
+    await unblockPostById(target_id);
+
+    // mark report as dismissed (reverted)
+    const report = await ReportModel.updateReportStatus(id, 'dismissed');
+    if (!report) return res.status(404).json({ message: 'Reporte no encontrado' });
+
+    res.json({ message: 'Post revertido y reporte actualizado', report });
+  } catch (error) {
+    console.error('Error al revertir reporte:', error);
+    res.status(500).json({ message: 'Error interno al revertir reporte' });
+  }
+}

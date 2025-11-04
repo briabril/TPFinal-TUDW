@@ -132,6 +132,46 @@ export const deletePostController = async (req: Request, res: Response) => {
       return res.status(403).json({ error: 'No autorizado para eliminar este post' })
     }
     
+    // First, remove any posts that shared this post (and their media assets)
+    try {
+      const sharesRes = await db.query(`SELECT id FROM post WHERE shared_post_id = $1`, [postId])
+      const shares = sharesRes.rows || []
+      for (const s of shares) {
+        const shareId = s.id
+        try {
+          const mediasRes2 = await db.query(`SELECT id, url, type FROM media WHERE post_id = $1`, [shareId])
+          const medias2 = mediasRes2.rows || []
+          for (const m of medias2) {
+            try {
+              const publicId = require('../utils/cloudinary').extractPublicIdFromUrl(m.url)
+              const resourceType = (m.type || '').toLowerCase()
+              if (publicId) {
+                try {
+                  await require('../utils/cloudinary').deleteFromCloudinary(publicId, resourceType || undefined)
+                } catch (e) {
+                  try { await require('../utils/cloudinary').deleteFromCloudinary(publicId) } catch (e2) { console.warn('failed to delete cloudinary asset', e2) }
+                }
+              }
+            } catch (e) {
+              console.warn('error deleting cloud asset for share', e)
+            }
+          }
+        } catch (err) {
+          console.warn('error fetching medias for share', err)
+        }
+
+        try {
+          const { deletePostById } = require('../models/postModel')
+          await deletePostById(shareId)
+        } catch (err) {
+          console.warn('error deleting share post', err)
+        }
+      }
+    } catch (err) {
+      console.warn('error fetching shares', err)
+    }
+
+    // Now remove media for the original post
     const mediasRes = await db.query(`SELECT id, url, type FROM media WHERE post_id = $1`, [postId])
     const medias = mediasRes.rows || []
     
@@ -143,7 +183,6 @@ export const deletePostController = async (req: Request, res: Response) => {
           try {
             await require('../utils/cloudinary').deleteFromCloudinary(publicId, resourceType || undefined)
           } catch (e) {
-            
             try { await require('../utils/cloudinary').deleteFromCloudinary(publicId) } catch (e2) { console.warn('failed to delete cloudinary asset', e2) }
           }
         }

@@ -12,6 +12,8 @@ import {
 import Comments from "@/components/Comments/Comments";
 import AuthorHeader from "@/components/posts/AuthorHeader";
 import PostBody from "@/components/posts/PostBody";
+import PostActions from "@/components/posts/PostActions";
+import { useAuth } from "@/context/AuthContext";
 import { Post } from "@tpfinal/types";
 
 const PostDetail = () => {
@@ -42,11 +44,43 @@ const PostDetail = () => {
     );
   }
 
+  const { user } = useAuth();
+  const isOwn = Boolean(user && String(post.author.id) === String(user.id));
+
+  const handleDelete = async () => {
+    if (!confirm("¿Eliminar post?")) return;
+    try {
+      await (await import("@/services/postService")).deletePost(post.id);
+      window.location.href = "/feed";
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleReport = async (reason: string) => {
+    try {
+      await (await import("@/services/postService")).reportPost(post.id, reason);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <Card sx={{ maxWidth: 900, mx: "auto", mt: 4 }}>
       <CardContent>
-        <AuthorHeader authorId={post.author.id} />
-        <PostBody post={post} description={post.text} />
+        <AuthorHeader
+          author={post.author}
+          actions={
+            <PostActions
+              onEdit={() => {}}
+              onDelete={handleDelete}
+              onReport={handleReport}
+              loading={false}
+              isOwn={isOwn}
+            />
+          }
+        />
+        <PostBody post={post} description={post.text ?? ""} />
         <Comments postId={post.id} authorId={post.author.id} />
       </CardContent>
     </Card>

@@ -50,7 +50,7 @@ export const getPosts = async () => {
         '[]'
       ) AS medias,
 
-      CASE WHEN sp.id IS NOT NULL THEN json_build_object(
+      CASE WHEN sp.id IS NOT NULL AND sp.is_blocked = FALSE THEN json_build_object(
         'id', sp.id,
         'text', sp.text,
         'link_url', sp.link_url,
@@ -67,13 +67,15 @@ export const getPosts = async () => {
           WHERE sm.post_id = sp.id
         ), '[]')
       )
-      ELSE NULL END AS shared_post
+  ELSE NULL END AS shared_post
 
     FROM post p
     LEFT JOIN users u ON p.author_id = u.id
     LEFT JOIN post sp ON p.shared_post_id = sp.id
     LEFT JOIN users spu ON sp.author_id = spu.id
+    -- Exclude posts that are shares of a missing or blocked original
     WHERE p.is_blocked = FALSE
+      AND (p.shared_post_id IS NULL OR (sp.id IS NOT NULL AND sp.is_blocked = FALSE))
     ORDER BY p.created_at DESC
     LIMIT 50;
   `;
@@ -104,6 +106,7 @@ export const getPostsByAuthor = async (authorId: string) => {
       sp.text AS shared_post_text,
       sp.link_url AS shared_post_link,
       sp.created_at AS shared_post_created_at,
+  (sp.is_blocked = FALSE) AS shared_post_id_visible,
 
       json_build_object(
         'id', spu.id,
@@ -125,7 +128,8 @@ export const getPostsByAuthor = async (authorId: string) => {
     LEFT JOIN post sp ON p.shared_post_id = sp.id
     LEFT JOIN users spu ON sp.author_id = spu.id
     LEFT JOIN media sm ON sm.post_id = sp.id
-    WHERE p.author_id = $1 AND p.is_blocked = FALSE
+  WHERE p.author_id = $1 AND p.is_blocked = FALSE
+    AND (p.shared_post_id IS NULL OR (sp.id IS NOT NULL AND sp.is_blocked = FALSE))
     GROUP BY p.id, u.id, sp.id, spu.id
     ORDER BY p.created_at DESC
     LIMIT 100;
@@ -140,7 +144,7 @@ export const getPostsByAuthor = async (authorId: string) => {
     created_at: row.created_at,
     author: row.author,
     medias: row.medias || [],
-    shared_post: row.shared_post_id
+    shared_post: row.shared_post_id && row.shared_post_id_visible
       ? {
           id: row.shared_post_id,
           text: row.shared_post_text,
@@ -176,6 +180,11 @@ export const getPostById = async (postId: string) => {
   const r = await db.query(q, [postId]);
   if (r.rows.length === 0) return null;
   const row = r.rows[0];
+  // if this post is a share, ensure the original exists and is not blocked
+  if (row.shared_post_id) {
+    const check = await db.query(`SELECT 1 FROM post WHERE id = $1 AND is_blocked = FALSE`, [row.shared_post_id]);
+    if ((check?.rowCount ?? 0) === 0) return null;
+  }
   return {
     id: row.id,
     text: row.text,
@@ -190,7 +199,18 @@ export const blockPostById = async (postId: string) => {
   const q = `
     UPDATE post
     SET is_blocked = true
-    WHERE id = $1
+    WHERE id = $1 OR shared_post_id = $1
+    RETURNING *;
+  `;
+  const r = await db.query(q, [postId]);
+  return r.rows[0];
+};
+
+export const unblockPostById = async (postId: string) => {
+  const q = `
+    UPDATE post
+    SET is_blocked = false
+    WHERE id = $1 OR shared_post_id = $1
     RETURNING *;
   `;
   const r = await db.query(q, [postId]);
@@ -218,5 +238,5 @@ export const hasUserSharedPost = async (author_id: string, original_post_id: str
     LIMIT 1;
   `;
   const r = await db.query(q, [author_id, original_post_id]);
-  return r.rowCount > 0;
+  return (r?.rowCount ?? 0) > 0;
 };

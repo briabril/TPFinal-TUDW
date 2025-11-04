@@ -32,7 +32,7 @@ export default function PostActions({
     };
 
     return (
-        <Box sx={{ position: "absolute", top: -76, right: 0 }}>
+    <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton onClick={handleMenuOpen}>
                 <MoreVert />
             </IconButton>

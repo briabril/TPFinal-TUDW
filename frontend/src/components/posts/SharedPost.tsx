@@ -4,6 +4,7 @@ import { Box, Typography, Stack, IconButton, Tooltip } from "@mui/material";
 import { Repeat } from "@mui/icons-material";
 import AuthorHeader from "./AuthorHeader";
 import PostBody from "./PostBody";
+import PostActions from "./PostActions";
 import { useState } from "react";
 
 export default function SharedPost({ post }: any) {
@@ -41,7 +42,20 @@ export default function SharedPost({ post }: any) {
           backgroundColor: "rgba(0,0,0,0.02)",
         }}
       >
-        <AuthorHeader author={originalAuthor} />
+        <AuthorHeader
+          author={originalAuthor}
+          actions={
+            <PostActions
+              onEdit={() => {}}
+              onDelete={() => {}}
+              onReport={async (reason: string) => {
+                await (await import("@/services/postService")).reportPost(originalPost.id, reason);
+              }}
+              loading={false}
+              isOwn={false}
+            />
+          }
+        />
         <PostBody post={originalPost} description={originalPost.text} />
       </Box>
     </Box>

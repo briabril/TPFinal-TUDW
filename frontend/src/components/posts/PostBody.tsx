@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Typography,
   Box,
@@ -14,18 +14,26 @@ import {
 } from "@mui/material";
 import { Save, Close, Translate, Language, Share } from "@mui/icons-material";
 import { Media } from "@tpfinal/types";
-import PostActions from "./PostActions";
 import { Reaction } from "../Reaction";
-import { deletePost, updatePost, reportPost } from "@/services/postService";
+import { updatePost } from "@/services/postService";
 import useTranslation from "@/hooks/useTranslation";
 
-export default function PostBody({ post, description }: any) {
-  const { user } = require("@/context/AuthContext").useAuth?.() || { user: null };
+interface PostBodyProps {
+  post: any;
+  description: string;
+  isOwn?: boolean;
+  onDelete?: () => void;
+  onReport?: (reason: string) => void;
+  editRequested?: boolean;
+  clearEditRequested?: () => void;
+  user?: any;
+}
+
+export default function PostBody({ post, description, isOwn = false, onDelete, onReport, editRequested, clearEditRequested, user }: PostBodyProps) {
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(description);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ type: "error" | "success" | null; text?: string } | null>(null);
-  const isOwn = user && post.author.id === user.id;
   const { translated, sourceLang, loading: tlLoading, error: tlError, translate, clear } = useTranslation();
 
   const postId = post.id.toString();
@@ -43,19 +51,6 @@ export default function PostBody({ post, description }: any) {
 
   const getMediaUrl = (media?: Media) => media?.url ?? null;
 
-  const handleDelete = async () => {
-    if (!confirm("¿Eliminar post?")) return;
-    setLoading(true);
-    try {
-      await deletePost(post.id);
-      setMsg({ type: "success", text: "Post eliminado" });
-      window.location.reload();
-    } catch (err: any) {
-      setMsg({ type: "error", text: err.response?.data?.error?.message || err.message });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSave = async () => {
     setLoading(true);
@@ -70,17 +65,13 @@ export default function PostBody({ post, description }: any) {
     }
   };
 
-  const handleReport = async (reason: string) => {
-    setLoading(true);
-    try {
-      await reportPost(post.id, reason);
-      setMsg({ type: "success", text: "Reporte enviado correctamente" });
-    } catch (err: any) {
-      setMsg({ type: "error", text: err.response?.data?.error?.message || err.message });
-    } finally {
-      setLoading(false);
+
+  useEffect(() => {
+    if (editRequested) {
+      setEditing(true);
+      clearEditRequested?.();
     }
-  };
+  }, [editRequested, clearEditRequested]);
 
   const medias = post.medias ?? [];
 
@@ -238,13 +229,6 @@ export default function PostBody({ post, description }: any) {
             spacing={1}
             sx={{ mt: 1, alignItems: { xs: "stretch", sm: "center" } }}
           >
-            <PostActions
-              onEdit={() => setEditing(true)}
-              onDelete={handleDelete}
-              onReport={handleReport}
-              loading={loading}
-              isOwn={isOwn}
-            />
             </Stack>
         </>
       ) : (

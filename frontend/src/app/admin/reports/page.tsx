@@ -62,6 +62,19 @@ const handleAction = async (id: string, target_id: string | number, action: "blo
   }
 };
 
+const handleRevert = async (id: string, target_id: string | number) => {
+  setActionLoading(id);
+  try {
+    await api.patch(`/reports/${id}/revert`, { target_id });
+    // remove report from list or refresh
+    setReports(prev => prev.filter(r => r.id !== id));
+  } catch (error) {
+    console.error('Error al revertir reporte:', error);
+  } finally {
+    setActionLoading(null);
+  }
+}
+
 
   return (
     <Stack spacing={3} sx={{ maxWidth: 800, mx: "auto", mt: 4, mb: 6 }}>
@@ -186,6 +199,27 @@ const handleAction = async (id: string, target_id: string | number, action: "blo
                       disabled={actionLoading === report.id}
                     >
                       Descartar reporte
+                    </Button>
+                  </Stack>
+                )}
+                {tab === "blocked" && (
+                  <Stack direction="row" spacing={1.5} mt={2}>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      startIcon={<OpenInNew />}
+                      href={`/posts/${report.target_id}`}
+                    >
+                      Ver contenido
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      startIcon={<CheckCircle />}
+                      onClick={() => handleRevert(report.id, report.target_id)}
+                      disabled={actionLoading === report.id}
+                    >
+                      Revertir bloqueo
                     </Button>
                   </Stack>
                 )}

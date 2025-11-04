@@ -6,9 +6,11 @@ import { Author } from "@tpfinal/types";
 interface AuthorHeaderProps {
   author: Author; // autor original
   sharedBy?: Author | null; // usuario que compartió, si aplica
+  actions?: React.ReactNode;
 }
 
-export default function AuthorHeader({ author, sharedBy }: AuthorHeaderProps) {
+export default function AuthorHeader(props: AuthorHeaderProps) {
+  const { author, sharedBy, actions } = props;
   if (!author) return null;
 
   return (
@@ -21,6 +23,8 @@ export default function AuthorHeader({ author, sharedBy }: AuthorHeaderProps) {
         p: 1.5,
         borderRadius: 3,
         backgroundColor: "rgba(0, 0, 0, 0.02)",
+        position: "relative", 
+        pr: 6,
         "&:hover": {
           backgroundColor: "rgba(0, 0, 0, 0.04)",
           transition: "background-color 0.3s ease",
@@ -71,6 +75,7 @@ export default function AuthorHeader({ author, sharedBy }: AuthorHeaderProps) {
           </Typography>
         )}
       </Box>
+      <Box sx={{ position: "absolute", top: 12, right: 12 }}>{actions}</Box>
     </Stack>
   );
 }

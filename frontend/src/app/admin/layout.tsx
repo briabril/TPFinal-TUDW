@@ -1,5 +1,6 @@
 "use client"
-import Sidebar from "@/components/Sidebar"
+// Sidebar component lives under src/components/sidebar/Sidebar.tsx
+import Sidebar from "@/components/sidebar/Sidebar"
 import { useAuth } from "@/context/AuthContext"
 import { redirect } from "next/navigation"
 

@@ -126,7 +126,7 @@ export default function RegisterPage() {
     justifyContent: "center",
   }}
 >
-  Iniciar sesión con Google
+  Continuar con Google
 </Button>
         <Typography variant="body2" align="center" color="text.secondary">
           ¿Ya tienes cuenta?{" "}

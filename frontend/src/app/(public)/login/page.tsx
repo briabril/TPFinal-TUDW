@@ -131,7 +131,7 @@ export default function LoginPage() {
        justifyContent: "center",
      }}
    >
-     Iniciar sesión con Google
+     Continuar con Google
    </Button>
         <Typography variant="body2" align="center" color="text.secondary">
           ¿No tienes cuenta?{" "}

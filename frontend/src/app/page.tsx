@@ -65,7 +65,7 @@ function PublicHome() {
     justifyContent: "center",
   }}
 >
-  Iniciar sesión con Google
+  Continuar con Google
 </Button>
         </Box>
       </Paper>

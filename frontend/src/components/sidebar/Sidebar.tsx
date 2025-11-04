@@ -54,10 +54,9 @@ export default function Sidebar() {
 
   // 🔹 Ítems del menú principal
   const navItems = [
-    { icon: <Home size={18} />, text: "Inicio", path: "/" },
+    { icon: <Home size={18} />, text: "Inicio", path: "/feed" },
     { icon: <User size={18} />, text: "Perfil", path: `/${user?.username}` },
     { icon: <MessageSquare size={18} />, text: "Mensajes", path: "/messages" },
-    { icon: <PenSquare size={18} />, text: "Postear", path: "/feed#crear-post" },
     { icon: <Settings size={18} />, text: "Configuración", path: "/settings" },
   ];
 

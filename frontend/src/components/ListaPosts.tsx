@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import PostBody from "./posts/PostBody";
-import { Reaction } from "./Reaction";
 import {
   Card,
   CardContent,
@@ -12,11 +11,11 @@ import {
   Box,
 } from "@mui/material";
 import api from "@tpfinal/api";
+import { CircularProgress } from "@mui/material";
 import { Post } from "@tpfinal/types";
 import AuthorHeader from "./posts/AuthorHeader";
 import { useAuth } from "@/context/AuthContext";
 import WeatherBackground from "./common/WeatherBackground";
-import { useMemo } from "react";
 
 export interface ApiResponse<T> {
   data: T;
@@ -24,20 +23,23 @@ export interface ApiResponse<T> {
 }
 
 type ListaPostsProps = {
-  mineOnly?: boolean;
+  mode?: "all" | "following" | "mine";
   reloadKey?: number;
   prependPost?: any | null;
 };
-
-  const ListaPosts: React.FC<ListaPostsProps> = ({ mineOnly = false, reloadKey, prependPost = null }) => {
+  const ListaPosts: React.FC<ListaPostsProps> = ({ mode = "all", reloadKey, prependPost = null }) => {
   const { user } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchPosts = async () => {
+      setLoading(true);
       try {
-        const endpoint = mineOnly ? "/posts/mine" : "/posts";
+        let endpoint = "/posts";
+        if (mode === "mine") endpoint = "/posts/mine";
+        else if (mode === "following") endpoint = "/posts/following";
         const { data } = await api.get<ApiResponse<Post[]>>(endpoint);
         let fetched = data.data || [];
         if (prependPost && prependPost.id) {
@@ -56,10 +58,13 @@ type ListaPostsProps = {
         setErrorMsg(message);
         setPosts([]);
       }
+      finally {
+        setLoading(false);
+      }
     };
 
     fetchPosts();
-  }, [mineOnly, reloadKey]);
+  }, [mode, reloadKey]);
 
 
   useEffect(() => {
@@ -74,11 +79,14 @@ type ListaPostsProps = {
   return (
     <Stack spacing={5}>
       {errorMsg && <Typography color="error">{errorMsg}</Typography>}
-      {posts.length === 0 && !errorMsg && (
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+          <CircularProgress />
+        </Box>
+      ) : posts.length === 0 && !errorMsg ? (
         <Typography color="text.secondary">No hay posts todavía</Typography>
-      )}
-
-      {posts.map((post) => {
+      ) : (
+        posts.map((post) => {
   const description = post.text ?? "(sin descripción)";
   const created = post.created_at ?? "";
   const pAny: any = post as any;
@@ -111,39 +119,11 @@ type ListaPostsProps = {
                 <PostBody post={post} description={description} user={user} />
               </Box>
 
-              <Stack
-                direction="row"
-                alignItems="center"
-                spacing={2}
-                sx={{
-                  pt: 1,
-                  borderRadius: 2,
-                  p: 1.5,
-                }}
-              >
-                <Reaction userId={user?.id} type="post" targetId={post.id} />
-
-                <Link
-                  href={`/posts/${post.id}`}
-                  style={{
-                    textDecoration: "none",
-                    color: "inherit",
-                    marginLeft: "auto",
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    color="primary"
-                    sx={{ fontWeight: 800, "&:hover": { textDecoration: "underline" } }}
-                  >
-                    Comentarios
-                  </Typography>
-                </Link>
-              </Stack>
             </CardContent>
           </Card>
         );
-      })}
+      })
+      )}
     </Stack>
   );
 };

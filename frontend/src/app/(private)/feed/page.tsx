@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import PostsList from "@/components/posts/PostList";
+import ListaPosts from "@/components/ListaPosts";
 import ThemeToggle from "@/components/ThemeToggle";
 import CrearPost from "@/components/CrearPost";
 import { Box, Typography } from "@mui/material";
+import { Button, ButtonGroup } from "@mui/material";
 
 export default function UserFeed() {
   const [reloadKey, setReloadKey] = useState(0);
   const [freshPost, setFreshPost] = useState<any | null>(null);
+  const [mode, setMode] = useState<"all" | "following">("all");
 
   const handlePostCreated = (createdPost?: any) => {
     if (createdPost) {
@@ -48,11 +50,15 @@ export default function UserFeed() {
           gap: 4,
         }}
       >
-        <Box id="crear-post" sx={{ width: "100%" }}>
+        <Box id="crear-post" sx={{ width: "100%", display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <ButtonGroup variant="outlined" aria-label="feed toggle">
+            <Button variant={mode === 'all' ? 'contained' : 'outlined'} onClick={() => setMode('all')}>Todos</Button>
+            <Button variant={mode === 'following' ? 'contained' : 'outlined'} onClick={() => setMode('following')}>Seguidos</Button>
+          </ButtonGroup>
           <CrearPost onCreated={handlePostCreated} />
         </Box>
         <Box sx={{ width: "100%" }}>
-          <PostsList {...({ reloadKey, prependPost: freshPost } as any)} />
+          <ListaPosts mode={mode} reloadKey={reloadKey} prependPost={freshPost} />
         </Box>
       </Box>
     </Box>

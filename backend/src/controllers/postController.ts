@@ -126,6 +126,18 @@ export const listPostsController = async (req: Request, res: Response) => {
   }
 }
 
+export const listFollowingPostsController = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id
+    if (!userId) return res.status(401).json({ error: 'No autenticado' })
+    const posts = await (require('../models/postModel') as any).getPostsByFollowed(userId)
+    res.json({ data: posts })
+  } catch (err) {
+    console.error('listFollowingPosts error', err)
+    res.status(500).json({ error: 'Error al obtener posts de seguidos' })
+  }
+}
+
 export const deletePostController = async (req: Request, res: Response) => {
   try {
     const authorId = (req as any).user?.id

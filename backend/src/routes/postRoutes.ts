@@ -11,6 +11,7 @@ const router = Router();
 
 router.get("/", listPostsController);
 router.get("/mine", authenticateJWT, (req, res) => require("../controllers/postController").myPostsController(req, res));
+router.get("/following", authenticateJWT, (req, res) => require("../controllers/postController").listFollowingPostsController(req, res));
 router.post("/", authenticateJWT, createPostController);
 router.post("/:id/share", authenticateJWT, sharePostController);
 router.get("/:id/isShared", authenticateJWT, isSharedPostController);

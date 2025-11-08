@@ -4,9 +4,12 @@ import { Stack, Typography } from "@mui/material";
 import { usePosts } from "@/hooks/usePosts";
 import PostCard from "./PostCard";
 
-export default function PostList({ mineOnly = false }: { mineOnly?: boolean }) {
-  const { posts, error, loading } = usePosts(mineOnly);
+interface PostListProps {
+  initialMode: string
+}
 
+export default function PostList({ initialMode }: PostListProps) {
+  const { posts, error, loading } = usePosts(initialMode);
   if (loading) return <Typography>Cargando posts...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;
   if (posts.length === 0) return <Typography>No hay posts todavía</Typography>;

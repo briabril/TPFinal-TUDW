@@ -7,9 +7,9 @@ import PostActions from "./PostActions";
 import SharedPost from "./SharedPost";
 import { Post } from "@tpfinal/types";
 import { useAuth } from "@/context/AuthContext";
+import WeatherBackground from "../common/WeatherBackground";
 
 export default function PostCard({ post }: { post: Post }) {
-  console.log(post)
   const { user } = useAuth();
   const description = post.text ?? "(sin descripción)";
   const created = post.created_at ?? "";
@@ -66,6 +66,7 @@ export default function PostCard({ post }: { post: Post }) {
           <SharedPost post={post} />
         ) : (
           <>
+           <WeatherBackground weather={(post as any).weather} postId={post.id} className="post-header-bg" imageOpacity={0.50}>
             <AuthorHeader
               author={post.author}
               actions={
@@ -79,6 +80,7 @@ export default function PostCard({ post }: { post: Post }) {
               }
               postId={post.id}
             />
+            </WeatherBackground>
             <Box sx={{ px: 2 }}>
               <PostBody
                 post={post}

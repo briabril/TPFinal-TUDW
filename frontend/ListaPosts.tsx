@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import PostBody from "./posts/PostBody";
 import {
   Card,

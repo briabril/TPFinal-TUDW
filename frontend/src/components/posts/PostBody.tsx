@@ -137,7 +137,6 @@ export default function PostBody({ post, description, isOwn = false, onDelete, o
     <Box sx={{ fontSize: "1.1rem", width: "100%", px: { xs: 1, sm: 2 } }}>
       {!editing ? (
         <>
-          {/* Si es un post compartido */}
           {post.shared_post && (
             <Box
               sx={{
@@ -318,7 +317,6 @@ export default function PostBody({ post, description, isOwn = false, onDelete, o
           )}
         </Stack>
 
-        {/* Link a comentarios */}
         <Link
           href={`/posts/${post.id}`}
           style={{

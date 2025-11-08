@@ -16,10 +16,7 @@ interface AuthorHeaderProps {
 }
 
 export default function AuthorHeader({ author, sharedBy, actions, weather, postId }: AuthorHeaderProps) {
-  // Debug logs to trace weather fetching in client
-  if (typeof window !== "undefined") {
-    console.log("AuthorHeader props:", { author, weather });
-  }
+  
   const [localWeather, setLocalWeather] = useState<any | null>(weather ?? null);
   const [loadingWeather, setLoadingWeather] = useState(false);
 
@@ -31,11 +28,11 @@ export default function AuthorHeader({ author, sharedBy, actions, weather, postI
         if (!author) return;
         const city = (author as any).city;
         const country = (author as any).country_iso;
-        if (typeof window !== "undefined") console.log("AuthorHeader: will fetch weather for", city, country);
+        // if (typeof window !== "undefined") console.log("AuthorHeader: will fetch weather for", city, country);
         if (!city) return;
         setLoadingWeather(true);
         const w = await fetchWeatherByCity(city, country);
-        if (typeof window !== "undefined") console.log("AuthorHeader: weather fetched", w);
+        // if (typeof window !== "undefined") console.log("AuthorHeader: weather fetched", w);
         if (mounted) setLocalWeather(w);
       } catch (e) {
         console.warn("Failed to fetch weather for author", e);
@@ -55,11 +52,11 @@ export default function AuthorHeader({ author, sharedBy, actions, weather, postI
       if (localWeather) return;
       if (!postId) return;
       try {
-        if (typeof window !== "undefined") console.log("AuthorHeader: fetching post by id for weather", postId);
+        // if (typeof window !== "undefined") console.log("AuthorHeader: fetching post by id for weather", postId);
         const res = await api.get(`/posts/${postId}`);
         const payload = res.data?.data;
         if (payload?.weather && mounted) {
-          if (typeof window !== "undefined") console.log("AuthorHeader: weather from post endpoint", payload.weather);
+          // if (typeof window !== "undefined") console.log("AuthorHeader: weather from post endpoint", payload.weather);
           setLocalWeather(payload.weather);
         }
       } catch (e) {

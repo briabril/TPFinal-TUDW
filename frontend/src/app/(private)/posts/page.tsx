@@ -6,7 +6,7 @@ export default function PostsPage() {
   return (
     <Box style={{ padding: 16 }}>
       <Typography>Posts</Typography>
-      <PostList />
+      <PostList initialMode='all'/>
     </Box>
   )
 }

@@ -27,4 +27,5 @@ export interface Post {
   author: Author;
   medias: Media[];
   shared_post?: SharedPost | null;
+  mode: string
 }

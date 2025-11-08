@@ -25,7 +25,6 @@ export default function WeatherBackground({ weather, children, className, overla
         try { console.debug("WeatherBackground props:", { weather, postId, localWeather }); } catch (e) {}
       } catch (e) {}
       try {
-        // if no weather passed but postId is available, try to fetch the post to get weather
         if ((!weather || !weather.current) && postId) {
           try {
             try { console.debug("WeatherBackground: fetching post by id", postId); } catch (e) {}

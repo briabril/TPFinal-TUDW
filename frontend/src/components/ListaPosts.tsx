@@ -14,7 +14,7 @@ import {
 import api from "@tpfinal/api";
 import { Post } from "@tpfinal/types";
 import AuthorHeader from "./posts/AuthorHeader";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@tpfinal/context";
 import WeatherBackground from "./common/WeatherBackground";
 import { useMemo } from "react";
 

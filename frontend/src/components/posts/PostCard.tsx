@@ -6,7 +6,7 @@ import PostBody from "./PostBody";
 import PostActions from "./PostActions";
 import SharedPost from "./SharedPost";
 import { Post } from "@tpfinal/types";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@tpfinal/context";
 
 export default function PostCard({ post }: { post: Post }) {
   console.log(post)

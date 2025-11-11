@@ -1,7 +1,7 @@
 "use client"
 import { SunMedium , Moon  } from 'lucide-react';
 import { Button } from '@mui/material';
-import { useThemeContext } from '@/app/context/ThemeContext';
+import { useThemeContext } from '@tpfinal/context';
 const ThemeToggle = () => {
   const {darkMode, toggleDarkMode}  = useThemeContext();
   

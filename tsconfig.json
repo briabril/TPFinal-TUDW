@@ -13,11 +13,30 @@
     "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
-      "@tpfinal/api/*": ["packages/api/*"],
-      "@tpfinal/schemas/*": ["packages/schemas/*"],
-      "@tpfinal/types/*": ["packages/types/*"],
-      "@/*": ["frontend/src/*"]
+      "@tpfinal/api/*": [
+        "packages/api/*"
+      ],
+      "@tpfinal/schemas/*": [
+        "packages/schemas/*"
+      ],
+      "@tpfinal/types/*": [
+        "packages/types/*"
+      ],
+      "@tpfinal/context/*": [
+        "packages/context/*"
+      ],
+      "@tpfinal/ui/*": [
+        "packages/ui/*"
+      ],
+      "@/*": [
+        "frontend/src/*"
+      ]
     }
   },
-  "include": ["frontend", "backend", "packages"]
+  "include": [
+    "frontend",
+    "backend",
+    "packages"
+  ],
+  "extends": "expo/tsconfig.base"
 }

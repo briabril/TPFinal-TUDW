@@ -2,7 +2,7 @@
 "use client";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@tpfinal/context";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 

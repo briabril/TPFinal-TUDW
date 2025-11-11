@@ -1,6 +1,6 @@
 "use client";
 import Sidebar from "@/components/sidebar/Sidebar";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@tpfinal/context";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Box, CircularProgress, Typography } from "@mui/material";

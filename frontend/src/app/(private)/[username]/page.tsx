@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import api from "@tpfinal/api";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@tpfinal/context";
 import { User, BlockStatus, FollowStatus } from "@tpfinal/types";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import BlockStatusMessage from "@/components/profile/BlockStatusMessage";

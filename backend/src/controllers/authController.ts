@@ -61,14 +61,21 @@ export const loginUser = async (req: Request, res: Response) => {
     }
     if (!JWT_SECRET) throw new Error("Falta JWT_SECRET en variables de entorno");
 
-    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: "2h" })
-    res.cookie("token", token, {
+    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: "7d" })
+     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
       sameSite: "none",
-      maxAge: 2 * 60 * 60 * 1000
-    })
-      .json({ message: "Login exitoso" })
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+    });
+
+    // Devolver token y user para mobile
+    const { password_hash, ...safeUser } = user;
+    return res.json({
+      message: "Login exitoso",
+      token,
+      user: safeUser,
+    });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ error: "Error al iniciar sesión" });

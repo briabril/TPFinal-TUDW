@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@tpfinal/context";
 import { Box, Button, Card, CardContent, TextField, Typography, Avatar, CircularProgress, FormControlLabel, Switch } from "@mui/material";
 import { fetchWeatherByCity } from "@/services/weatherService";
 

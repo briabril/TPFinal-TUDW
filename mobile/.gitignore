@@ -2,7 +2,7 @@
 
 # dependencies
 node_modules/
-
+./mobile/node_modules
 # Expo
 .expo/
 dist/

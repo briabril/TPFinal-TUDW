@@ -9,6 +9,7 @@
     "start": "node dist/server.js",
     "seed:users": "ts-node scripts/seedUsers.ts"
   },
+  
   "dependencies": {
     "@tpfinal/api": "*",
     "@tpfinal/schemas": "*",

@@ -79,6 +79,11 @@ app.get(
   path: "/",
       secure: true,
     });
+    res.status(200).json({
+  message: "Login exitoso",
+  token,
+  user
+});
     res.redirect("http://localhost:3000/feed");
   }
 );

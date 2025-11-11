@@ -6,33 +6,41 @@ import db from "../db";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import type { User } from "@tpfinal/types";
+
 dotenv.config();
 
-
-
+// Verificación de variables de entorno
 const clientID = process.env.GOOGLE_CLIENT_ID;
 const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 if (!clientID || !clientSecret) {
-  throw new Error("❌ Missing Google OAuth environment variables");
+  throw new Error("Faltan las variables de entorno de Google OAuth");
 }
+
 passport.use(
   new GoogleStrategy(
     {
       clientID,
       clientSecret,
-      callbackURL: "http://localhost:4000/auth/google/callback",
+      callbackURL: "http://192.168.0.228:4000/auth/google/callback",
     },
     async (_accessToken: string, _refreshToken: string, profile: Profile, done: VerifyCallback) => {
+   
+
       try {
         const email = profile.emails?.[0]?.value;
         const name = profile.displayName;
         const picture = profile.photos?.[0]?.value;
 
-        if (!email) return done(new Error("No email returned from Google"), undefined);
+        if (!email) {
+          return done(new Error("No se recibió email desde Google"), undefined);
+        }
 
-        // Revisar de que exista el usuario en la DB
+        //  Verificar si el usuario ya existe
         const existing = await db.query("SELECT * FROM users WHERE email = $1", [email]);
-        if (existing.rows.length > 0) return done(null, existing.rows[0]);
+        if (existing.rows.length > 0) {
+          return done(null, existing.rows[0]);
+        }
+
 
         // Generar username único
         const baseUsername = email.split("@")[0].slice(0, 30);
@@ -45,37 +53,43 @@ passport.use(
           i++;
           candidate = `${baseUsername}${i}`.slice(0, 30);
         }
-          // Generar contraseña aleatoria que no se usa
-        const randomPassword = crypto.randomBytes(20).toString("hex"); 
+
+
+        // Generar contraseña aleatoria (no usable)
+        const randomPassword = crypto.randomBytes(20).toString("hex");
         const passwordHash = await bcrypt.hash(randomPassword, 10);
 
-        // Crear nuevo usuario
+        // Insertar usuario nuevo
         const newUser = await db.query(
           `INSERT INTO users (email, username, displayname, profile_picture_url, password_hash)
-           VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+           VALUES ($1, $2, $3, $4, $5)
+           RETURNING *`,
           [email, candidate, name, picture, passwordHash]
         );
 
         return done(null, newUser.rows[0]);
       } catch (err) {
+        console.error("Error en GoogleStrategy:", err);
         return done(err as Error, undefined);
       }
     }
   )
 );
 
+// 🧩 Serialización y deserialización
 passport.serializeUser((user: any, done) => {
-  console.log("🔑 Serialize user:", user);
+  console.log(" Serialize user:", user?.id);
   done(null, user.id);
 });
 
 passport.deserializeUser(async (id: string, done) => {
-  console.log("🔑 Deserialize user id:", id);
+  console.log(" Deserialize user id:", id);
   try {
     const { rows } = await db.query("SELECT * FROM users WHERE id = $1", [id]);
-    console.log("🔑 Deserialize result:", rows[0]);
+    console.log(" Usuario deserializado:", rows[0]?.email || "(no encontrado)");
     done(null, rows[0] || null);
   } catch (err) {
+    console.error("❌ Error en deserializeUser:", err);
     done(err, null);
   }
 });

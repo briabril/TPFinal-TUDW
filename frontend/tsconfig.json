@@ -9,7 +9,9 @@
       "@tpfinal/types": ["../packages/types"],
       "@tpfinal/schemas": ["../packages/schemas"],
       "@tpfinal/schemas/*": ["../packages/schemas/*"],
-      "@tpfinal/api": ["../packages/api"]
+      "@tpfinal/api": ["../packages/api"],
+      "@tpfinal/context": ["../packages/context"],
+          "@tpfinal/ui": ["../packages/ui"]
     },
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,

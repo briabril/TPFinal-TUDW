@@ -1,7 +1,7 @@
 "use client"
 // Sidebar component lives under src/components/sidebar/Sidebar.tsx
 import Sidebar from "@/components/sidebar/Sidebar"
-import { useAuth } from "@/context/AuthContext"
+import { useAuth } from "@tpfinal/context"
 import { redirect } from "next/navigation"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

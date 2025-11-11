@@ -2,7 +2,7 @@
 
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/context/AuthContext";
-import { ThemeProviderCustom } from "./context/ThemeContext";
+import { ThemeProviderCustom } from "@tpfinal/context";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (

@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { editProfilSchema, ProfileData } from "@tpfinal/schemas";
 import { Button, TextField, Container, Paper, Typography, Box } from "@mui/material";
 import toast from "react-hot-toast";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@tpfinal/context";
 import Autocomplete from "@mui/material/Autocomplete";
 
 export default function EditProfilePage() {

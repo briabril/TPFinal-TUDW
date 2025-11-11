@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { commentSchema, CommentFormData } from "@tpfinal/schemas";
 import { TextField, Button, Avatar, Paper, CircularProgress, Box, Stack } from "@mui/material";
 import toast from "react-hot-toast";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@tpfinal/context";
 interface Props {
   postId: string | number;
   parentId?: string | number | null;

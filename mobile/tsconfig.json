@@ -1,12 +1,29 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "jsx": "react-jsx",
-    "noEmit": true,
+    "strict": false,
     "skipLibCheck": true,
-    "resolveJsonModule": true,
+    "jsx": "react-native",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "isolatedModules": true,
-    "types": ["react", "react-native"]
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@tpfinal/context/*": ["../packages/context/*"],
+      "@tpfinal/schemas/*": ["../packages/schemas/*"],
+      "@tpfinal/types/*": ["../packages/types/*"],
+      "@tpfinal/ui/*": ["../packages/ui/*"],
+      "@tpfinal/api/*": ["../packages/api/*"]
+    }
   },
-  "include": ["**/*.ts", "**/*.tsx"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "global.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

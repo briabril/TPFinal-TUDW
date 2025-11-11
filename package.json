@@ -8,18 +8,22 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev -w frontend\" \"npm run dev -w backend\"",
+    "dev": "concurrently \"npm run dev -w frontend\" \"npm run dev -w backend\" \"npm run start -w mobile\"",
     "build": "npm run build -w frontend && npm run build -w backend",
-    "start": "concurrently \"npm run start -w frontend\" \"npm run start -w backend\"",
-    "lint": "eslint frontend"
+    "start": "concurrently \"npm run start -w frontend\" \"npm run start -w backend\" \"npm run start -w mobile\"",
+    "lint": "eslint frontend",
+    "mobile": "npm run start -w mobile"
   },
   "devDependencies": {
+    "@expo/cli": "^0.18.31",
     "concurrently": "^9.0.0",
     "eslint": "^9.0.0",
     "turbo": "^2.2.0",
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "expo": "^54.0.23",
+    "expo-secure-store": "^15.0.7",
     "express-session": "^1.18.2",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0"

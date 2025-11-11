@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import api from "@tpfinal/api";
 import { loginData, loginSchema} from "@tpfinal/schemas"
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@tpfinal/context";
 import { User } from "@tpfinal/types";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -36,7 +36,7 @@ export default function LoginPage() {
         router.push("/feed");
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.error || "Error en el login");
+      toast.error(err.response?.data?.error || "Error al inciar sesión");
     }
   };
 

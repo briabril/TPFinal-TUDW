@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import { CommentFormData } from "@tpfinal/schemas";
 import api from "@tpfinal/api";
 import toast from "react-hot-toast";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@tpfinal/context";
 
 interface CommentProps {
   postId: string | number;

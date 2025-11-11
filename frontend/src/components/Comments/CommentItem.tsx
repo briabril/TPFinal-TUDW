@@ -5,7 +5,7 @@ import CommentForm from "./CommentForm";
 import { MessageCircle, Edit2, Trash2, Icon } from "lucide-react";
 import { CommentFormData } from "@tpfinal/schemas/commentSchema";
 import { Reaction } from "../Reaction";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@tpfinal/context";
 import api from "@tpfinal/api";
 import toast from "react-hot-toast";
 import { useState } from "react";

@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { User, BlockStatus, FollowStatus } from "@tpfinal/types";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import BlockStatusMessage from "@/components/profile/BlockStatusMessage";
-import ListaPosts from "@/components/posts/PostList";
+import PostList from "@/components/posts/PostList";
 import { Alert, AlertTitle, CircularProgress, Box } from "@mui/material";
 
 export default function ProfilePage() {
@@ -100,6 +100,7 @@ export default function ProfilePage() {
     );
 
   const isOwnProfile = !!(user && profile.id === user.id);
+  console.log(isOwnProfile)
 
   return (
     <Box className="flex flex-col items-center">
@@ -124,7 +125,7 @@ export default function ProfilePage() {
           <>
             {
               isOwnProfile ? (
-                <ListaPosts mineOnly />
+                <PostList initialMode="mine" />
               ) : (
                 <p> Por hacer </p>
               )

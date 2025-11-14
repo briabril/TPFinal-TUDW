@@ -24,6 +24,17 @@ export async function searchUsers(searchTerm: string, excludeIds: string[]): Pro
   return rows;
 }
 
+// encontrar usuario por id
+export const findUserById = async (id: string) => {
+  const result = await db.query("SELECT * FROM users WHERE id = $1", [id]);
+  return result.rows[0];
+};
+
+export const getUserById = async (id: string) => {
+  const result = await db.query("SELECT * FROM users WHERE id = $1", [id]);
+  return result.rows[0];
+};
+
 // traer a todos los usuarios
 export const getAllUsers = async (): Promise<User[]> => {
   const result = await db.query("SELECT * FROM users");
@@ -32,8 +43,8 @@ export const getAllUsers = async (): Promise<User[]> => {
 
 export const updateUserProfile = async (
   id: string,
-  { username, displayname, bio, profile_picture_url, password_hash }:
-  { username?: string; displayname?: string; bio?: string; profile_picture_url?: string; password_hash?: string; }
+  { username, displayname, bio, profile_picture_url, password_hash, country_iso, city }:
+  { username?: string; displayname?: string; bio?: string; profile_picture_url?: string; password_hash?: string; country_iso?:string, city?:string}
 ) => {
   const fields = [];
   const values: any[] = [id];
@@ -47,6 +58,14 @@ export const updateUserProfile = async (
     fields.push(`displayname = COALESCE($${idx++}, displayname)`);
     values.push(displayname);
   }
+  if (country_iso !== undefined) {
+  fields.push(`country_iso = COALESCE($${idx++}, country_iso)`);
+  values.push(country_iso);
+}
+  if (city !== undefined) {
+  fields.push(`city = COALESCE($${idx++}, city)`);
+  values.push(city);
+}
   if (bio !== undefined) {
     fields.push(`bio = COALESCE($${idx++}, bio)`);
     values.push(bio);
@@ -68,11 +87,6 @@ export const updateUserProfile = async (
   return result.rows[0];
 };
 
-export const getUserById = async (id: string) => {
-  const result = await db.query("SELECT * FROM users WHERE id = $1", [id]);
-  return result.rows[0];
-};
-
 //cambiar estado de un usuario
 export const updateUserStatus = async (userId: string, status: "ACTIVE" | "SUSPENDED") => {
   const result = await db.query(
@@ -83,3 +97,30 @@ export const updateUserStatus = async (userId: string, status: "ACTIVE" | "SUSPE
   )
   return result.rows[0]
 }
+
+export const insertUser = async (user: User): Promise<User> => {
+  const query = `
+    INSERT INTO users (
+      id, email, password_hash, username, displayname, bio,
+      profile_picture_url, created_at, updated_at, role, status,
+      city, country_iso
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW(), $8, $9, $10, $11)
+    RETURNING *;
+  `;
+  const values = [
+    user.id,
+    user.email,
+    user.password_hash,
+    user.username,
+    user.displayname,
+    user.bio,
+    user.profile_picture_url,
+    user.role,
+    user.status,
+    user.city,
+    user.country_iso,
+  ];
+  const result = await db.query(query, values);
+  return result.rows[0];
+};

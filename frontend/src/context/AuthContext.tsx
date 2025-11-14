@@ -18,24 +18,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null)
     const [loading, setLoading] = useState(true)
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const res = await api.get<User>("/auth/me", { withCredentials: true });
-                setUser(res.data);
-            } catch {
-                setUser(null);
-            } finally {
-                setLoading(false);
-            }
-        };
+  useEffect(() => {
+  const fetchUser = async () => {
+    try {
+      const res = await api.get<User>("/auth/me", { withCredentials: true });
+      setUser(res.data);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchUser();
+}, []);
 
-        if (!user) {
-            fetchUser();
-        } else {
-            setLoading(false);
-        }
-    }, []);
 
     const logout = async () => {
         try {

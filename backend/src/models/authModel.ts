@@ -1,5 +1,5 @@
 import db from "../db";
-import { DbUser as User } from "@tpfinal/types";
+import { DbUser as User } from "@tpfinal/types/user";
 
 export const createUser = async (
   email: string,
@@ -31,6 +31,19 @@ export const createUserPendingVerification = async (
   return result.rows[0] as User;
 };
 
+// verificar email
+export const createEmailVerification = async (
+  userId: string,
+  token: string,
+  expiresAt: Date
+) => {
+  await db.query(
+    `INSERT INTO email_verifications (user_id, token, expires_at)
+     VALUES ($1, $2, $3)`,
+    [userId, token, expiresAt]
+  );
+};
+
 // encontrar la verificación del token
 export const findVerificationByToken = async (token: string) => {
   const result = await db.query(
@@ -56,19 +69,6 @@ export const activateUser = async (userId: string) => {
   return result.rows[0];
 };
 
-// verificar email
-export const createEmailVerification = async (
-  userId: string,
-  token: string,
-  expiresAt: Date
-) => {
-  await db.query(
-    `INSERT INTO email_verifications (user_id, token, expires_at)
-     VALUES ($1, $2, $3)`,
-    [userId, token, expiresAt]
-  );
-};
-
 export const findUserByIdentifier = async (identifier: string): Promise<User | null> => {
   const result = await db.query(
     `SELECT * FROM users WHERE email = $1 OR username = $1 LIMIT 1`,
@@ -76,3 +76,4 @@ export const findUserByIdentifier = async (identifier: string): Promise<User | n
   );
   return result.rows[0] || null;
 };
+

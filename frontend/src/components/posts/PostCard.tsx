@@ -1,16 +1,50 @@
 "use client";
-import { Card, CardContent, Stack, Typography, Box } from "@mui/material";
+import React from "react";
+import { Card, CardContent, Box } from "@mui/material";
 import AuthorHeader from "./AuthorHeader";
 import PostBody from "./PostBody";
-import { Reaction } from "../Reaction";
-import Link from "next/link";
+import PostActions from "./PostActions";
+import SharedPost from "./SharedPost";
 import { Post } from "@tpfinal/types";
 import { useAuth } from "@/context/AuthContext";
+import WeatherBackground from "../common/WeatherBackground";
 
 export default function PostCard({ post }: { post: Post }) {
   const { user } = useAuth();
   const description = post.text ?? "(sin descripción)";
   const created = post.created_at ?? "";
+
+  const isShared = !!post.shared_post;
+  const [editRequested, setEditRequested] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+
+  const isOwn = Boolean(user && String(post.author.id) === String(user.id));
+
+  const handleDelete = async () => {
+    if (!confirm("¿Eliminar post?")) return;
+    setLoading(true);
+    try {
+      const res = await (await import("@/services/postService")).deletePost(post.id);
+      window.location.reload();
+    } catch (err: any) {
+      console.error(err);
+      setLoading(false);
+    }
+  };
+
+  const handleReport = async (reason: string) => {
+    setLoading(true);
+    try {
+      await (await import("@/services/postService")).reportPost(post.id, reason);
+      // optional: show toast
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditRequest = () => setEditRequested(true);
 
   return (
     <Card
@@ -27,34 +61,40 @@ export default function PostCard({ post }: { post: Post }) {
       }}
     >
       <CardContent sx={{ px: 0, py: 0 }}>
-        <AuthorHeader authorId={post.author.id} />
-        <Box sx={{ px: 2 }}>
-          <PostBody post={post} description={description} />
-        </Box>
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={2}
-          sx={{ p: 1.5 }}
-        >
-          <Reaction userId={user?.id} type="post" targetId={post.id} />
-          <Link
-            href={`/posts/${post.id}`}
-            style={{
-              textDecoration: "none",
-              color: "inherit",
-              marginLeft: "auto",
-            }}
-          >
-            <Typography
-              variant="body2"
-              color="primary"
-              sx={{ fontWeight: 800, "&:hover": { textDecoration: "underline" } }}
-            >
-              Comentarios
-            </Typography>
-          </Link>
-        </Stack>
+        {/* 🔹 Si es un post compartido → mostrar SharedPost */}
+        {isShared ? (
+          <SharedPost post={post} />
+        ) : (
+          <>
+           <WeatherBackground weather={(post as any).weather} postId={post.id} className="post-header-bg" imageOpacity={0.50}>
+            <AuthorHeader
+              author={post.author}
+              actions={
+                <PostActions
+                  onEdit={handleEditRequest}
+                  onDelete={handleDelete}
+                  onReport={handleReport}
+                  loading={loading}
+                  isOwn={isOwn}
+                />
+              }
+              postId={post.id}
+            />
+            </WeatherBackground>
+            <Box sx={{ px: 2 }}>
+              <PostBody
+                post={post}
+                description={description}
+                isOwn={isOwn}
+                onDelete={handleDelete}
+                onReport={handleReport}
+                editRequested={editRequested}
+                clearEditRequested={() => setEditRequested(false)}
+                user={user}
+              />
+            </Box>
+          </>
+        )}
       </CardContent>
     </Card>
   );

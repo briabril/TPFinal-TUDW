@@ -8,6 +8,12 @@ export const editProfilSchema = z.object({
     password: z.string().optional(),
     new_password: z.string().optional(), 
     bio: z.string().max(160, "El máximo son 160 caracteres").optional(),
+    country_iso: z.string().max(100, "El máximo son 2 caracteres").min(2, "El mínimo son 2 caracteres").toUpperCase(),
+    city: z.string().max(100, "El máximo son 100 caracteres"),
+    /*profile_picture_url: z
+      .instanceof(File, { message: "Se espera un archivo" })
+      .refine((file) => file.size <= MAX_FILE_SIZE, `El máximo permitido es ${MAX_FILE_SIZE / (1024 * 1024 *8)}MB.`)
+      .refine((file) => ACCEPTED_IMAGE_TYPES.includes(file.type), "Solo se soportan los formatos .jpg, .jpeg, .png and .webp.")*/
     profile_picture_url: z.any()
         .optional()
         .refine((file) => {

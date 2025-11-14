@@ -1,6 +1,5 @@
 import { Request, Response } from "express"
 import * as BlockModel from "../models/blockModel"
-import db from "../db"
 import { getUserById } from "../models/userModel"
 
 export async function block(req: Request, res: Response) {

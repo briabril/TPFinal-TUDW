@@ -5,7 +5,7 @@ import { authenticateJWT } from "../middleware/auth";
 const router = Router();
 
 /* ----------- Protected Routes ----------- */
-router.use(authenticateJWT); // aplica auth automáticamente a todas las de abajo
+router.use(authenticateJWT);
 
 router.get("/", UserController.getUsers);
 router.get("/search", UserController.searchUsersController);

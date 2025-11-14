@@ -12,10 +12,19 @@ export interface User {
   posts_count?: number;
   followers_count?: number;
   following_count?: number;
+  city?: string;
+  country_iso?: string;
 }
 
 export interface DbUser extends User {
   password_hash: string;
+}
+
+export interface PostUser {
+  id: string
+  username: string
+  displayname: string
+  profile_picture_url?: string
 }
 
 // Estado de bloqueo entre dos usuarios

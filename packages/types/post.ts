@@ -3,13 +3,29 @@ export interface Media {
   type: string;
 }
 
-export interface Post {
+export interface Author {
   id: string;
-  text: string;
+  username: string;
+  displayname: string;
+  profile_picture_url: string | null;
+}
+
+export interface SharedPost {
+  id: string;
+  text: string | null;
   link_url?: string | null;
   created_at: string;
-  author: {
-    id: string
-  };
+  author: Author;
   medias: Media[];
+}
+
+export interface Post {
+  id: string;
+  text: string | null;
+  link_url?: string | null;
+  created_at: string;
+  author: Author;
+  medias: Media[];
+  shared_post?: SharedPost | null;
+  mode: string
 }

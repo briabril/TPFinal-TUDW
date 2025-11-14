@@ -78,6 +78,7 @@ export const config = {
     "/dashboard/:path*",
     "/reports/:path*",
     "/users/:path*",
+    "/auth/:path*",
     "/feed/:path*",
     "/profile/:path*",
     "/settings/:path*",

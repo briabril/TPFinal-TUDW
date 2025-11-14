@@ -50,6 +50,23 @@ function PublicHome() {
           >
             Crear Cuenta
           </Button>
+           <Button
+  variant="contained"
+  color="inherit"
+  
+  onClick={() => (window.location.href = "http://localhost:4000/auth/google")}
+  startIcon={<img src="/google-icon.png" alt="Google" width={20} height={20} />}
+  sx={{
+    borderColor: "#ccc",
+    textTransform: "none",
+    fontWeight: 500,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  }}
+>
+  Continuar con Google
+</Button>
         </Box>
       </Paper>
     </Box>

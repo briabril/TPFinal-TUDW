@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+import messageRoutes from "./routes/messageRoutes";
 const http = require("http");
 const { Server: SocketIOServer } = require("socket.io");
 const cookieParser = require("cookie-parser");
@@ -11,6 +12,7 @@ import userRoutes from "./routes/userRoutes";
 import adminRoutes from "./routes/adminRoutes"
 import blockRoutes from "./routes/blockRoutes"
 import { attachIO } from "./middleware/socket"
+import { initChat } from "./sockets/chat";
 import postRoutes from "./routes/postRoutes"
 import reactionRoutes from "./routes/reactionRoutes"
 import commentRoutes from "./routes/commentRoutes"
@@ -103,14 +105,9 @@ app.use("/api/follow", followRoutes);
 app.use("/api/countries", countryRoutes);
 app.use("/api/weather", weatherRoutes);
 app.use("/api/photo", photoRoutes);
+import messageRoutes from "./routes/messageRoutes";
+app.use("/api/messages", messageRoutes);
 
-// Socket.IO
-io.on("connection", (socket: any) => {
-  console.log("✅ Cliente conectado:", socket.id);
-  socket.on("disconnect", (reason: any) => {
-    console.log("❌ Cliente desconectado:", socket.id, "Motivo:", reason);
-  });
-});
+initChat(io);
 
-// Start server
 server.listen(PORT, () => console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`));

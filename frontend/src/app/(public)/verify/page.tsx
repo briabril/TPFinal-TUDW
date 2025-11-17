@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import api from "@tpfinal/api";
 
 export default function VerifyPage() {
   const search = useSearchParams();
@@ -14,22 +15,20 @@ export default function VerifyPage() {
 
     (async () => {
       try {
-        const res = await fetch(`http://localhost:4000/api/auth/verify?token=${token}`, {
-          method: "GET",
-        });
-        const data = await res.json();
+        const res = await api.get(`/auth/verify`, { params: { token }, withCredentials: true });
+        const data = res.data;
 
-  if (res.ok) {
-  setStatus("success");
-  setTimeout(() => router.push("/login"), 3000);
-} else {
-  if (data.error.includes("ya usado")) {
-    setStatus("success"); 
-    setTimeout(() => router.push("/login"), 3000);
-  } else {
-    setStatus("error");
-  }
-}
+        if (res.status >= 200 && res.status < 300) {
+          setStatus("success");
+          setTimeout(() => router.push("/login"), 3000);
+        } else {
+          if (data?.error?.includes("ya usado")) {
+            setStatus("success");
+            setTimeout(() => router.push("/login"), 3000);
+          } else {
+            setStatus("error");
+          }
+        }
       } catch (err) {
         console.error("Error en verificación:", err);
         setStatus("error");

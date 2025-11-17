@@ -16,12 +16,12 @@ export async function blockUser(blockerId: string, blockedId: string) {
         )
 
         // eliminar follows en ambas direcciones
-        await client.query(
-            `DELETE FROM follow
-       WHERE (follower_id = $1 AND followed_id = $2)
-          OR (follower_id = $2 AND followed_id = $1)`,
-            [blockerId, blockedId]
-        )
+                await client.query(
+                        `DELETE FROM follow
+             WHERE (follower_id = $1 AND followee_id = $2)
+                    OR (follower_id = $2 AND followee_id = $1)`,
+                        [blockerId, blockedId]
+                )
 
         await client.query("COMMIT")
     } catch (err) {

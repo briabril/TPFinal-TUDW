@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Box, Button, Card, CardContent, TextField, Typography, Avatar, CircularProgress, FormControlLabel, Switch } from "@mui/material";
 import { fetchWeatherByCity } from "@/services/weatherService";
+import api from "@tpfinal/api";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:4000";
 
 type CrearPostProps = {
   onCreated?: (createdPost?: any) => void;
@@ -60,14 +60,10 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
   for (const f of files) formData.append("files", f);
 
   console.log("Creating post...", { text: contenido, fileCount: files.length });
-      const res = await fetch(`${API_BASE}/api/posts`, {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      });
-      const json = await res.json();
+      const res = await api.post(`/posts`, formData, { withCredentials: true });
+      const json = res.data;
       console.log("create post response", res.status, json);
-      if (!res.ok) {
+      if (res.status >= 400) {
         const errMsg = json?.error || json?.message || "Error creando post";
         setMessage({ type: 'error', text: errMsg });
         return;

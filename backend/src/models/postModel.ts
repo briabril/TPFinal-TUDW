@@ -141,24 +141,47 @@ export const getPostsByFollowed = async (userId: string) => {
     LEFT JOIN users spu ON sp.author_id = spu.id
     -- Only posts from users that the given user follows
     WHERE p.is_blocked = FALSE
-      AND p.author_id IN (SELECT followed_id FROM follow WHERE follower_id = $1)
+      AND p.author_id IN (SELECT followee_id FROM follow WHERE follower_id = $1)
       AND (p.shared_post_id IS NULL OR (sp.id IS NOT NULL AND sp.is_blocked = FALSE))
     ORDER BY p.created_at DESC
     LIMIT 50`;
-  const r = await db.query(q, [userId]);
-  return r.rows.map(row => {
-    const parsedWeather = row.weather ? (typeof row.weather === 'string' ? JSON.parse(row.weather) : row.weather) : null;
-    return {
-      id: row.id,
-      text: row.text,
-      link_url: row.link_url,
-      weather: parsedWeather,
-      created_at: row.created_at,
-      author: row.author || null,
-      medias: row.medias || [],
-      shared_post: row.shared_post || null,
-    };
-  });
+  try {
+    const r = await db.query(q, [userId]);
+    return r.rows.map(row => {
+      const parsedWeather = row.weather ? (typeof row.weather === 'string' ? JSON.parse(row.weather) : row.weather) : null;
+      return {
+        id: row.id,
+        text: row.text,
+        link_url: row.link_url,
+        weather: parsedWeather,
+        created_at: row.created_at,
+        author: row.author || null,
+        medias: row.medias || [],
+        shared_post: row.shared_post || null,
+      };
+    });
+  } catch (err) {
+    // If the DB uses an older column name `followed_id` instead of `followee_id`, retry the query
+    const e: any = err;
+    if (e && e.code === '42703') {
+      const altQ = q.replace(/followee_id/g, 'followed_id');
+      const r2 = await db.query(altQ, [userId]);
+      return r2.rows.map(row => {
+        const parsedWeather = row.weather ? (typeof row.weather === 'string' ? JSON.parse(row.weather) : row.weather) : null;
+        return {
+          id: row.id,
+          text: row.text,
+          link_url: row.link_url,
+          weather: parsedWeather,
+          created_at: row.created_at,
+          author: row.author || null,
+          medias: row.medias || [],
+          shared_post: row.shared_post || null,
+        };
+      });
+    }
+    throw err;
+  }
 };
 
 export const getPostsByAuthor = async (authorId: string) => {

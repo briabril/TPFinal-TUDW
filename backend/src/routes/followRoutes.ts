@@ -11,6 +11,6 @@ router.post("/:targetId", FollowController.follow)
 router.delete("/:targetId", FollowController.unfollow) 
 router.get("/:userId/followers", FollowController.getFollowers) 
 router.get("/:userId/following", FollowController.getFollowing)
-router.get("/:userId/status", FollowController.status)
+router.get("/:userId/status", FollowController.getFollowStatus)
 
 export default router

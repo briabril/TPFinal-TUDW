@@ -19,8 +19,9 @@ async function validateFollowAction(followerId: string, targetId: string) {
 
 export async function follow(req: Request, res: Response) {
   try {
-    const followerId = req.user!.id;
+    const followerId = (req.user as any)?.id;
     const targetId = req.params.targetId;
+    if (!followerId) return res.status(401).json({ message: "Authentication required" });
 
     const validation = await validateFollowAction(followerId, targetId);
     if (validation.error) return res.status(validation.code).json({ message: validation.error });
@@ -35,8 +36,9 @@ export async function follow(req: Request, res: Response) {
 
 export async function unfollow(req: Request, res: Response) {
   try {
-    const followerId = req.user!.id;
+    const followerId = (req.user as any)?.id;
     const targetId = req.params.targetId;
+    if (!followerId) return res.status(401).json({ message: "Authentication required" });
 
     const validation = await validateFollowAction(followerId, targetId);
     if (validation.error && validation.code !== 403 && validation.code !== 400)
@@ -52,7 +54,8 @@ export async function unfollow(req: Request, res: Response) {
 
 export async function getFollowers(req: Request, res: Response) {
   try {
-    const userId = req.params.userId || req.user!.id;
+    const userId = req.params.userId || (req.user as any)?.id;
+    if (!userId) return res.status(401).json({ message: "Authentication required" });
     const followers = await FollowModel.getFollowRelations(userId, "followers");
     res.json(followers);
   } catch (err) {
@@ -63,8 +66,11 @@ export async function getFollowers(req: Request, res: Response) {
 
 export async function getFollowing(req: Request, res: Response) {
   try {
-    const userId = req.params.userId || req.user!.id;
+    const userId = req.params.userId || (req.user as any)?.id;
+    if (!userId) return res.status(401).json({ message: "Authentication required" });
+    console.log("getFollowing called for userId:", userId);
     const following = await FollowModel.getFollowRelations(userId, "following");
+    console.log("getFollowing returning count:", (following || []).length);
     res.json(following);
   } catch (err) {
     console.error("Error fetching following:", err);
@@ -72,10 +78,11 @@ export async function getFollowing(req: Request, res: Response) {
   }
 }
 
-export async function status(req: Request, res: Response) {
+export async function getFollowStatus(req: Request, res: Response) {
   try {
-    const viewerId = req.user!.id;
+    const viewerId = (req.user as any)?.id;
     const targetId = req.params.userId;
+    if (!viewerId) return res.status(401).json({ message: "Authentication required" });
 
     if (!targetId) return res.status(400).json({ message: "targetId required" });
     if (viewerId === targetId)

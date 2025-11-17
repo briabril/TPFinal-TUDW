@@ -16,7 +16,11 @@ import {
   Box,
 } from "@mui/material";
 
-export default function UserSearch() {
+type Props = {
+  onSelect?: (user: User) => void;
+};
+
+export default function UserSearch({ onSelect }: Props) {
   const [q, setQ] = useState("");
   const [results, setResults] = useState<User[]>([]);
   const debounceRef = useRef<number | null>(null);
@@ -78,7 +82,7 @@ export default function UserSearch() {
             {results.map((u) => (
               <ListItemButton
                 key={u.id}
-                onClick={() => router.push(`/${u.username}`)}
+                onClick={() => (onSelect ? onSelect(u) : router.push(`/${u.username}`))}
                 sx={{ py: 1.25 }}
               >
                 <ListItemAvatar>

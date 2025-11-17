@@ -230,12 +230,14 @@ export const searchUsersController = async (req: Request, res: Response) => {
 export const getProfileByUsername = async (req: Request, res: Response) => {
   try {
     const { username } = req.params;
+    console.log("getProfileByUsername called for username:", username);
     const currentUserId = (req as any).user?.id;
 
    
 
     const user = await AuthModel.findUserByIdentifier(username);
     if (!user) {
+      console.log("getProfileByUsername: no user found for", username);
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 

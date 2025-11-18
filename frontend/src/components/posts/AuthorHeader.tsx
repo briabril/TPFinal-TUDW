@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Avatar, Box, Typography, Stack } from "@mui/material";
-import { Author } from "@tpfinal/types";
+import { Author } from "../../types/post";
 import WeatherBadge from "@/components/common/WeatherBadge";
 import { fetchWeatherByCity } from "@/services/weatherService";
 import api from "../../api/index";

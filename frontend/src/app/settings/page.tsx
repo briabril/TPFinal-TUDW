@@ -1,10 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
-import api from "@tpfinal/api";
+import api from "../../api/index";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { editProfilSchema, ProfileData } from "@tpfinal/schemas";
+import { editProfilSchema, ProfileData } from "../../schemas/editProfile";
 import { Button, TextField, Container, Paper, Typography, Box } from "@mui/material";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";

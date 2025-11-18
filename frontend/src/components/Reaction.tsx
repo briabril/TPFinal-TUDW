@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button, IconButton, Tooltip } from "@mui/material";
 import { Heart, ShareIcon } from "lucide-react";
-import api from "@tpfinal/api";
+import api from "../api/index";
 import toast from "react-hot-toast";
 
 interface PostReactionProps {

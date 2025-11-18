@@ -2,8 +2,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react"
 import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
-import api from "@tpfinal/api"
-import type { User } from "@tpfinal/types"
+import api from "../api/index"
+import type { User } from "../types/user"
 
 type AuthContextType = {
     user: User | null

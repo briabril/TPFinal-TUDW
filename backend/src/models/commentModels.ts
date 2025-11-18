@@ -1,5 +1,5 @@
 import db from "../db";
-import { Comment } from "@tpfinal/types/comment";
+import { Comment } from "../types/comment";
 
 const MAX_DEPTH = 6;
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import api from "@tpfinal/api";
-import { User } from "@tpfinal/types";
+import api from "../../../api/index";
+import { User } from "../../../types";
 import ThemeToggle from "@/components/ThemeToggle";
 import UserTable from "@/components/admin/UserTable";
 

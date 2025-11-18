@@ -1,5 +1,5 @@
 import db from "../db";
-import { DbUser as User } from "@tpfinal/types";
+import { DbUser as User } from "../types/user";
 
 // buscar usuarios
 export async function searchUsers(searchTerm: string, excludeIds: string[]): Promise<any[]> {

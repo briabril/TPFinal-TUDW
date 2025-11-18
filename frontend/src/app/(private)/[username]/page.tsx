@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import api from "@tpfinal/api";
+import api from "../../../api/index";
 import { useAuth } from "@/context/AuthContext";
-import { User, BlockStatus, FollowStatus } from "@tpfinal/types";
+import { User, BlockStatus, FollowStatus } from "../../../types/user";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import BlockStatusMessage from "@/components/profile/BlockStatusMessage";
 import PostList from "@/components/posts/PostList";

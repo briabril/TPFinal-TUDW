@@ -1,10 +1,10 @@
 "use client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import api from "@tpfinal/api";
-import { loginData, loginSchema} from "@tpfinal/schemas"
+import api from "../../../api/index";
+import { loginData, loginSchema} from "../../../schemas/loginSchema"
 import { useAuth } from "@/context/AuthContext";
-import { User } from "@tpfinal/types";
+import { User } from "../../../types/user";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import ThemeToggle from "@/components/ThemeToggle";

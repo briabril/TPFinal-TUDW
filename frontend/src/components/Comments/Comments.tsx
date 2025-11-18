@@ -1,12 +1,12 @@
 "use client";
-import { Comment } from "@tpfinal/types";
+import { Comment } from "../../types/comment";
 import socket from "@/socket";
 import CommentForm from "./CommentForm";
 import CommentItem from "./CommentItem";
 import { Typography, Box, CircularProgress, Divider } from "@mui/material";
 import { useState, useEffect } from "react";
-import { CommentFormData } from "@tpfinal/schemas";
-import api from "@tpfinal/api";
+import { CommentFormData } from "../../schemas/commentSchema";
+import api from "../../api/index";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 

@@ -5,7 +5,7 @@ import { Avatar, Box, Typography, Stack } from "@mui/material";
 import { Author } from "@tpfinal/types";
 import WeatherBadge from "@/components/common/WeatherBadge";
 import { fetchWeatherByCity } from "@/services/weatherService";
-import api from "@tpfinal/api";
+import api from "../../api/index";
 
 interface AuthorHeaderProps {
   author: Author;

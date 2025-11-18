@@ -1,4 +1,4 @@
-import api from "@tpfinal/api";
+import api from "../api/index";
 
 export const deletePost = async (postId: string | number) => {
   return api.delete(`/posts/${postId}`);

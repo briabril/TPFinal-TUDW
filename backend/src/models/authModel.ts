@@ -1,5 +1,5 @@
 import db from "../db";
-import { DbUser as User } from "@tpfinal/types/user";
+import { DbUser as User } from "../types/user";
 
 export const createUser = async (
   email: string,

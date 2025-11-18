@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Box, CircularProgress } from "@mui/material";
-import api from "@tpfinal/api";
+import api from "../../api/index";
 
 interface Props {
   weather?: any | null;

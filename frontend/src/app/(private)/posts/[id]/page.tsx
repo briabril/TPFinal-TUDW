@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import api from "@tpfinal/api";
+import api from "../../../../api/index";
 import {
   Card,
   CardContent,
@@ -14,7 +14,7 @@ import AuthorHeader from "@/components/posts/AuthorHeader";
 import PostBody from "@/components/posts/PostBody";
 import PostActions from "@/components/posts/PostActions";
 import { useAuth } from "@/context/AuthContext";
-import { Post } from "@tpfinal/types";
+import { Post } from "../../../..//types";
 
 const PostDetail = () => {
   const { id } = useParams();

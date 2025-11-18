@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Box, CardMedia } from "@mui/material";
-import { Media } from "@tpfinal/types";
+import { Media } from "../../types/post";
 import ModalBase from "../common/Modal";
 
 export default function PostMedia({ medias }: { medias: Media[] }) {

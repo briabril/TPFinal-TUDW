@@ -1,6 +1,6 @@
 "use client";
 
-import { User, BlockStatus, FollowStatus } from "@tpfinal/types";
+import { User, BlockStatus, FollowStatus } from "../../types/user";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -9,7 +9,7 @@ import Divider from "@mui/material/Divider";
 import ProfileActions from "./ProfileActions";
 import { alpha } from "@mui/material/styles";
 import { useState, useEffect } from "react";
-import api from "@tpfinal/api";
+import api from "../../api/index";
 interface Props {
   profile: User;
   isOwnProfile: boolean;

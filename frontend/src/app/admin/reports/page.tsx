@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import api from "@tpfinal/api";
+import api from "../../../api/index";
 import {
   Card,
   CardContent,
@@ -23,7 +23,7 @@ import {
   CheckCircle,
   OpenInNew,
 } from "@mui/icons-material";
-import { Report } from "@tpfinal/types";
+import { Report } from "../../../types/report";
 
 export default function AdminReportsPage() {
   const [reports, setReports] = useState<Report[]>([]);

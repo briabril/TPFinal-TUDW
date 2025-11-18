@@ -12,12 +12,6 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "baseUrl": ".",
-    "paths": {
-      "@tpfinal/api/*": ["packages/api/*"],
-      "@tpfinal/schemas/*": ["packages/schemas/*"],
-      "@tpfinal/types/*": ["packages/types/*"],
-      "@/*": ["frontend/src/*"]
-    }
   },
   "include": ["frontend", "backend", "packages"]
 }

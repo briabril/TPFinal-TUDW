@@ -1,5 +1,5 @@
 import { useState } from "react";
-import api from "@tpfinal/api";
+import api from "../api/index";
 
 type Result = {
   loading: boolean;

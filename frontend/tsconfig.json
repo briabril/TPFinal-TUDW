@@ -5,11 +5,7 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@tpfinal/types": ["../packages/types"],
-      "@tpfinal/schemas": ["../packages/schemas"],
-      "@tpfinal/schemas/*": ["../packages/schemas/*"],
-      "@tpfinal/api": ["../packages/api"]
+      "@/*": ["src/*"]
     },
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,

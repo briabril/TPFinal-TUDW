@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
-import api from "@tpfinal/api"
-import { Post } from "@tpfinal/types"
+import api from "../api/index"
+import { Post } from "../types/post"
 
 export function usePosts(mode: string) {
     const [posts, setPosts] = useState<Post[]>([])

@@ -1,4 +1,4 @@
-import api from "@tpfinal/api";
+import api from "../api/index";
 
 export async function fetchWeatherByCity(city: string, country_iso?: string) {
   const params: any = { city };

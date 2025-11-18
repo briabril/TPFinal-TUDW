@@ -13,7 +13,7 @@ import {
   Chip,
   CircularProgress,
 } from "@mui/material";
-import type { User } from "@tpfinal/types";
+import type { User } from "../../types/user";
 
 interface Props {
   users: User[];

@@ -1,6 +1,6 @@
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { commentSchema, CommentFormData } from "@tpfinal/schemas";
+import { commentSchema, CommentFormData } from "../../schemas/commentSchema";
 import { TextField, Button, Avatar, Paper, CircularProgress, Box, Stack } from "@mui/material";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import api from "@tpfinal/api";
-import { User, BlockStatus, FollowStatus } from "@tpfinal/types";
+import api from "../../api/index";
+import { User, BlockStatus, FollowStatus } from "../../types/user";
 import {
   Box,
   Button,

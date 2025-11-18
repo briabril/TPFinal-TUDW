@@ -5,7 +5,7 @@ import AuthorHeader from "./AuthorHeader";
 import PostBody from "./PostBody";
 import PostActions from "./PostActions";
 import SharedPost from "./SharedPost";
-import { Post } from "@tpfinal/types";
+import { Post } from "../../types/post";
 import { useAuth } from "@/context/AuthContext";
 import WeatherBackground from "../common/WeatherBackground";
 

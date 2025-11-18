@@ -13,7 +13,7 @@ import {
   Link,
 } from "@mui/material";
 import { Save, Close, Translate, Language, Share } from "@mui/icons-material";
-import { Media } from "@tpfinal/types";
+import { Media } from "../../types/post";
 import { Reaction } from "../Reaction";
 import { updatePost } from "@/services/postService";
 import useTranslation from "@/hooks/useTranslation";

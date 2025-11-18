@@ -1,12 +1,12 @@
 "use client";
-import { Comment } from "@tpfinal/types";
+import { Comment } from "../../types/comment";
 import { Typography, Box, Paper, Button, TextField, Avatar, Stack, IconButton, useTheme, Collapse } from "@mui/material";
 import CommentForm from "./CommentForm";
 import { MessageCircle, Edit2, Trash2, Icon } from "lucide-react";
-import { CommentFormData } from "@tpfinal/schemas/commentSchema";
+import { CommentFormData } from "../../schemas/commentSchema";
 import { Reaction } from "../Reaction";
 import { useAuth } from "@/context/AuthContext";
-import api from "@tpfinal/api";
+import api from "../../api/index";
 import toast from "react-hot-toast";
 import { useState } from "react";
 

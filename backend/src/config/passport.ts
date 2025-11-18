@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import db from "../db";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
-import type { User } from "@tpfinal/types";
+import type { User } from "../types/user";
 dotenv.config();
 
 

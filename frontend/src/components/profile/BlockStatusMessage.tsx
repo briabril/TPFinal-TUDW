@@ -1,7 +1,7 @@
 "use client";
 
 import { Alert, AlertTitle, Button } from "@mui/material";
-import { User } from "@tpfinal/types";
+import { User } from "../../types/user";
 
 interface BlockStatus {
   blockedByYou: boolean;

@@ -89,14 +89,55 @@ export default function DirectChat({ otherUserId, otherUserDisplay }: Props) {
       <List ref={listRef as any} sx={{ flex: 1, overflow: 'auto', pr: 1 }}>
         {messages.map((m, i) => (
           <ListItem key={i} sx={{ justifyContent: m.from === user?.id ? 'flex-end' : 'flex-start' }}>
-            <ListItemText primary={m.text} secondary={m.from === user?.id ? 'Tú' : otherUserDisplay || m.from} />
+            <ListItemText
+              primary={m.text}
+              secondary={
+                <span title={new Date(m.created_at).toLocaleString()}>
+                  {m.from === user?.id ? 'Tú' : otherUserDisplay || m.from} • {formatMessageDate(m.created_at)}
+                </span>
+              }
+            />
           </ListItem>
         ))}
       </List>
       <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-        <TextField fullWidth size="small" value={text} onChange={(e) => setText(e.target.value)} placeholder="Escribe un mensaje" />
+        <TextField
+          fullWidth
+          size="small"
+          multiline
+          minRows={2}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Escribe un mensaje"
+          onKeyDown={(e: React.KeyboardEvent) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              send();
+            }
+          }}
+        />
         <IconButton onClick={send} color="primary"><SendIcon /></IconButton>
       </Box>
     </Box>
   );
+}
+
+function formatMessageDate(input: string | undefined | null) {
+  if (!input) return "";
+  const d = new Date(input);
+  if (Number.isNaN(d.getTime())) return "";
+  const now = new Date();
+  const sameDay = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+  const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  if (sameDay) {
+    // show time only for today
+    return time;
+  }
+  // show date and time for messages not from today
+  if (d.getFullYear() === now.getFullYear()) {
+    const datePart = d.toLocaleDateString([], { day: '2-digit', month: 'short' });
+    return `${datePart} ${time}`;
+  }
+  // different year: full date + time
+  return `${d.toLocaleDateString()} ${time}`;
 }

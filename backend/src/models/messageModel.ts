@@ -31,7 +31,7 @@ export const createConversationBetween = async (a: string, b: string) => {
 };
 
 export const createMessage = async (fromUserId: string, toUserId: string, text: string) => {
-  // ensure conversation exists
+  
   let convId = await findConversationBetween(fromUserId, toUserId);
   if (!convId) convId = await createConversationBetween(fromUserId, toUserId);
 
@@ -51,7 +51,6 @@ export const getMessagesBetween = async (a: string, b: string) => {
 };
 
 export const getConversationsForUser = async (userId: string) => {
-  // get user's conversations and last message per conversation, plus the other participant
   const result = await db.query(
     `SELECT DISTINCT ON (m.conversation_id) m.conversation_id, m.text, m.sender_id, m.created_at,
             other.user_id AS other_user_id, u.username, u.displayname, u.profile_picture_url

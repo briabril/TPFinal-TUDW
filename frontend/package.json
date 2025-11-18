@@ -35,9 +35,11 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.14",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.6",
+    "@types/react-dom": "^19.2.3",
     "@types/socket.io-client": "^1.4.36",
-    "eslint-config-next": "15.5.3"
+    "eslint-config-next": "15.5.3",
+    "typescript": "^5.9.3"
   }
 }

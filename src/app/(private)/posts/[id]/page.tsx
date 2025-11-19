@@ -14,7 +14,7 @@ import AuthorHeader from "@/components/posts/AuthorHeader";
 import PostBody from "@/components/posts/PostBody";
 import PostActions from "@/components/posts/PostActions";
 import { useAuth } from "@/context/AuthContext";
-import { Post } from "../../../..//types";
+import { Post } from "../../../../types";
 
 const PostDetail = () => {
   const { id } = useParams();

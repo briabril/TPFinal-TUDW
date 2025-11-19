@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Box, TextField, IconButton, List, ListItem, ListItemText, Typography } from "@mui/material";
 import SendIcon from '@mui/icons-material/Send';
 import useSocket from "@/hooks/useSocket";
-import api from "@tpfinal/api";
+import api from "@/api";
 import { useAuth } from "@/context/AuthContext";
 
 type Props = {

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Box, Typography, List, ListItemButton, ListItemAvatar, Avatar, ListItemText } from "@mui/material";
 import UserSearch from "@/components/UserSearch";
 import { useAuth } from "@/context/AuthContext";
-import api from "@tpfinal/api";
+import api from "@/api";
 import DirectChat from "@/components/Chat/DirectChat";
 
 export default function MessagesPage() {

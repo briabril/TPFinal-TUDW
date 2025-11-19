@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import api from "@tpfinal/api";
-import type { User } from "@tpfinal/types";
+import api from "@/api";
+import type { User } from "@/types/user";
 
 import {
   TextField,

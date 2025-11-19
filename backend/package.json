@@ -33,7 +33,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-     "@types/multer": "^1.4.11",
+     "@types/multer": "^1.4.13",
      "typescript": "^5.6.3",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.9",

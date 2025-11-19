@@ -23,7 +23,7 @@ function pathMatchesAny(path: string, list: string[]) {
 }
 
 export default async function middleware(req: NextRequest) {
-  const apiUrl = process.env.API_URL || "http://localhost:4000/api";
+  const apiUrl = process.env.API_URL || "http://api.bloop.cool/api";
   const rawPath = req.nextUrl.pathname;
   const path = normalize(rawPath);
 

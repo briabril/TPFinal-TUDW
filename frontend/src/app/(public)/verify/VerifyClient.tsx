@@ -14,7 +14,7 @@ export default function VerifyClient() {
 
     (async () => {
       try {
-        const res = await fetch(`http://localhost:4000/api/auth/verify?token=${token}`, {
+        const res = await fetch(`http://api.bloop.cool/api/auth/verify?token=${token}`, {
           method: "GET",
         });
         const data = await res.json();

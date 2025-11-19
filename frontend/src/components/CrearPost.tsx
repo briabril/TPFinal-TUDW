@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Box, Button, Card, CardContent, TextField, Typography, Avatar, CircularProgress, FormControlLabel, Switch } from "@mui/material";
 import { fetchWeatherByCity } from "@/services/weatherService";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:4000";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://api.bloop.cool";
 
 type CrearPostProps = {
   onCreated?: (createdPost?: any) => void;

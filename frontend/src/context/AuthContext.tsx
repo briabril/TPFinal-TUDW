@@ -2,8 +2,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react"
 import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
-import api from "../api/index"
-import type { User } from "../types/user"
+import api from "@/api"
+import type { User } from '@/types/user'
 
 type AuthContextType = {
     user: User | null
@@ -19,18 +19,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null)
     const [loading, setLoading] = useState(true)
   useEffect(() => {
-  const fetchUser = async () => {
-    try {
-      const res = await api.get<User>("/auth/me", { withCredentials: true });
-      setUser(res.data);
-    } catch {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-  fetchUser();
-}, []);
+    let mounted = true;
+    const fetchUser = async () => {
+      try {
+        const res = await api.get<User>("/auth/me", { withCredentials: true });
+        if (!mounted) return;
+        setUser(res.data);
+      } catch {
+        if (!mounted) return;
+        setUser(null);
+      } finally {
+        if (!mounted) return;
+        setLoading(false);
+      }
+    };
+    fetchUser();
+    return () => { mounted = false; };
+  }, []);
 
 
     const logout = async () => {

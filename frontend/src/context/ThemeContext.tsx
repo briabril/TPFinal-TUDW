@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, createContext, useContext, useMemo } from "react";
+import { useState, useEffect, useCallback, createContext, useContext, useMemo } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
 
@@ -21,24 +21,37 @@ export const useThemeContext = () => {
 export function ThemeProviderCustom({ children }: { children: React.ReactNode }) {
   const [darkMode, setDarkMode] = useState(false);
 
-  // Detectar preferencia guardada o del sistema
+  // Detectar preferencia guardada o del sistema (con protecciones)
   useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    if (saved) {
-      setDarkMode(saved === "dark");
-      return;
+    try {
+      const saved = localStorage.getItem("theme");
+      if (saved) {
+        setDarkMode(saved === "dark");
+        return;
+      }
+    } catch (e) {
+      // localStorage puede fallar en entornos restringidos; ignorar y continuar
     }
-    const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
-    if (prefersDark) setDarkMode(true);
+
+    try {
+      const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
+      if (prefersDark) setDarkMode(true);
+    } catch (e) {
+      // matchMedia rara vez falla; ignorar
+    }
   }, []);
 
-  const toggleDarkMode = () => {
+  const toggleDarkMode = useCallback(() => {
     setDarkMode((prev) => {
       const newMode = !prev;
-      localStorage.setItem("theme", newMode ? "dark" : "light");
+      try {
+        localStorage.setItem("theme", newMode ? "dark" : "light");
+      } catch (e) {
+        // Silenciar errores de localStorage
+      }
       return newMode;
     });
-  };
+  }, []);
 
   const theme = useMemo(
     () =>
@@ -58,7 +71,7 @@ export function ThemeProviderCustom({ children }: { children: React.ReactNode })
 
   const contextValue = useMemo(
     () => ({ darkMode, toggleDarkMode }),
-    [darkMode]
+    [darkMode, toggleDarkMode]
   );
 
   return (

@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import api from "../api/index";
-import type { User } from "../types/user";
+import api from "@tpfinal/api";
+import type { User } from "@tpfinal/types";
 
 import {
   TextField,
@@ -16,7 +16,11 @@ import {
   Box,
 } from "@mui/material";
 
-export default function UserSearch() {
+type Props = {
+  onSelect?: (user: User) => void;
+};
+
+export default function UserSearch({ onSelect }: Props) {
   const [q, setQ] = useState("");
   const [results, setResults] = useState<User[]>([]);
   const debounceRef = useRef<number | null>(null);

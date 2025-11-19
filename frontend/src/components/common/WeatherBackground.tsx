@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Box, CircularProgress } from "@mui/material";
-import api from "../../api/index";
+import api from "@tpfinal/api";
 
 interface Props {
   weather?: any | null;
@@ -22,7 +22,7 @@ export default function WeatherBackground({ weather, children, className, overla
     let mounted = true;
     (async () => {
       try {
-        try { console.debug("WeatherBackground props:", { weather, postId, localWeather }); } catch (e) {}
+      try { console.debug("WeatherBackground props:", { weather, postId, localWeather }); } catch (e) {}
       } catch (e) {}
       try {
         if ((!weather || !weather.current) && postId) {
@@ -113,7 +113,7 @@ export default function WeatherBackground({ weather, children, className, overla
       }
     })();
     return () => { mounted = false; };
-  }, [weather, postId, localWeather]);
+  }, [weather, postId]);
 
   return (
     <Box className={className} sx={{ position: "relative", width: "100%" }}>
@@ -124,9 +124,7 @@ export default function WeatherBackground({ weather, children, className, overla
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0, opacity: imageOpacity }}
         />
       )}
-      {bgUrl && (
-        <Box sx={{ position: "absolute", inset: 0, backgroundImage: `url(${bgUrl})`, backgroundSize: "cover", backgroundPosition: "center", zIndex: 0, opacity: imageOpacity }} />
-      )}
+      {/* background is rendered via the <img> above; avoid rendering a second background node to prevent duplicate painting/requests */}
       {bgUrl && overlayOpacity > 0 && (
         <Box sx={{ position: "absolute", inset: 0, background: `linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,${overlayOpacity}))`, zIndex: 1 }} />
       )}

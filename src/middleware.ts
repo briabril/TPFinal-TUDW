@@ -67,7 +67,7 @@ export default async function middleware(req: NextRequest) {
   } catch (err) {
     // error en fetch -> redirigir al home
     const homeUrl = req.nextUrl.clone();
-    homeUrl.pathname = "/";
+    homeUrl.pathname = "/feed";
     return NextResponse.redirect(homeUrl);
   }
   return NextResponse.next();

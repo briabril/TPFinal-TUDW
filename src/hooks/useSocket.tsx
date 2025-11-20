@@ -14,7 +14,7 @@ export function useSocket() {
         const token = res.data?.token;
         if (!token) return;
 
-        const socket = io("https://www.api.bloop.cool/api", {
+        const socket = io("https://www.api.bloop.cool", {
           auth: { token },
           withCredentials: true,
         });

@@ -12,7 +12,6 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.6",
     "@types/react-dom": "^19.2.3",
-    "@types/socket.io-client": "^1.4.36",
     "concurrently": "^9.0.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "15.5.3",

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { io, Socket } from "socket.io-client";
+import io, {Socket } from "socket.io-client";
 import api from "@/api";
 
 export function useSocket() {
@@ -14,9 +14,8 @@ export function useSocket() {
         const token = res.data?.token;
         if (!token) return;
 
-        const socket = io("https://www.api.bloop.cool/api", {
+        const socket = io(`${process.env.BACKEND_UR}/api`, {
           auth: { token },
-          withCredentials: true,
         });
 
         socketRef.current = socket;

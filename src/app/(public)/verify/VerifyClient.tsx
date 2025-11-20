@@ -14,9 +14,11 @@ export default function VerifyClient() {
 
     (async () => {
       try {
-        const res = await fetch(`http://api.bloop.cool/api/auth/verify?token=${token}`, {
-          method: "GET",
-        });
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/verify?token=${token}`, {
+  method: "POST",
+  credentials: "include",
+});
+
         const data = await res.json();
 
         if (res.ok) {

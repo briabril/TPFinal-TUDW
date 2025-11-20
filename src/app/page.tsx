@@ -54,7 +54,7 @@ function PublicHome() {
   variant="contained"
   color="inherit"
   
-  onClick={() => (window.location.href = "http://api.bloop.cool/auth/google")}
+  onClick={() => (window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`)}
   startIcon={<img src="/google-icon.png" alt="Google" width={20} height={20} />}
   sx={{
     borderColor: "#ccc",

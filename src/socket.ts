@@ -1,8 +1,7 @@
-import { io, Socket } from "socket.io-client";
+import  io, {Socket } from "socket.io-client";
 
-const socket: Socket = io("http://api.bloop.cool", {
+const socket: Socket = io(`${process.env.NEXT_PUBLIC_BACKEND_URL}`, {
   transports: ["websocket", "polling"],
-  withCredentials: true,
 });
 
 // Eventos globales de conexión

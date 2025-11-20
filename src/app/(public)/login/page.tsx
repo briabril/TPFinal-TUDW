@@ -25,11 +25,12 @@ export default function LoginPage() {
 
   const onSubmit = async (data: loginData) => {
     try {
+      console.log("API", api)
       await api.post("/auth/login", data, { withCredentials: true });
       const me = await api.get<User>("/auth/me", { withCredentials: true });
       setUser(me.data);
       toast.success("Login exitoso 🎉");
-
+      console.log("DATA", me.data)
       if (me.data.role === "ADMIN") {
         router.push("/admin/dashboard");
       } else {
@@ -120,7 +121,7 @@ export default function LoginPage() {
      variant="contained"
      color="inherit"
      
-     onClick={() => (window.location.href = "http://api.bloop.cool/auth/google")}
+     onClick={() => (window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URL}/google`)}
      startIcon={<img src="/google-icon.png" alt="Google" width={20} height={20} />}
      sx={{
        borderColor: "#ccc",

@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://api.bloop.cool/api",
+  baseURL: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`,
+
   withCredentials: true,
 });
 

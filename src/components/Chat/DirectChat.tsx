@@ -29,10 +29,32 @@ export default function DirectChat({ otherUserId, otherUserDisplay }: Props) {
 
     const handler = (msg: any) => {
       setMessages((m) => {
+        // Si un mensaje con el mismo id ya existe, ignorar
         if (msg.id && m.some((ex) => ex.id === msg.id)) return m;
+
+        // Si un mensaje entrante tiene un id pero tenemos un mensaje temporal con el mismo texto/origen, reemplazarlo
+        if (msg.id) {
+          const tempIndex = m.findIndex((ex) => String(ex.id).startsWith('temp-') && ex.text === msg.text && (ex.from === msg.from || ex.from === msg.sender_id || ex.from === msg.senderId));
+          if (tempIndex !== -1) {
+            const copy = [...m];
+            copy[tempIndex] = msg;
+            return copy;
+          }
+        }
+
+        // Si un mensaje entrante no tiene id, eliminar duplicados por texto/origen/fecha
         if (!msg.id && m.some((ex) => ex.text === msg.text && ex.from === msg.from && ex.created_at === msg.created_at)) return m;
+
         return [...m, msg];
       });
+      try {
+        // Re-disparar evento globalmente para otros listeners en la app
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('dm_message', { detail: msg }));
+        }
+      } catch (e) {
+        /* ignore */
+      }
     };
 
     if (socket) {
@@ -57,7 +79,6 @@ export default function DirectChat({ otherUserId, otherUserDisplay }: Props) {
         const normalized = (data || []).map((m: any) => ({ ...m, from: m.from || m.sender_id }));
         setMessages(normalized);
       } catch (err) {
-        console.error("Error fetching message history", err);
       }
     };
     fetchHistory();
@@ -75,12 +96,43 @@ export default function DirectChat({ otherUserId, otherUserDisplay }: Props) {
 
   const send = () => {
     const socket = socketRef.current;
-    if (!socket || !text.trim()) return;
+    if (!text.trim()) return;
     const trimmed = text.trim();
     const tempId = `temp-${Date.now()}`;
-    socket.emit("dm_message", { to: otherUserId, text: trimmed });  
-    setMessages((m) => [...m, { id: tempId, from: user?.id, to: otherUserId, text: trimmed, created_at: new Date().toISOString() }]);
+
+    const tempMsg = { id: tempId, from: user?.id, to: otherUserId, text: trimmed, created_at: new Date().toISOString() };
+    setMessages((m) => [...m, tempMsg]);
     setText("");
+
+    (async () => {
+      try {
+        
+        const res = await api.post('/messages', { to: otherUserId, text: trimmed }, { withCredentials: true });
+        const saved = res.data;
+        setMessages((prev) => prev.map((m) => (m.id === tempId ? saved : m)));
+        try {
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('dm_message', { detail: saved }));
+          }
+        } catch (e) {
+          /* ignore */
+        }
+      } catch (err: any) {
+        // si el servidor responde con un error de validación específico, no intentar el fallback por socket
+        const validationMsg = err?.response?.data?.message;
+        if (validationMsg && /to and text required/i.test(String(validationMsg))) {
+          return;
+        }
+
+        try {
+          if (socket && socket.connected) {
+            socket.emit('dm_message', { to: otherUserId, text: trimmed });
+          } else {
+          }
+        } catch (e) {
+        }
+      }
+    })();
   };
 
   return (
@@ -130,14 +182,12 @@ function formatMessageDate(input: string | undefined | null) {
   const sameDay = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
   const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   if (sameDay) {
-    // show time only for today
     return time;
   }
-  // show date and time for messages not from today
   if (d.getFullYear() === now.getFullYear()) {
     const datePart = d.toLocaleDateString([], { day: '2-digit', month: 'short' });
     return `${datePart} ${time}`;
   }
-  // different year: full date + time
+  
   return `${d.toLocaleDateString()} ${time}`;
 }

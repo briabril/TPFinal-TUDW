@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
-import io, {Socket } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import api from "@/api";
 
 export function useSocket() {
@@ -10,20 +10,50 @@ export function useSocket() {
     let mounted = true;
     const setup = async () => {
       try {
-        const res = await api.get("/auth/socket-token", { withCredentials: true });
-        const token = res.data?.token;
-        if (!token) return;
+        
+        const envBackendPublic = process.env.NEXT_PUBLIC_BACKEND_URL;
+        const envBackend = process.env.BACKEND_URL;
+        const envApi = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL;
+        let backendUrl: string | undefined = envBackendPublic || envBackend;
+        if (!backendUrl && envApi) {
+          try {
+            backendUrl = new URL(envApi).origin;
+          } catch (e) {
+            // ignore
+          }
+        }
+        if (!backendUrl && typeof window !== "undefined") {
+          backendUrl = window.location.origin;
+        }
 
-        const socket = io(`${process.env.BACKEND_UR}/api`, {
-          auth: { token },
+        
+
+        
+        let token: string | undefined;
+        try {
+          const res = await api.get("/auth/socket-token", { withCredentials: true });
+          token = res.data?.token;
+        } catch (err) {
+          
+        }
+
+        
+        if (!backendUrl) {
+          return;
+        }
+
+        const socket = io(backendUrl, {
+          auth: token ? { token } : undefined,
+          transports: ["websocket"],
         });
 
         socketRef.current = socket;
 
-        socket.on("connect", () => console.log("Socket connected", socket.id));
-        socket.on("disconnect", (reason) => console.log("Socket disconnected", reason));
+        socket.on("connect", () => {});
+        socket.on("disconnect", () => {});
+        socket.on("connect_error", () => {});
       } catch (err) {
-        console.error("Error setting up socket", err);
+        
       }
     };
 

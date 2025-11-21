@@ -22,21 +22,17 @@ export default function WeatherBackground({ weather, children, className, overla
     let mounted = true;
     (async () => {
       try {
-      try { console.debug("WeatherBackground props:", { weather, postId, localWeather }); } catch (e) {}
       } catch (e) {}
       try {
         if ((!weather || !weather.current) && postId) {
-          try {
-            try { console.debug("WeatherBackground: fetching post by id", postId); } catch (e) {}
+            try {
             const res = await api.get(`/posts/${postId}`);
             const payload = res.data?.data;
-            try { console.debug("WeatherBackground: post payload", payload); } catch (e) {}
             if (payload?.weather) {
-              try { console.debug("WeatherBackground: setting localWeather from post"); } catch (e) {}
               setLocalWeather(payload.weather);
             }
           } catch (e) {
-            try { console.debug("WeatherBackground: error fetching post", e); } catch (ee) {}
+            
           }
         }
 
@@ -89,11 +85,10 @@ export default function WeatherBackground({ weather, children, className, overla
     const query = `${baseMapped}, landscape`;
 
         setLoading(true);
-        try {
+          try {
           const res = await api.get("/photo", { params: { query } });
           const url = res.data?.url;
           if (mounted && url) {
-              try { console.debug("WeatherBackground: fetched bgUrl", url); } catch (e) {}
               setBgUrl(url);
               setLoading(false);
               return;
@@ -103,11 +98,10 @@ export default function WeatherBackground({ weather, children, className, overla
 
         if (mounted) {
           const fallback = `https://source.unsplash.com/1200x800/?${encodeURIComponent(query)}`;
-          try { console.debug("WeatherBackground: using fallback url", fallback); } catch (e) {}
           setBgUrl(fallback);
         }
       } catch (e) {
-        console.warn("WeatherBackground error", e);
+        
       } finally {
         if (mounted) setLoading(false);
       }

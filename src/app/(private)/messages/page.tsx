@@ -32,6 +32,40 @@ export default function MessagesPage() {
     fetchFollowing();
   }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+    const handler = (e: any) => {
+      const msg = e?.detail || e;
+      if (!msg) return;
+      //determinar el otro usuario en la conversación
+      const sender = msg.from || msg.sender_id || msg.senderId;
+      const recipient = msg.to || msg.toUserId;
+      const otherId = String(sender) === String(user.id) ? String(recipient) : String(sender);
+
+      setConversations((prev) => {
+        let found = false;
+        const updated = prev.map((c: any) => {
+          if (String(c.otherUser?.id) === otherId) {
+            found = true;
+            return { ...c, lastMessage: { text: msg.text, created_at: msg.created_at, id: msg.id } };
+          }
+          return c;
+        });
+        if (found) return updated;
+
+        // Si la conversación no existía, agregarla
+        api.get(`/messages/conversations`, { withCredentials: true }).then((r) => {
+          setConversations(r.data || []);
+        }).catch(() => {});
+
+        return prev;
+      });
+    };
+
+    window.addEventListener('dm_message', handler as EventListener);
+    return () => window.removeEventListener('dm_message', handler as EventListener);
+  }, [user]);
+
 
 
   return (

@@ -6,9 +6,11 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import Divider from "@mui/material/Divider";
+import { Button } from "@mui/material";
 import ProfileActions from "./ProfileActions";
 import { alpha } from "@mui/material/styles";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import api from "../../api/index";
 interface Props {
   profile: User;
@@ -153,6 +155,17 @@ export default function ProfileHeader({
               seguidos
             </Typography>
           </Stack>
+  {isOwnProfile && (
+  <Button
+    variant="outlined"
+    component={Link}
+    href={`/${profile.username}/edit`}
+  >
+    Editar Perfil
+  </Button>
+)}
+
+
         </Stack>
 
         <Divider sx={{ mt: 5 }} />

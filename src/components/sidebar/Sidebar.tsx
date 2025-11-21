@@ -32,10 +32,8 @@ import { fetchWeatherByCity } from "@/services/weatherService";
 export default function Sidebar() {
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
+const [weather, setWeather] = React.useState<any | null>(null);
 
-  if (loading) return <h1 className="text-center py-10 text-lg">Cargando...</h1>;
-
-  const [weather, setWeather] = React.useState<any | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -67,11 +65,19 @@ export default function Sidebar() {
     { icon: <Flag size={18} />, text: "Reportes", path: "/admin/reports" },
   ];
 
+    if (loading) {
+    return (
+      <Box sx={{ width: 250, p: 2 }}>
+        <h1 className="text-center py-10 text-lg">Cargando...</h1>
+      </Box>
+    );
+  }
   // 🔹 Renderizado con estilo activo
   const renderList = (items: any[]) =>
     items.map(({ icon, text, path }) => {
   const basePath = typeof path === "string" ? path.split("#")[0] : path;
   const active = pathname === basePath;
+
       return (
         <ListItemButton
           key={path}

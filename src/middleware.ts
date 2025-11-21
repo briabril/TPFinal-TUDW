@@ -1,4 +1,3 @@
-// frontend/middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import api from "./api/index"
@@ -39,7 +38,6 @@ export default function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Si querés validación de rol, podés decodificar JWT directamente:
   if (requiresAdmin) {
     try {
       const decoded: any = jwt.verify(token, process.env.JWT_SECRET || "");

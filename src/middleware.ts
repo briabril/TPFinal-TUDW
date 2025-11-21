@@ -1,5 +1,15 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+export const config = {
+  matcher: [
+    "/feed/:path*",
+    "/profile/:path*",
+    "/settings/:path*",
+    "/dashboard/:path*",
+    "/reports/:path*",
+    "/users/:path*",
+  ]
+};
 
 const ADMIN_PATHS = ["/dashboard", "/reports", "/users"];
 const AUTH_PATHS = ["/feed", "/profile", "/settings"];
@@ -14,6 +24,8 @@ function pathMatchesAny(path: string, list: string[]) {
 
 export default async function middleware(req: NextRequest) {
   const path = normalize(req.nextUrl.pathname);
+    console.log("🔍 PATH:", req.nextUrl.pathname);
+  console.log("🔍 COOKIES:", req.cookies.getAll());
   const requiresAdmin = pathMatchesAny(path, ADMIN_PATHS);
   const requiresAuth = pathMatchesAny(path, AUTH_PATHS);
 
@@ -50,13 +62,4 @@ export default async function middleware(req: NextRequest) {
   }
 }
 
-export const config = {
-  matcher: [
-    "/feed/:path*",
-    "/profile/:path*",
-    "/settings/:path*",
-    "/dashboard/:path*",
-    "/reports/:path*",
-    "/users/:path*",
-  ],
-};
+

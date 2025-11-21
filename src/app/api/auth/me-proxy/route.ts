@@ -11,12 +11,14 @@ export async function GET(req: NextRequest) {
 
     const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/me`;
 
-    const backendResp = await fetch(backendUrl, {
-      method: "GET",
-      headers: {
-        Cookie: `token=${token}`,
-      },
-    });
+   const backendResp = await fetch(backendUrl, {
+  method: "GET",
+  credentials: "include",
+  headers: {
+    Cookie: req.cookies.toString(),
+  },
+});
+
 
     const data = await backendResp.json();
 

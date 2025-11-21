@@ -16,7 +16,8 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
   const [previews, setPreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error' | null; text: string | null }>({ type: null, text: null });
-
+const [attachWeather, setAttachWeather] = useState(false);
+  const [weatherData, setWeatherData] = useState<any | null>(null);
   const { user } = useAuth();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,8 +94,7 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
     }
   };
 
-  const [attachWeather, setAttachWeather] = useState(false);
-  const [weatherData, setWeatherData] = useState<any | null>(null);
+  
 
   React.useEffect(() => {
     let mounted = true;

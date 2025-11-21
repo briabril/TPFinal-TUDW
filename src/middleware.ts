@@ -17,24 +17,24 @@ export default async function middleware(req: NextRequest) {
   const requiresAdmin = pathMatchesAny(path, ADMIN_PATHS);
   const requiresAuth = pathMatchesAny(path, AUTH_PATHS);
 
+  // Público
   if (!requiresAdmin && !requiresAuth) return NextResponse.next();
 
-  const hasCookie = req.cookies.get("token");
-  if (!hasCookie) {
+  const token = req.cookies.get("token");
+  if (!token) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
   try {
-    const backendResp = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/me`,
-      {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          Cookie: req.cookies.toString(), 
-        },
-      }
-    );
+    // App Router internal API 
+    const proxyUrl = `${req.nextUrl.origin}/api/auth/me-proxy`;
+
+    const backendResp = await fetch(proxyUrl, {
+      method: "GET",
+      headers: {
+        Cookie: req.cookies.toString(),
+      },
+    });
 
     if (!backendResp.ok) throw new Error("Unauthorized");
 
@@ -45,7 +45,18 @@ export default async function middleware(req: NextRequest) {
     }
 
     return NextResponse.next();
-  } catch (err) {
+  } catch {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 }
+
+export const config = {
+  matcher: [
+    "/feed/:path*",
+    "/profile/:path*",
+    "/settings/:path*",
+    "/dashboard/:path*",
+    "/reports/:path*",
+    "/users/:path*",
+  ],
+};

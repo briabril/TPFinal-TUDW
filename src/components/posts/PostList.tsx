@@ -5,10 +5,11 @@ import { usePosts } from "@/hooks/usePosts";
 import PostCard from "./PostCard";
 
 interface PostListProps {
-  initialMode: string
+  initialMode: string;
+   username?: string;
 }
 
-export default function PostList({ initialMode }: PostListProps) {
+export default function PostList({ initialMode,  username  }: PostListProps) {
   const { posts, error, loading } = usePosts(initialMode);
   if (loading) return <Typography>Cargando posts...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;

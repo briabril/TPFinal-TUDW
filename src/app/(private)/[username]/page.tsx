@@ -127,7 +127,7 @@ export default function ProfilePage() {
               isOwnProfile ? (
                 <PostList initialMode="mine" />
               ) : (
-                <p> Por hacer </p>
+                <PostList initialMode="user" username={username}/>
               )
             }
           </>

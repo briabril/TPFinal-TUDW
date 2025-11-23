@@ -192,12 +192,17 @@ export default function EditProfilePage() {
               const selectedCity = cities.find((c) => c.value === field.value) || null;
               return (
                 <Autocomplete
+                  freeSolo
                   options={cities}
-                  getOptionLabel={(opt) => opt.label}
+                  getOptionLabel={(opt) => (typeof opt === "string" ? opt : opt.label)}
                   isOptionEqualToValue={(option, value) => option.value === value?.value}
-                  value={selectedCity}
-                  onChange={(_, selected) => field.onChange(selected?.value || "")}
-                  renderInput={(params) => <TextField {...params} label="Ciudad" />}
+                  value={selectedCity || (field.value ? { label: field.value, value: field.value } : null)}
+                  onChange={(_, selected) => field.onChange((selected as any)?.value || "")}
+                  onInputChange={(_, input) => {
+                    // update field with typed value even if it's not in list
+                    if (input !== undefined) field.onChange(input);
+                  }}
+                  renderInput={(params) => <TextField {...params} label="Ciudad (escribe o selecciona)" />}
                 />
               );
             }}

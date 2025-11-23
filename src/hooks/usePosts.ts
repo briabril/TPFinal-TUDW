@@ -25,7 +25,7 @@ export function usePosts(mode: string, username?: string) {
                 if (mode === "mine") endpoint = "/posts/mine"
                 else if (mode === "following") endpoint = "/posts/following"
                  else if (mode === "user" && username)
-    endpoint = `/posts/by-user/${username}`;
+    endpoint = `/posts/user/${username}`;
                 const { data } = await api.get<{ data: Post[] }>(endpoint)
 
                 setPosts(data.data || [])

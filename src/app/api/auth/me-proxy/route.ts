@@ -22,7 +22,6 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // Proxy the backend response body/status directly for easier debugging
     const contentType = backendResp.headers.get("content-type") || "";
     if (contentType.includes("application/json")) {
       const data = await backendResp.json();
@@ -30,7 +29,10 @@ export async function GET(req: NextRequest) {
     }
 
     const text = await backendResp.text();
-    return NextResponse.text(text, { status: backendResp.status });
+    return new NextResponse(text, {
+      status: backendResp.status,
+      headers: { "content-type": contentType || "text/plain; charset=utf-8" },
+    });
   } catch (err) {
     console.error("Proxy error:", err);
     return NextResponse.json({ error: "Proxy failure" }, { status: 500 });

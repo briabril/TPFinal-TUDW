@@ -47,9 +47,11 @@ export default function RegisterPage() {
       <Paper
         elevation={6}
         sx={{
-          p: 5,
+          p: { xs: 3, md: 5 },
           borderRadius: 4,
-          width: "40%",
+          width: "100%",
+          maxWidth: 520,
+          mx: "auto",
           display: "flex",
           flexDirection: "column",
           gap: 3,

@@ -88,16 +88,14 @@ const [weather, setWeather] = React.useState<any | null>(null);
             mb: 0.5,
             transition: "all 0.2s ease",
             backgroundColor: active ? "primary.main" : "transparent",
-            color: active ? "#fff" : "text.primary",
+            color: active ? "primary.contrastText" : "text.primary",
             "&:hover": {
-              backgroundColor: active
-                ? "primary.dark"
-                : "rgba(25,118,210,0.08)",
+              backgroundColor: active ? "primary.dark" : "action.hover",
             },
           }}
         >
           <ListItemIcon
-            sx={{ color: active ? "#fff" : "text.secondary", minWidth: 36 }}
+            sx={{ color: active ? "primary.contrastText" : "text.secondary", minWidth: 36 }}
           >
             {icon}
           </ListItemIcon>
@@ -118,7 +116,8 @@ const [weather, setWeather] = React.useState<any | null>(null);
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        borderRight: "1px solid #e0e0e0",
+        borderRight: "1px solid",
+        borderColor: "divider",
         boxShadow: "2px 0 8px rgba(0,0,0,0.05)",
         p: 2,
         position: "sticky",

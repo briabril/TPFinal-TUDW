@@ -1,3 +1,43 @@
 @import "tailwindcss";
 
 
+
+:root {
+}
+
+.bg-background { background-color: var(--background); }
+.text-foreground { color: var(--foreground); }
+.text-muted-foreground { color: var(--muted-foreground); }
+.bg-input { background-color: var(--input); }
+.border-border { border-color: var(--border); }
+
+.bg-accent { background-color: var(--accent); }
+.text-accent { color: var(--accent); }
+.text-accent-foreground { color: var(--accent-foreground); }
+
+.bg-accent-05 { background-color: rgba(var(--accent-rgb), .05); }
+.bg-accent-10 { background-color: rgba(var(--accent-rgb), .10); }
+.border-accent-20 { border-color: rgba(var(--accent-rgb), .20); }
+.hover\:bg-accent-05:hover { background-color: rgba(var(--accent-rgb), .05); }
+
+.btn-accent {
+	background-color: var(--accent);
+	color: var(--accent-foreground);
+}
+.btn-accent:hover { background-color: rgba(var(--accent-rgb), .92); }
+
+.btn-outline-accent {
+	background: transparent;
+	border: 1px solid rgba(var(--accent-rgb), .95);
+	color: var(--accent);
+}
+.btn-outline-accent:hover { background-color: rgba(var(--accent-rgb), .05); }
+
+.btn-primary {
+	background-color: var(--color-primary);
+	color: var(--color-primary-contrast);
+}
+.btn-primary:hover { background-color: rgba(var(--color-primary-rgb), .92); }
+
+
+

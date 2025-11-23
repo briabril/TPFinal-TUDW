@@ -58,16 +58,100 @@ export function ThemeProviderCustom({ children }: { children: React.ReactNode })
       createTheme({
         palette: {
           mode: darkMode ? "dark" : "light",
+
+          
           primary: {
-            main: "#1976d2",
+            main: darkMode ? '#384EA3' : '#C2185B',
+            contrastText: darkMode ? '#0B1020' : '#FFFFFF',
           },
           secondary: {
-            main: "#9c27b0",
+            main: darkMode ? '#8C82FF' : '#6C5CE7',
+          },
+          background: {
+            default: darkMode ? '#071226' : '#FFFFFF',
+            paper: darkMode ? '#071226' : '#FFFFFF',
+          },
+          text: {
+            primary: darkMode ? '#E6EEF6' : '#0F1724',
+            secondary: darkMode ? '#94A3B8' : '#6B7280',
           },
         },
       }),
     [darkMode]
   );
+
+  useEffect(() => {
+    try {
+      const root = document.documentElement;
+      root.classList.toggle('dark', darkMode);
+      root.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+
+      const hexToRgb = (hex: string) => {
+        const sanitized = hex.replace('#', '');
+        const full = sanitized.length === 3 ? sanitized.split('').map(c => c + c).join('') : sanitized;
+        const bigint = parseInt(full, 16);
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+        return `${r} ${g} ${b}`;
+      };
+
+      const light = {
+        '--color-primary': '#C2185B',  
+        '--color-primary-contrast': '#FFFFFF',
+        '--color-secondary': '#6C5CE7',
+        '--bg': '#FFFFFF',
+        '--surface': '#FFFFFF',
+        '--text': '#0F1724',
+        '--muted': '#6B7280',
+        '--border': '#E6E9F0',
+        '--accent': '#0891B2',
+        '--success': '#16A34A',
+        '--warning': '#F59E0B',
+        '--danger': '#DC2626',
+        '--info': '#2563EB',
+      } as Record<string, string>;
+
+      const dark = {
+        '--color-primary': '#384EA3',
+        '--color-primary-contrast': '#0B1020',
+        '--color-secondary': '#8C82FF',
+        '--bg': '#071226',
+        '--surface': '#071226',
+        '--text': '#E6EEF6',
+        '--muted': '#94A3B8',
+        '--border': '#192132',
+        '--accent': '#2DD4BF',
+        '--success': '#34D399',
+        '--warning': '#FBBF24',
+        '--danger': '#FF6B6B',
+        '--info': '#60A5FA',
+      } as Record<string, string>;
+
+      const tokens = darkMode ? dark : light;
+     
+      Object.entries(tokens).forEach(([k, v]) => root.style.setProperty(k, v));
+
+      root.style.setProperty('--background', tokens['--bg']);
+      root.style.setProperty('--foreground', tokens['--text']);
+      root.style.setProperty('--muted-foreground', tokens['--muted']);
+      root.style.setProperty('--input', tokens['--surface']);
+      root.style.setProperty('--border', tokens['--border']);
+      root.style.setProperty('--accent', tokens['--accent']);
+      root.style.setProperty('--accent-foreground', tokens['--color-primary-contrast']);
+      try {
+        root.style.setProperty('--accent-rgb', hexToRgb(tokens['--accent']));
+      } catch (e) {
+        root.style.setProperty('--accent-rgb', '0 191 166');
+      }
+      try {
+        root.style.setProperty('--color-primary-rgb', hexToRgb(tokens['--color-primary']));
+      } catch (e) {
+        root.style.setProperty('--color-primary-rgb', '255 77 109');
+      }
+    } catch (e) {
+    }
+  }, [darkMode, theme]);
 
   const contextValue = useMemo(
     () => ({ darkMode, toggleDarkMode }),

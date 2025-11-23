@@ -52,7 +52,8 @@ export default function SharedPost({ post }: any) {
                 await (await import("@/services/postService")).reportPost(originalPost.id, reason);
               }}
               loading={false}
-              isOwn={false}
+                isOwn={false}
+                postId={originalPost.id}
             />
           }
         />

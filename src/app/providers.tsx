@@ -4,7 +4,7 @@
 //import { queryClient } from "@/lib/react-query";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/context/AuthContext";
-import { ThemeProviderCustom } from "./context/ThemeContext";
+import { ThemeProviderCustom } from "@/context/ThemeContext";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (

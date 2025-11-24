@@ -118,7 +118,7 @@ export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
   return (
     <>
       {/* ❤️ Botón de like */}
-      <Button onClick={toggleReaction} className="flex items-center">
+      <Button onClick={toggleReaction} className="flex items-center" aria-label="Reaccionar" title="Reaccionar">
         {liked ? (
           <Heart className="text-red-500 size-5" fill="red" />
         ) : (
@@ -140,7 +140,7 @@ export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
           <IconButton
             onClick={handleShare}
             disabled={loading || shared}
-            color={shared ? "primary" : "default"}
+            color={shared ? "primary" : "default"} aria-label="Compartir post" title="Compartir post"
           >
             <ShareIcon
               className={shared ? "text-blue-600" : "text-gray-600"}

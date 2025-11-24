@@ -5,7 +5,9 @@ import UserSearch from "@/components/UserSearch";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/api";
 import DirectChat from "@/components/Chat/DirectChat";
-
+export const metadata = {
+  title: "Mensajes – Red Social",
+};
 export default function MessagesPage() {
   const { user } = useAuth();
   const [following, setFollowing] = useState<any[]>([]);
@@ -71,7 +73,7 @@ export default function MessagesPage() {
   return (
     <Box sx={{ display: 'flex', gap: 2, p: 2, height: '100vh', flexDirection: 'row', flexWrap: 'nowrap' }}>
       <Box sx={{ width: { xs: 160, sm: 220, md: 320 }, minWidth: 140, maxWidth: 320, flexShrink: 0, overflow: 'auto' }}>
-        <Typography variant="h6">Mensajes</Typography>
+        <Typography variant="h6" component="h1">Mensajes</Typography>
 
         <Box sx={{ mt: 2 }}>
           <UserSearch onSelect={(u) => setSelected(u)} />

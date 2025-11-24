@@ -34,7 +34,8 @@ export default function PostActions({
     return (
         // Place the actions above other header elements so the menu remains clickable
     <Box sx={{ display: "flex", alignItems: "center", zIndex: 10 }}>
-            <IconButton onClick={handleMenuOpen}>
+            <IconButton onClick={handleMenuOpen}   aria-label="acciones para el post"
+  title="acciones para el post">
                 <MoreVert />
             </IconButton>
 

@@ -212,6 +212,8 @@ const [weather, setWeather] = React.useState<any | null>(null);
               color="error"
               variant="text"
               sx={{ minWidth: 0 }}
+               aria-label="Cerrar sesión"
+  title="Cerrar sesión"
             >
               <LogOut size={18} />
             </Button>

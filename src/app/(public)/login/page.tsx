@@ -10,11 +10,13 @@ import toast from "react-hot-toast";
 import ThemeToggle from "@/components/ThemeToggle";
 
 import { Box, Button, Container, TextField, Typography, Paper, Link } from "@mui/material";
-
+export const metadata = {
+  title: "Login – Red Social",
+};
 export default function LoginPage() {
   const router = useRouter();
   const { setUser } = useAuth();
-
+  {console.log("dirección de google", `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`)}
   const {
     register,
     handleSubmit,
@@ -122,6 +124,7 @@ export default function LoginPage() {
      color="inherit"
      
      onClick={() => (window.location.href = `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`)}
+   
      startIcon={<img src="/google-icon.png" alt="Google" width={20} height={20} />}
      sx={{
        borderColor: "#ccc",

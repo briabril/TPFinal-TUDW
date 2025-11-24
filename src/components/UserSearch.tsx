@@ -14,6 +14,7 @@ import {
   ListItemText,
   Avatar,
   Box,
+  Typography,
 } from "@mui/material";
 
 type Props = {
@@ -53,6 +54,7 @@ export default function UserSearch({ onSelect }: Props) {
 
   return (
     <Box sx={{ position: "relative", width: "100%" }}>
+      <Typography variant="h5" component="h1">Mensajes</Typography>
       <TextField
         fullWidth
         size="small"
@@ -61,6 +63,7 @@ export default function UserSearch({ onSelect }: Props) {
         placeholder="Buscar usuario"
         variant="outlined"
         aria-label="Buscar usuario"
+        label="Buscar Usuario"
       />
 
       {results.length > 0 && (

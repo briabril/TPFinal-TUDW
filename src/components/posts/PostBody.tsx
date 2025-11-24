@@ -288,7 +288,7 @@ export default function PostBody({ post, description, isOwn = false, onDelete, o
           {showTranslateButton && (
             <Tooltip title="Traducir al idioma de tu navegador">
               <span>
-                <IconButton onClick={handleTranslateClick} disabled={tlLoading}>
+                <IconButton onClick={handleTranslateClick} disabled={tlLoading} aria-label="Traducir" title="Traducir">
                   {tlLoading ? <CircularProgress size={18} /> : <Translate />}
                 </IconButton>
               </span>

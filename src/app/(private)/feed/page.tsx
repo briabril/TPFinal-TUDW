@@ -5,7 +5,9 @@ import PostList from "@/components/posts/PostList"
 import ThemeToggle from "@/components/ThemeToggle"
 import CrearPost from "@/components/CrearPost"
 import { Box, Typography, Button, ButtonGroup } from "@mui/material"
-
+export const metadata = {
+  title: "Feed – Red Social",
+};
 export default function UserFeed() {
   const [initialMode, setInitialMode] = useState<"all" | "following">("all")
   const [hydrated, setHydrated] = useState(false)

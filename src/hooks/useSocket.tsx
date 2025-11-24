@@ -1,10 +1,11 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import api from "@/api";
 
 export function useSocket() {
   const socketRef = useRef<Socket | null>(null);
+  const [, setReadyTick] = useState(0);
 
   useEffect(() => {
     let mounted = true;
@@ -48,12 +49,19 @@ export function useSocket() {
         });
 
         socketRef.current = socket;
+        setReadyTick((t) => t + 1);
 
-        socket.on("connect", () => {});
-        socket.on("disconnect", () => {});
-        socket.on("connect_error", () => {});
+        socket.on("connect", () => {
+          console.debug("[useSocket] connected", socket.id);
+        });
+        socket.on("disconnect", (reason) => {
+          console.debug("[useSocket] disconnected", reason);
+        });
+        socket.on("connect_error", (err) => {
+          console.debug("[useSocket] connect_error", err?.message || err);
+        });
       } catch (err) {
-        
+        console.debug("[useSocket] setup error", err);
       }
     };
 

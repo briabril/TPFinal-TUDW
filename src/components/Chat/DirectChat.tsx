@@ -21,13 +21,15 @@ export default function DirectChat({ otherUserId, otherUserDisplay }: Props) {
   useEffect(() => {
     const socket = socketRef.current;
     if (!user) return;
-
+    console.debug('[DirectChat] socketRef.current at effect start', socket);
     const onConnect = () => {
       const s = socketRef.current;
       if (s) s.emit("join_dm", otherUserId);
+      console.debug('[DirectChat] onConnect emitted join_dm', otherUserId);
     };
 
     const handler = (msg: any) => {
+      console.debug('[DirectChat] received dm_message', msg);
       setMessages((m) => {
         // Si un mensaje con el mismo id ya existe, ignorar
         if (msg.id && m.some((ex) => ex.id === msg.id)) return m;
@@ -60,6 +62,7 @@ export default function DirectChat({ otherUserId, otherUserDisplay }: Props) {
     if (socket) {
       socket.on("connect", onConnect);
       socket.on("dm_message", handler);
+      console.debug('[DirectChat] attached socket listeners, connected=', socket.connected, 'id=', socket.id);
       if (socket.connected) socket.emit("join_dm", otherUserId);
     }
 
@@ -67,6 +70,7 @@ export default function DirectChat({ otherUserId, otherUserDisplay }: Props) {
       if (socket) {
         socket.off("connect", onConnect);
         socket.off("dm_message", handler);
+        console.debug('[DirectChat] detached socket listeners');
       }
     };
   }, [socketRef.current, otherUserId, user]);
@@ -126,10 +130,13 @@ export default function DirectChat({ otherUserId, otherUserDisplay }: Props) {
 
         try {
           if (socket && socket.connected) {
+            console.debug('[DirectChat] fallback emit dm_message via socket', { to: otherUserId, text: trimmed });
             socket.emit('dm_message', { to: otherUserId, text: trimmed });
           } else {
+            console.debug('[DirectChat] socket not connected for fallback emit');
           }
         } catch (e) {
+          console.debug('[DirectChat] fallback emit error', e);
         }
       }
     })();

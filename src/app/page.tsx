@@ -26,7 +26,7 @@ function PublicHome() {
      
       <Paper elevation={6} sx={{ p: 5, borderRadius: 3, textAlign: "center" }}>
         <Typography variant="h4" fontWeight="bold" color="text.primary" mb={2}>
-          Bienvenido a "la red" social
+          Bienvenido a Bloop
         </Typography>
         <Typography color="text.secondary" mb={4}>
           Conéctate con tus amigos y comparte momentos especiales

@@ -2,6 +2,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { commentSchema, CommentFormData } from "../../schemas/commentSchema";
 import { TextField, Button, Avatar, Paper, CircularProgress, Box, Stack } from "@mui/material";
+import getImageUrl from "@/utils/getImageUrl";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 interface Props {
@@ -41,7 +42,7 @@ const {user} = useAuth();
     >
       <Stack direction="row" spacing={1.5}>
         <Avatar
-          src={user?.profile_picture_url || "../../default-avatar-icon.jpg"}
+          src={getImageUrl(user?.profile_picture_url) ?? "../../default-avatar-icon.jpg"}
           sx={{ width: 36, height: 36 }}
         />
 

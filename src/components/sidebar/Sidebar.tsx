@@ -15,6 +15,7 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
+import getImageUrl from "@/utils/getImageUrl";
 import {
   Home,
   User,
@@ -125,17 +126,18 @@ const [weather, setWeather] = React.useState<any | null>(null);
       }}
     >
       <div>
-        <Typography
-          variant="h5"
-          sx={{
-            fontWeight: "bold",
-            mb: 2,
-            color: "primary.main",
-            textAlign: "center",
-          }}
-        >
-          La Red
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 2 }}>
+          <img src="/logo.png" alt="Bloop" style={{ width: 28, height: 28, objectFit: 'contain' }} onError={(e: any)=>{e.target.style.display='none'}} />
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: "bold",
+              color: "primary.main",
+            }}
+          >
+            Bloop
+          </Typography>
+        </Box>
 
         <Box sx={{ mb: 2 }}>
           <UserSearch />
@@ -191,7 +193,7 @@ const [weather, setWeather] = React.useState<any | null>(null);
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Avatar
-                src={user.profile_picture_url ?? undefined}
+                src={getImageUrl(user.profile_picture_url) ?? undefined}
                 alt={user.displayname ?? user.username}
                 sx={{ width: 36, height: 36 }}
               />

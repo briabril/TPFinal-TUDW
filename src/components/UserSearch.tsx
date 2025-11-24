@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/api";
 import type { User } from "@/types/user";
+import getImageUrl from "@/utils/getImageUrl";
 
 import {
   TextField,
@@ -87,7 +88,7 @@ export default function UserSearch({ onSelect }: Props) {
               >
                 <ListItemAvatar>
                   <Avatar
-                    src={u.profile_picture_url ?? undefined}
+                    src={getImageUrl(u.profile_picture_url) ?? undefined}
                     alt={u.displayname ?? u.username}
                     sx={{ width: 40, height: 40 }}
                   />

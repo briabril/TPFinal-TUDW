@@ -5,9 +5,7 @@ import UserSearch from "@/components/UserSearch";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/api";
 import DirectChat from "@/components/Chat/DirectChat";
-export const metadata = {
-  title: "Mensajes – Red Social",
-};
+
 export default function MessagesPage() {
   const { user } = useAuth();
   const [following, setFollowing] = useState<any[]>([]);

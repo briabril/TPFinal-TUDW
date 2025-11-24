@@ -9,9 +9,7 @@ import toast from "react-hot-toast";
 import { Box, Button, Container, TextField, Typography, Paper, Link } from "@mui/material";
 import ThemeToggle from "@/components/ThemeToggle";
 
-export const metadata = {
-  title: "Register – Red Social",
-};
+
 export default function RegisterPage() {
   const router = useRouter();
 

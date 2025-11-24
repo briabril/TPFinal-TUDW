@@ -10,9 +10,7 @@ import toast from "react-hot-toast";
 import ThemeToggle from "@/components/ThemeToggle";
 
 import { Box, Button, Container, TextField, Typography, Paper, Link } from "@mui/material";
-export const metadata = {
-  title: "Login – Red Social",
-};
+
 export default function LoginPage() {
   const router = useRouter();
   const { setUser } = useAuth();

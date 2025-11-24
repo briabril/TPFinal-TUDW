@@ -9,9 +9,7 @@ import { Button, TextField, Container, Paper, Typography, Box } from "@mui/mater
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import Autocomplete from "@mui/material/Autocomplete";
-export const metadata = {
-  title: "Editar Perfil – Red Social",
-};
+
 export default function EditProfilePage() {
   const {
     register,

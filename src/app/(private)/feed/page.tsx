@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react"
 import PostList from "@/components/posts/PostList"
 import ThemeToggle from "@/components/ThemeToggle"
 import CrearPost from "@/components/CrearPost"
-import { Box, Typography, Button, ButtonGroup } from "@mui/material"
+import { Box, Typography, Button, ButtonGroup, useTheme } from "@mui/material"
 
 export default function UserFeed() {
   const [initialMode, setInitialMode] = useState<"all" | "following">("all")
@@ -34,6 +34,7 @@ export default function UserFeed() {
   }, [initialMode, hydrated])
   
   if (!hydrated) return null
+  const theme = useTheme();
 
   return (
     <Box
@@ -79,12 +80,14 @@ export default function UserFeed() {
             <Button
               variant={initialMode === "all" ? "contained" : "outlined"}
               onClick={() => setInitialMode("all")}
+              sx={{ color: initialMode === 'all' && theme.palette.mode === 'dark' ? 'common.white' : undefined }}
             >
               Todos
             </Button>
             <Button
               variant={initialMode === "following" ? "contained" : "outlined"}
               onClick={() => setInitialMode("following")}
+              sx={{ color: initialMode === 'following' && theme.palette.mode === 'dark' ? 'common.white' : undefined }}
             >
               Seguidos
             </Button>

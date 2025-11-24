@@ -157,6 +157,10 @@ export default function ProfileHeader({
     variant="outlined"
     component={Link}
     href={`/${profile.username}/edit`}
+    sx={(theme) => ({
+      color: theme.palette.mode === 'dark' ? 'common.white' : undefined,
+      borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : undefined,
+    })}
   >
     Editar Perfil
   </Button>

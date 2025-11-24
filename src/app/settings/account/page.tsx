@@ -5,7 +5,7 @@ import Sidebar from "@/components/sidebar/Sidebar";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { editProfilSchema, ProfileData } from "../../../schemas/editProfile";
-import { Button, TextField, Container, Paper, Typography, Box } from "@mui/material";
+import { Button, TextField, Paper, Typography, Box, CircularProgress } from "@mui/material";
 import toast from "react-hot-toast";
 import AvatarCropper from "@/components/AvatarCropper";
 import { useAuth } from "@/context/AuthContext";
@@ -157,101 +157,103 @@ export default function EditProfilePage() {
     toast.success("Imagen recortada lista para guardar");
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-black">
-        <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
-          <span className="text-white text-lg">Cargando perfil...</span>
-        </div>
-      </div>
-    );
-  }
+  // Nota: mostramos el estado de carga dentro del Paper principal
+  // para evitar que la página reemplace todo el layout (sidebar + settings)
+  // lo que provocaba un pequeño desfase al navegar.
 
   return (
-    <Container maxWidth="lg" sx={{ minHeight: "100vh", display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
+    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "row", justifyContent: "flex-start", alignItems: "flex-start", width: '100%' }}>
       <Sidebar />
-    <SettingsSidebar/>
-      <Paper elevation={6} sx={{ p: 5, flex: 1, width: "100%", display: "flex", flexDirection: "column", gap: 3, minHeight: "100vh" }}>
+      <SettingsSidebar />
+      <Paper elevation={6} sx={{ p: 5, flex: 1, display: "flex", flexDirection: "column", gap: 3, minHeight: "100vh" }}>
         <Typography variant="h3" align="center" fontWeight="bold" gutterBottom>
           Editar Perfil
         </Typography>
 
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} display="flex" flexDirection="column" gap={2.5}>
-          {/* País */}
-          <Controller
-            name="country_iso"
-            control={control}
-            render={({ field }) => {
-              // selectedOption: objeto que Autocomplete espera
-              const selectedOption = countries.find((c) => c.value === field.value) || null;
-              return (
-                <Autocomplete
-                 key={countryIso} 
-                  options={countries}
-                  getOptionLabel={(opt) => opt.label}
-                  isOptionEqualToValue={(option, value) => option.value === value?.value}
-                  value={selectedOption}
-                  onChange={(_, selected) => {
-                    const iso = selected?.value || "";
-                    field.onChange(iso); 
-                    setValue("city", "");
-                  }}
-                  renderInput={(params) => <TextField {...params} label="País" />}
-                />
-              );
-            }}
-          />
-
-          {/* Ciudad */}
-          <Controller
-            name="city"
-            control={control}
-            render={({ field }) => {
-              const selectedCity = cities.find((c) => c.value === field.value) || null;
-              return (
-                <Autocomplete
-                  freeSolo
-                  options={cities}
-                  getOptionLabel={(opt) => (typeof opt === "string" ? opt : opt.label)}
-                  isOptionEqualToValue={(option, value) => option.value === value?.value}
-                  value={selectedCity || (field.value ? { label: field.value, value: field.value } : null)}
-                  onChange={(_, selected) => field.onChange((selected as any)?.value || "")}
-                  onInputChange={(_, input) => {
-                    // update field with typed value even if it's not in list
-                    if (input !== undefined) field.onChange(input);
-                  }}
-                  renderInput={(params) => <TextField {...params} label="Ciudad (escribe o selecciona)" />}
-                />
-              );
-            }}
-          />
-
-          <TextField label="Nombre de Usuario" fullWidth {...register("displayname")} error={!!errors.displayname} helperText={errors.displayname?.message} />
-
-          <Box>
-            <Box display="flex" justifyContent="space-between" alignItems="center">
-              <Typography variant="subtitle1">Bio</Typography>
-              <Typography variant="caption" color={bioLength > maxBioLength ? "error" : "text.secondary"}>
-                {bioLength}/{maxBioLength}
-              </Typography>
+        {loading ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <CircularProgress size={48} sx={{ mb: 2 }} />
+              <Typography>Cargando perfil...</Typography>
             </Box>
-            <TextField label="Bio" fullWidth {...register("bio")} error={!!errors.bio} helperText={errors.bio?.message || (bioLength > maxBioLength ? "Has superado el máximo de 160 caracteres" : "")} />
           </Box>
+        ) : (
+          <Box component="form" onSubmit={handleSubmit(onSubmit)} display="flex" flexDirection="column" gap={2.5}>
+            {/* País */}
+            <Controller
+              name="country_iso"
+              control={control}
+              render={({ field }) => {
+                // selectedOption: objeto que Autocomplete espera
+                const selectedOption = countries.find((c) => c.value === field.value) || null;
+                return (
+                  <Autocomplete
+                   key={countryIso}
+                    options={countries}
+                    getOptionLabel={(opt) => opt.label}
+                    isOptionEqualToValue={(option, value) => option.value === value?.value}
+                    value={selectedOption}
+                    onChange={(_, selected) => {
+                      const iso = selected?.value || "";
+                      field.onChange(iso);
+                      setValue("city", "");
+                    }}
+                    renderInput={(params) => <TextField {...params} label="País" />}
+                  />
+                );
+              }}
+            />
 
-          <TextField label="Contraseña anterior" fullWidth {...register("password")} error={!!errors.password} helperText={errors.password?.message} />
-          <TextField label="Nueva contraseña" fullWidth {...register("new_password")} error={!!errors.new_password} helperText={errors.new_password?.message} />
+            {/* Ciudad */}
+            <Controller
+              name="city"
+              control={control}
+              render={({ field }) => {
+                const selectedCity = cities.find((c) => c.value === field.value) || null;
+                return (
+                  <Autocomplete
+                    freeSolo
+                    options={cities}
+                    getOptionLabel={(opt) => (typeof opt === "string" ? opt : opt.label)}
+                    isOptionEqualToValue={(option, value) => option.value === value?.value}
+                    value={selectedCity || (field.value ? { label: field.value, value: field.value } : null)}
+                    onChange={(_, selected) => field.onChange((selected as any)?.value || "")}
+                    onInputChange={(_, input) => {
+                      // update field with typed value even if it's not in list
+                      if (input !== undefined) field.onChange(input);
+                    }}
+                    renderInput={(params) => <TextField {...params} label="Ciudad (escribe o selecciona)" />}
+                  />
+                );
+              }}
+            />
 
-          <label htmlFor="profile_picture_url">Elija una foto de perfil:</label>
-          <input type="file" id="profile_picture_url" accept="image/png, image/jpeg" onChange={handleFileSelect} />
-          {errors.profile_picture_url && <p className="text-red-600">{errors.profile_picture_url.message as string}</p>}
-          <AvatarCropper open={cropOpen} imageSrc={imageSrc} onClose={() => { setCropOpen(false); if (imageSrc) { URL.revokeObjectURL(imageSrc); setImageSrc(null); } }} onCropped={handleCropped} />
+            <TextField label="Nombre de Usuario" fullWidth {...register("displayname")} error={!!errors.displayname} helperText={errors.displayname?.message} />
 
-          <Button type="submit" variant="contained" color="primary" size="large" disabled={isSubmitting} sx={{ borderRadius: 2, py: 1.5, fontWeight: 600 }}>
-            {isSubmitting ? "Guardando..." : "Guardar"}
-          </Button>
-        </Box>
+            <Box>
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Typography variant="subtitle1">Bio</Typography>
+                <Typography variant="caption" color={bioLength > maxBioLength ? "error" : "text.secondary"}>
+                  {bioLength}/{maxBioLength}
+                </Typography>
+              </Box>
+              <TextField label="Bio" fullWidth {...register("bio")} error={!!errors.bio} helperText={errors.bio?.message || (bioLength > maxBioLength ? "Has superado el máximo de 160 caracteres" : "")} />
+            </Box>
+
+            <TextField label="Contraseña anterior" fullWidth {...register("password")} error={!!errors.password} helperText={errors.password?.message} />
+            <TextField label="Nueva contraseña" fullWidth {...register("new_password")} error={!!errors.new_password} helperText={errors.new_password?.message} />
+
+            <label htmlFor="profile_picture_url">Elija una foto de perfil:</label>
+            <input type="file" id="profile_picture_url" accept="image/png, image/jpeg" onChange={handleFileSelect} />
+            {errors.profile_picture_url && <p className="text-red-600">{errors.profile_picture_url.message as string}</p>}
+            <AvatarCropper open={cropOpen} imageSrc={imageSrc} onClose={() => { setCropOpen(false); if (imageSrc) { URL.revokeObjectURL(imageSrc); setImageSrc(null); } }} onCropped={handleCropped} />
+
+            <Button type="submit" variant="contained" color="primary" size="large" disabled={isSubmitting} sx={{ borderRadius: 2, py: 1.5, fontWeight: 600 }}>
+              {isSubmitting ? "Guardando..." : "Guardar"}
+            </Button>
+          </Box>
+        )}
       </Paper>
-    </Container>
+    </Box>
   );
 }

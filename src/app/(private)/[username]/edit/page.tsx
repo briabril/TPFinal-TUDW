@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import api from "../../../../api/index";
-import Sidebar from "@/components/sidebar/Sidebar";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { editProfilSchema, ProfileData } from "../../../../schemas/editProfile";
@@ -151,7 +150,7 @@ export default function EditProfilePage() {
 
   return (
     <Container maxWidth="lg" sx={{ minHeight: "100vh", display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
-      <Sidebar />
+      
       <Paper elevation={6} sx={{ p: 5, flex: 1, width: "100%", display: "flex", flexDirection: "column", gap: 3, minHeight: "100vh" }}>
         <Typography variant="h3" align="center" fontWeight="bold" gutterBottom>
           Editar Perfil

@@ -14,6 +14,7 @@ import {
   ListItemIcon,
   ListItemText,
   Typography,
+  useTheme,
 } from "@mui/material";
 import getImageUrl from "@/utils/getImageUrl";
 import {
@@ -33,6 +34,8 @@ import { fetchWeatherByCity } from "@/services/weatherService";
 export default function Sidebar() {
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
 const [weather, setWeather] = React.useState<any | null>(null);
 
 
@@ -89,20 +92,20 @@ const [weather, setWeather] = React.useState<any | null>(null);
             mb: 0.5,
             transition: "all 0.2s ease",
             backgroundColor: active ? "primary.main" : "transparent",
-            color: active ? "primary.contrastText" : "text.primary",
+            color: active ? (isDark ? "common.white" : "primary.contrastText") : "text.primary",
             "&:hover": {
               backgroundColor: active ? "primary.dark" : "action.hover",
             },
           }}
         >
           <ListItemIcon
-            sx={{ color: active ? "primary.contrastText" : "text.secondary", minWidth: 36 }}
+            sx={{ color: active ? (isDark ? "common.white" : "primary.contrastText") : "text.secondary", minWidth: 36 }}
           >
             {icon}
           </ListItemIcon>
           <ListItemText
             primary={
-              <Typography fontWeight={active ? 600 : 500}>{text}</Typography>
+              <Typography sx={{ color: active ? (isDark ? 'common.white' : undefined) : undefined }} fontWeight={active ? 600 : 500}>{text}</Typography>
             }
           />
         </ListItemButton>

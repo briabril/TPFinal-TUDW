@@ -118,13 +118,11 @@ useEffect(() => {
 
   const handleSubmit = async (data: CommentFormData, parentId?: string | number | null) => {
     try{
-        const res = await api.post("/comments", {
+        const res = await api.post(`/comments/post/${postId}`, {
             author_id: authorId,
-            post_id: postId,
             text: data.text,
             parent_id : parentId || null
-        },
-    {withCredentials: true})
+          }, { withCredentials: true })
     return res.data;
     }catch(error){
         toast.error("Error al publicar comentario")

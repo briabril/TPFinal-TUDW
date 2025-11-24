@@ -56,6 +56,11 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
       setMessage({ type: 'error', text: 'Debes iniciar sesión' });
       return;
     }
+    // Validación: se requiere texto o al menos 1 archivo
+    if ((contenido || "").trim().length === 0 && files.length === 0) {
+      setMessage({ type: 'error', text: 'La publicación debe tener texto o al menos un archivo adjunto' });
+      return;
+    }
     setLoading(true);
     try {
       const formData = new FormData();
@@ -104,6 +109,8 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
     })();
     return () => { mounted = false; };
   }, [attachWeather, user?.city, user?.country_iso]);
+
+  const canSubmit = ((contenido || "").trim().length > 0) || files.length > 0;
 
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, width: '100%', maxWidth: 1100, mx: 'auto' }}>
@@ -210,7 +217,7 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
           
 
           <Stack direction="row" spacing={2} sx={{ pt: 1 }}>
-            <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading}>
+            <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading || !canSubmit}>
               {loading ? (
                 <>
                   <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} /> Publicando...

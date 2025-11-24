@@ -48,7 +48,17 @@ export default async function middleware(req: NextRequest) {
       },
     });
 
-    if (!backendResp.ok) throw new Error("Unauthorized");
+    if (!backendResp.ok) {
+      let bodyText = "";
+      try {
+        const ct = backendResp.headers.get("content-type") || "";
+        bodyText = ct.includes("application/json") ? JSON.stringify(await backendResp.json()) : await backendResp.text();
+      } catch (e) {
+        bodyText = "(failed to read body)";
+      }
+      console.warn("Auth proxy returned non-ok:", backendResp.status, bodyText);
+      throw new Error("Unauthorized");
+    }
 
     const me = await backendResp.json();
 

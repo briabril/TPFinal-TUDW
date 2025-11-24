@@ -117,15 +117,12 @@ export default function ProfileHeader({
               setFollowStatus={setFollowStatus}
             />
           )}
-{profile.city || profile.country_iso ? (
+{profile.country_iso ? (
   <Typography variant="body2" color="text.secondary" display="flex" sx={{ mt: 0.5, justifyContent: "center", alignItems: "center"}}>
-    {profile.city && <>{profile.city}{profile.country_iso && ", "}</>}
     {profile.country_iso && (
       <>
-      
-        { /* opcional: mostrar bandera si tenés flagUrl en profile */ }
         {flag ? (
-          <img src={flag} alt={profile.country_iso} style={{width:18, marginLeft:6}}/>
+          <img src={flag} alt={profile.country_iso} style={{ width: 18, marginLeft: 6 }} />
         ) : (
           <strong>{profile.country_iso}</strong>
         )}

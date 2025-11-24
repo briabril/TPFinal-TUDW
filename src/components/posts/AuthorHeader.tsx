@@ -2,6 +2,7 @@
 
 import  { useEffect, useState } from "react";
 import { Avatar, Box, Typography, Stack } from "@mui/material";
+import getImageUrl from "@/utils/getImageUrl";
 import { Author } from "../../types/post";
 import WeatherBadge from "@/components/common/WeatherBadge";
 import { fetchWeatherByCity } from "@/services/weatherService";
@@ -90,7 +91,7 @@ export default function AuthorHeader({ author, sharedBy, actions, weather, postI
       {/* Avatar del autor original */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, flex: 1 }}>
         <Avatar
-          src={author.profile_picture_url ?? "/default-avatar.png"}
+          src={getImageUrl(author.profile_picture_url) ?? "/default-avatar.png"}
           alt={author.displayname ?? author.username}
           sx={{
             width: 56,

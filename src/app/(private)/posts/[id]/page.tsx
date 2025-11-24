@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import api from "../../../../api/index";
 import {
   Card,
@@ -18,6 +18,7 @@ import { Post } from "../../../../types";
 
 const PostDetail = () => {
   const { id } = useParams();
+  const router = useRouter();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -48,10 +49,9 @@ const PostDetail = () => {
   const isOwn = Boolean(user && String(post.author.id) === String(user.id));
 
   const handleDelete = async () => {
-    if (!confirm("¿Eliminar post?")) return;
     try {
       await (await import("@/services/postService")).deletePost(post.id);
-      window.location.href = "/feed";
+      router.push("/feed");
     } catch (err) {
       console.error(err);
     }
@@ -77,6 +77,7 @@ const PostDetail = () => {
               onReport={handleReport}
               loading={false}
               isOwn={isOwn}
+              postId={post.id}
             />
           }
           postId={post.id}

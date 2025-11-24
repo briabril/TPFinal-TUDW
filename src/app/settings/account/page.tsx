@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { editProfilSchema, ProfileData } from "../../../schemas/editProfile";
 import { Button, TextField, Container, Paper, Typography, Box } from "@mui/material";
 import toast from "react-hot-toast";
+import AvatarCropper from "@/components/AvatarCropper";
 import { useAuth } from "@/context/AuthContext";
 import Autocomplete from "@mui/material/Autocomplete";
 import SettingsSidebar from "@/components/sidebar/SettingsSidebar";
@@ -138,6 +139,24 @@ export default function EditProfilePage() {
     }
   };
 
+  // avatar cropper
+  const [cropOpen, setCropOpen] = useState(false);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    const url = URL.createObjectURL(f);
+    setImageSrc(url);
+    setCropOpen(true);
+    e.currentTarget.value = "";
+  };
+
+  const handleCropped = (file: File) => {
+    setValue("profile_picture_url", file);
+    toast.success("Imagen recortada lista para guardar");
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen text-black">
@@ -192,12 +211,17 @@ export default function EditProfilePage() {
               const selectedCity = cities.find((c) => c.value === field.value) || null;
               return (
                 <Autocomplete
+                  freeSolo
                   options={cities}
-                  getOptionLabel={(opt) => opt.label}
+                  getOptionLabel={(opt) => (typeof opt === "string" ? opt : opt.label)}
                   isOptionEqualToValue={(option, value) => option.value === value?.value}
-                  value={selectedCity}
-                  onChange={(_, selected) => field.onChange(selected?.value || "")}
-                  renderInput={(params) => <TextField {...params} label="Ciudad" />}
+                  value={selectedCity || (field.value ? { label: field.value, value: field.value } : null)}
+                  onChange={(_, selected) => field.onChange((selected as any)?.value || "")}
+                  onInputChange={(_, input) => {
+                    // update field with typed value even if it's not in list
+                    if (input !== undefined) field.onChange(input);
+                  }}
+                  renderInput={(params) => <TextField {...params} label="Ciudad (escribe o selecciona)" />}
                 />
               );
             }}
@@ -219,8 +243,9 @@ export default function EditProfilePage() {
           <TextField label="Nueva contraseña" fullWidth {...register("new_password")} error={!!errors.new_password} helperText={errors.new_password?.message} />
 
           <label htmlFor="profile_picture_url">Elija una foto de perfil:</label>
-          <input type="file" id="profile_picture_url" {...register("profile_picture_url")} accept="image/png, image/jpeg" />
+          <input type="file" id="profile_picture_url" accept="image/png, image/jpeg" onChange={handleFileSelect} />
           {errors.profile_picture_url && <p className="text-red-600">{errors.profile_picture_url.message as string}</p>}
+          <AvatarCropper open={cropOpen} imageSrc={imageSrc} onClose={() => { setCropOpen(false); if (imageSrc) { URL.revokeObjectURL(imageSrc); setImageSrc(null); } }} onCropped={handleCropped} />
 
           <Button type="submit" variant="contained" color="primary" size="large" disabled={isSubmitting} sx={{ borderRadius: 2, py: 1.5, fontWeight: 600 }}>
             {isSubmitting ? "Guardando..." : "Guardar"}

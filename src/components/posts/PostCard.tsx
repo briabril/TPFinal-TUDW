@@ -6,6 +6,7 @@ import PostBody from "./PostBody";
 import PostActions from "./PostActions";
 import SharedPost from "./SharedPost";
 import { Post } from "../../types/post";
+import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import WeatherBackground from "../common/WeatherBackground";
 
@@ -21,11 +22,15 @@ export default function PostCard({ post }: { post: Post }) {
   const isOwn = Boolean(user && String(post.author.id) === String(user.id));
 
   const handleDelete = async () => {
-    if (!confirm("¿Eliminar post?")) return;
+    // deletion confirmation is handled by PostActions dialog
     setLoading(true);
     try {
       const res = await (await import("@/services/postService")).deletePost(post.id);
-      window.location.reload();
+      
+      try {
+        window.dispatchEvent(new CustomEvent('post-deleted', { detail: post.id }));
+      } catch (e) {}
+      toast.success('Post eliminado');
     } catch (err: any) {
       console.error(err);
       setLoading(false);
@@ -36,7 +41,7 @@ export default function PostCard({ post }: { post: Post }) {
     setLoading(true);
     try {
       await (await import("@/services/postService")).reportPost(post.id, reason);
-      // optional: show toast
+      
     } catch (err: any) {
       console.error(err);
     } finally {
@@ -76,6 +81,7 @@ export default function PostCard({ post }: { post: Post }) {
                   onReport={handleReport}
                   loading={loading}
                   isOwn={isOwn}
+                  postId={post.id}
                 />
               }
               postId={post.id}

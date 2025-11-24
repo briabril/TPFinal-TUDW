@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import api from "../api/index"
 import { Post } from "../types/post"
+import socket from "@/socket"
 
 export function usePosts(mode: string, username?: string) {
     const [posts, setPosts] = useState<Post[]>([])
@@ -12,7 +13,7 @@ export function usePosts(mode: string, username?: string) {
             
         localStorage.setItem("postsMode", mode)
         }
-    }, [mode])
+    }, [mode, username])
 
 
 
@@ -40,6 +41,53 @@ export function usePosts(mode: string, username?: string) {
 
         fetchPosts()
     }, [mode])
+
+    useEffect(() => {
+        const handleNewPost = (newPost: Post) => {
+            setPosts((prev) => {
+                // evita duplicados
+                if (prev.find((p) => p.id === newPost.id)) return prev
+                return [newPost, ...prev]
+            })
+        }
+
+        const handleUpdatePost = (updated: Post) => {
+            setPosts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)))
+        }
+
+        const handleDeletePost = (id: string | number) => {
+            setPosts((prev) => prev.filter((p) => p.id !== id))
+        }
+
+        try {
+            socket.on("new-post", handleNewPost)
+            socket.on("update-post", handleUpdatePost)
+            socket.on("delete-post", handleDeletePost)
+        } catch (e) {
+        }
+
+        const windowNew = (e: Event) => {
+            const detail = (e as CustomEvent).detail as Post | undefined
+            if (detail) handleNewPost(detail)
+        }
+            const windowDelete = (e: Event) => {
+                const id = (e as CustomEvent).detail as string | number | undefined
+                if (id) handleDeletePost(id)
+            }
+
+        window.addEventListener("post-created", windowNew as EventListener)
+            window.addEventListener("post-deleted", windowDelete as EventListener)
+
+        return () => {
+            try {
+                socket.off("new-post", handleNewPost)
+                socket.off("update-post", handleUpdatePost)
+                socket.off("delete-post", handleDeletePost)
+            } catch (e) {}
+            window.removeEventListener("post-created", windowNew as EventListener)
+                window.removeEventListener("post-deleted", windowDelete as EventListener)
+        }
+    }, [])
 
     return { posts, error, loading }
 }

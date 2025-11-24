@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { IconButton, Menu, MenuItem, Box } from "@mui/material";
-import { MoreVert, Edit, Delete, Flag } from "@mui/icons-material";
+import { IconButton, Menu, MenuItem, Box, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from "@mui/material";
+import { MoreVert, Edit, Delete, Flag, ContentCopy } from "@mui/icons-material";
+import toast from "react-hot-toast";
 import ReportDialog from "./ReportDialog";
 
 interface PostActionsProps {
@@ -9,6 +10,7 @@ interface PostActionsProps {
     onReport: (reason: string) => void;
     loading?: boolean;
     isOwn: boolean;
+    postId?: string | number;
 }
 
 export default function PostActions({
@@ -17,9 +19,11 @@ export default function PostActions({
     onReport,
     loading,
     isOwn,
+    postId,
 }: PostActionsProps) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [reportOpen, setReportOpen] = useState(false);
+    const [deleteOpen, setDeleteOpen] = useState(false);
 
     const open = Boolean(anchorEl);
 
@@ -60,7 +64,7 @@ export default function PostActions({
                         <MenuItem
                             key="delete"
                             onClick={() => {
-                                onDelete();
+                                setDeleteOpen(true);
                                 handleMenuClose();
                             }}
                             disabled={loading}
@@ -81,6 +85,32 @@ export default function PostActions({
                         <Flag fontSize="small" sx={{ mr: 1 }} /> Reportar
                     </MenuItem>
                 )}
+                <MenuItem
+                    onClick={async () => {
+                        try {
+                            const origin = typeof window !== 'undefined' ? window.location.origin : '';
+                            const url = `${origin}/posts/${postId}`;
+                            if (navigator.clipboard && navigator.clipboard.writeText) {
+                                await navigator.clipboard.writeText(url);
+                            } else {
+                                const ta = document.createElement('textarea');
+                                ta.value = url;
+                                document.body.appendChild(ta);
+                                ta.select();
+                                document.execCommand('copy');
+                                document.body.removeChild(ta);
+                            }
+                            toast.success('Enlace copiado al portapapeles');
+                        } catch (e) {
+                            console.error('Copy failed', e);
+                            toast.error('No se pudo copiar el enlace');
+                        } finally {
+                            handleMenuClose();
+                        }
+                    }}
+                >
+                    <ContentCopy fontSize="small" sx={{ mr: 1 }} /> Compartir
+                </MenuItem>
             </Menu>
 
             <ReportDialog
@@ -88,6 +118,34 @@ export default function PostActions({
                 onClose={() => setReportOpen(false)}
                 onSubmit={onReport}
             />
+
+            <Dialog
+                open={deleteOpen}
+                onClose={() => setDeleteOpen(false)}
+                aria-labelledby="delete-post-dialog-title"
+            >
+                <DialogTitle id="delete-post-dialog-title">Eliminar post</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        ¿Estás seguro que querés eliminar este post? Esta acción no se puede deshacer.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDeleteOpen(false)}>Cancelar</Button>
+                    <Button
+                        color="error"
+                        onClick={() => {
+                            try {
+                                onDelete();
+                            } finally {
+                                setDeleteOpen(false);
+                            }
+                        }}
+                    >
+                        Eliminar
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }

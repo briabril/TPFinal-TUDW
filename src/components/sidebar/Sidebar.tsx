@@ -15,6 +15,7 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
+import getImageUrl from "@/utils/getImageUrl";
 import {
   Home,
   User,
@@ -88,16 +89,14 @@ const [weather, setWeather] = React.useState<any | null>(null);
             mb: 0.5,
             transition: "all 0.2s ease",
             backgroundColor: active ? "primary.main" : "transparent",
-            color: active ? "#fff" : "text.primary",
+            color: active ? "primary.contrastText" : "text.primary",
             "&:hover": {
-              backgroundColor: active
-                ? "primary.dark"
-                : "rgba(25,118,210,0.08)",
+              backgroundColor: active ? "primary.dark" : "action.hover",
             },
           }}
         >
           <ListItemIcon
-            sx={{ color: active ? "#fff" : "text.secondary", minWidth: 36 }}
+            sx={{ color: active ? "primary.contrastText" : "text.secondary", minWidth: 36 }}
           >
             {icon}
           </ListItemIcon>
@@ -117,28 +116,27 @@ const [weather, setWeather] = React.useState<any | null>(null);
         height: "100vh",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
-        borderRight: "1px solid #e0e0e0",
+        justifyContent: "flex-start",
+        borderRight: "1px solid",
+        borderColor: "divider",
         boxShadow: "2px 0 8px rgba(0,0,0,0.05)",
-        p: 2,
+        p: 1,
         position: "sticky",
         top: 0,
       }}
     >
       <div>
-        <Typography
-          variant="h5"
-          sx={{
-            fontWeight: "bold",
-            mb: 2,
-            color: "primary.main",
-            textAlign: "center",
-          }}
-        >
-          La Red
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2, mt: 2 }}>
+          <img
+            src="/logo.png"
+            alt="Bloop"
+            title="Bloop"
+            style={{ width: 130, objectFit: 'contain', display: 'block' }}
+            onError={(e: any) => { e.target.style.display = 'none'; }}
+          />
+        </Box>
 
-        <Box sx={{ mb: 2 }}>
+        <Box sx={{ mb: 1 }}>
           <UserSearch />
         </Box>
 
@@ -172,6 +170,7 @@ const [weather, setWeather] = React.useState<any | null>(null);
             justifyContent: "space-between",
             p: 1.5,
             borderRadius: 2,
+            mt: "auto",
           }}
         >
           
@@ -192,7 +191,7 @@ const [weather, setWeather] = React.useState<any | null>(null);
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Avatar
-                src={user.profile_picture_url ?? undefined}
+                src={getImageUrl(user.profile_picture_url) ?? undefined}
                 alt={user.displayname ?? user.username}
                 sx={{ width: 36, height: 36 }}
               />

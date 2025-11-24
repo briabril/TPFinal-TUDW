@@ -116,27 +116,27 @@ const [weather, setWeather] = React.useState<any | null>(null);
         height: "100vh",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
+        justifyContent: "flex-start",
         borderRight: "1px solid",
         borderColor: "divider",
         boxShadow: "2px 0 8px rgba(0,0,0,0.05)",
-        p: 2,
+        p: 1,
         position: "sticky",
         top: 0,
       }}
     >
       <div>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2, mt: 2 }}>
           <img
             src="/logo.png"
             alt="Bloop"
             title="Bloop"
-            style={{ width: 40, height: 40, objectFit: 'contain', display: 'block' }}
+            style={{ width: 130, objectFit: 'contain', display: 'block' }}
             onError={(e: any) => { e.target.style.display = 'none'; }}
           />
         </Box>
 
-        <Box sx={{ mb: 2 }}>
+        <Box sx={{ mb: 1 }}>
           <UserSearch />
         </Box>
 
@@ -170,6 +170,7 @@ const [weather, setWeather] = React.useState<any | null>(null);
             justifyContent: "space-between",
             p: 1.5,
             borderRadius: 2,
+            mt: "auto",
           }}
         >
           

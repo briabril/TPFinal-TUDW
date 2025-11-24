@@ -126,17 +126,14 @@ const [weather, setWeather] = React.useState<any | null>(null);
       }}
     >
       <div>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 2 }}>
-          <img src="/logo.png" alt="Bloop" style={{ width: 28, height: 28, objectFit: 'contain' }} onError={(e: any)=>{e.target.style.display='none'}} />
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: "bold",
-              color: "primary.main",
-            }}
-          >
-            Bloop
-          </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+          <img
+            src="/logo.png"
+            alt="Bloop"
+            title="Bloop"
+            style={{ width: 40, height: 40, objectFit: 'contain', display: 'block' }}
+            onError={(e: any) => { e.target.style.display = 'none'; }}
+          />
         </Box>
 
         <Box sx={{ mb: 2 }}>

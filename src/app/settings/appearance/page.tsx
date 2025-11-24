@@ -7,16 +7,13 @@ import SettingsSidebar from "@/components/sidebar/SettingsSidebar";
 
 export default function AppearancePage() {
   return (
-    <Box sx={{ display: "flex", gap: 4, p: 4 }}>
-      
+    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "row", justifyContent: "flex-start", alignItems: "flex-start", width: "100%" }}>
       {/* Sidebars */}
-      <Box sx={{ display: "flex", gap: 2 }}>
-        <Sidebar />
-        <SettingsSidebar />
-      </Box>
+      <Sidebar />
+      <SettingsSidebar />
 
       {/* Contenido principal */}
-      <Box sx={{ flex: 1 }}>
+      <Box sx={{ flex: 1, p: 4 }}>
         <Typography variant="h5" sx={{ mt: 2 }}>Apariencia</Typography>
         <Typography variant="h6" sx={{ mt: 1 }}>
           Seleccioná el modo que prefieras:

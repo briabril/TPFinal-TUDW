@@ -74,7 +74,7 @@ export default function MessagesPage() {
         <Typography variant="h6" component="h1">Mensajes</Typography>
 
         <Box sx={{ mt: 2 }}>
-          <UserSearch onSelect={(u) => setSelected(u)} />
+          <UserSearch showTitle onSelect={(u) => setSelected(u)} />
         </Box>
 
         <Box sx={{ mt: 3 }}>

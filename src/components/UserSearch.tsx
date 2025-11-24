@@ -20,9 +20,10 @@ import {
 
 type Props = {
   onSelect?: (user: User) => void;
+  showTitle?: boolean;
 };
 
-export default function UserSearch({ onSelect }: Props) {
+export default function UserSearch({ onSelect, showTitle = false }: Props) {
   const [q, setQ] = useState("");
   const [results, setResults] = useState<User[]>([]);
   const debounceRef = useRef<number | null>(null);
@@ -55,7 +56,7 @@ export default function UserSearch({ onSelect }: Props) {
 
   return (
     <Box sx={{ position: "relative", width: "100%" }}>
-      <Typography variant="h5" component="h1">Mensajes</Typography>
+      {showTitle && <Typography variant="h5" component="h1">Mensajes</Typography>}
       <TextField
         fullWidth
         size="small"
@@ -85,10 +86,18 @@ export default function UserSearch({ onSelect }: Props) {
           <List disablePadding>
             {results.map((u) => (
               <ListItemButton
-                key={u.id}
-                onClick={() => router.push(`/${u.username}`)}
-                sx={{ py: 1.25 }}
-              >
+                  key={u.id}
+                  onClick={() => {
+                    if (onSelect) {
+                      onSelect(u);
+                      setQ("");
+                      setResults([]);
+                    } else {
+                      router.push(`/${u.username}`);
+                    }
+                  }}
+                  sx={{ py: 1.25 }}
+                >
                 <ListItemAvatar>
                   <Avatar
                     src={getImageUrl(u.profile_picture_url) ?? undefined}

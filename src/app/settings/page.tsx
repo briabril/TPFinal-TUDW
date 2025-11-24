@@ -5,15 +5,13 @@ import SettingsSidebar from "../../components/sidebar/SettingsSidebar";
 import Sidebar from "../../components/sidebar/Sidebar";
 export default function SettingsHome() {
   return (
-    <Box sx={{ display: "flex", gap: 4, p: 4 }}>
-      
-        {/* Sidebar Settings*/}
+    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "row", justifyContent: "flex-start", alignItems: "flex-start", width: "100%" }}>
+      {/* Sidebars */}
       <Sidebar />
-      {/* Sidebar Settings*/}
       <SettingsSidebar />
 
       {/* Contenido principal */}
-      <Box sx={{ flex: 1 }}>
+      <Box sx={{ flex: 1, p: 4 }}>
         <Typography variant="h4" fontWeight={700} mb={2}>
           Configuración
         </Typography>

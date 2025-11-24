@@ -22,7 +22,7 @@ export default function PostCard({ post }: { post: Post }) {
   const isOwn = Boolean(user && String(post.author.id) === String(user.id));
 
   const handleDelete = async () => {
-    if (!confirm("¿Eliminar post?")) return;
+    // deletion confirmation is handled by PostActions dialog
     setLoading(true);
     try {
       const res = await (await import("@/services/postService")).deletePost(post.id);

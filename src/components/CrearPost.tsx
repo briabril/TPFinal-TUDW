@@ -76,6 +76,10 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
       if (json?.post) {
         const created: any = json.post;
         created.author = created.author || { id: created.author_id || user?.id };
+        created.author.username = created.author.username || user?.username || created.author.username || "";
+        created.author.displayname = created.author.displayname || user?.displayname || created.author.displayname || "";
+        created.author.profile_picture_url =
+          created.author.profile_picture_url ?? user?.profile_picture_url ?? null;
         created.medias = json.medias || [];
         created.weather = json.weather || null;
         onCreated?.(created);

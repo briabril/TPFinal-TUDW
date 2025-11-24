@@ -123,7 +123,14 @@ useEffect(() => {
             text: data.text,
             parent_id : parentId || null
           }, { withCredentials: true })
-    return res.data;
+  
+    const created = res.data as Comment;
+    if (created) {
+      created.author_username = created.author_username || user?.username || "Usuario";
+      created.author_avatar = created.author_avatar || user?.profile_picture_url || null;
+      setComments((prev) => addCommentToTree(prev, created));
+    }
+    return created;
     }catch(error){
         toast.error("Error al publicar comentario")
     }

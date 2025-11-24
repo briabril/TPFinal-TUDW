@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { IconButton, Menu, MenuItem, Box } from "@mui/material";
+import { IconButton, Menu, MenuItem, Box, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from "@mui/material";
 import { MoreVert, Edit, Delete, Flag, ContentCopy } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import ReportDialog from "./ReportDialog";
@@ -23,6 +23,7 @@ export default function PostActions({
 }: PostActionsProps) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [reportOpen, setReportOpen] = useState(false);
+    const [deleteOpen, setDeleteOpen] = useState(false);
 
     const open = Boolean(anchorEl);
 
@@ -62,7 +63,7 @@ export default function PostActions({
                         <MenuItem
                             key="delete"
                             onClick={() => {
-                                onDelete();
+                                setDeleteOpen(true);
                                 handleMenuClose();
                             }}
                             disabled={loading}
@@ -116,6 +117,34 @@ export default function PostActions({
                 onClose={() => setReportOpen(false)}
                 onSubmit={onReport}
             />
+
+            <Dialog
+                open={deleteOpen}
+                onClose={() => setDeleteOpen(false)}
+                aria-labelledby="delete-post-dialog-title"
+            >
+                <DialogTitle id="delete-post-dialog-title">Eliminar post</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        ¿Estás seguro que querés eliminar este post? Esta acción no se puede deshacer.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDeleteOpen(false)}>Cancelar</Button>
+                    <Button
+                        color="error"
+                        onClick={() => {
+                            try {
+                                onDelete();
+                            } finally {
+                                setDeleteOpen(false);
+                            }
+                        }}
+                    >
+                        Eliminar
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }

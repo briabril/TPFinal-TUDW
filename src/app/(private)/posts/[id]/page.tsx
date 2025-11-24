@@ -49,10 +49,8 @@ const PostDetail = () => {
   const isOwn = Boolean(user && String(post.author.id) === String(user.id));
 
   const handleDelete = async () => {
-    if (!confirm("¿Eliminar post?")) return;
     try {
       await (await import("@/services/postService")).deletePost(post.id);
-      
       router.push("/feed");
     } catch (err) {
       console.error(err);

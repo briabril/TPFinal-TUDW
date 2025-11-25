@@ -121,15 +121,14 @@ export default function ProfileHeader({
   <Typography variant="body2" color="text.secondary" display="flex" sx={{ mt: 0.5, justifyContent: "center", alignItems: "center"}}>
     {profile.country_iso && (
       <>
-       {flag ? (
-  flag.startsWith("http") ? (
-    <img src={flag} alt={profile.country_iso} style={{ width: 18, marginLeft: 6 }} />
-  ) : (
-    <span style={{ marginLeft: 6 }}>{flag}</span>
-  )
-) : (
-  <strong>{profile.country_iso}</strong>
+       {flag && (
+  <img
+  src={flag}
+  alt={profile.country_iso}
+  style={{ width: 18, marginLeft: 6 }}/>
+  
 )}
+
 
       </>
     )}

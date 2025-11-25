@@ -258,6 +258,8 @@ export default function Sidebar({ userRole = "USER" }) {
                   size="small"
                   color="error"
                   sx={{ minWidth: 0, p: 0.5, borderRadius: "50%" }}
+                  aria-label="Logout"
+                  title="Logout"
                 >
                   <LogOut size={18} />
                 </Button>

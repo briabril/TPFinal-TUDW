@@ -133,7 +133,7 @@ export const Reaction = ({
       </Stack>
 
       {type === "post" && (
-        <IconButton onClick={handleShare} size="small" disabled={shared}>
+        <IconButton onClick={handleShare} size="small" disabled={shared} aria-label="Compartir post" title="Compartir post">
           <Repeat2
             className={shared ? "text-blue-600" : "text-gray-600"}
             fill={shared ? "blue" : "none"}

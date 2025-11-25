@@ -2,8 +2,15 @@
 
 import Sidebar from "@/components/sidebar/Sidebar";
 import SidebarMobile from "@/components/sidebar/SidebarMobile";
-import SidebarPanel from "@/components/sidebar/SidebarPanel"
-import { Home, SearchIcon, User, Settings, MessageSquare, LayoutDashboard, Flag, BellDotIcon } from "lucide-react";
+import SidebarPanel from "@/components/sidebar/SidebarPanel";
+import {
+  Home,
+  SearchIcon,
+  Settings,
+  MessageSquare,
+  LayoutDashboard,
+  Flag,
+} from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -32,7 +39,6 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
             { id: "home", label: "Inicio", icon: Home, path: "/feed" },
             { id: "search", label: "Buscar", icon: SearchIcon, path: "/search" },
             { id: "settings", label: "Configuración", icon: Settings, path: "/settings" },
-            // { id: "notifications", label: "Notificaciones", icon: BellDotIcon, path: '/notifications', expandable: true },
             { id: "messages", label: "Mensajes", icon: MessageSquare, path: "/messages" },
           ]
         : [],
@@ -41,8 +47,8 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
 
   const adminItems = user
     ? [
-        { id: "admin-dashboard", label: "Admin Panel", icon: LayoutDashboard, path: "/admin/dashboard", roles: ["ADMIN"], expandable: false },
-        { id: "admin-reports", label: "Reportes", icon: Flag, path: "/admin/reports", roles: ["ADMIN"], expandable: false },
+        { id: "admin-dashboard", label: "Admin Panel", icon: LayoutDashboard, path: "/admin/dashboard", roles: ["ADMIN"] },
+        { id: "admin-reports", label: "Reportes", icon: Flag, path: "/admin/reports", roles: ["ADMIN"] },
       ]
     : [];
 
@@ -62,22 +68,35 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
   if (!user) return null;
 
   return (
-    <div className="flex relative">
+    <div className="flex relative min-h-screen w-full">
 
-      {!isMobile && <Sidebar userRole={user.role} />}
-      <SidebarPanel activePanel={activePanel} />
+      {/* Sidebar desktop */}
+      {!isMobile && (
+        <div className="z-20">
+          <Sidebar userRole={user.role} />
+        </div>
+      )}
 
+      {!isMobile && (
+        <div className="z-10">
+          <SidebarPanel activePanel={activePanel} />
+        </div>
+      )}
       <div
-        className="flex-1 flex flex-col transition-all"
+        className="flex-1 flex flex-col transition-all z-0"
         style={{
-          marginLeft: shouldPush ? 250 : 0,
+          marginLeft: !isMobile ? pushAmount : 0,
           transition: "margin-left .3s ease",
         }}
       >
-        <main className="flex-1 pb-[60px]">{children}</main>
+        <main className="flex-1 pb-[60px] min-h-screen">{children}</main>
       </div>
 
-      {isMobile && <SidebarMobile items={itemsForMobile} />}
+      {isMobile && (
+        <div className="fixed bottom-0 left-0 w-full z-30">
+          <SidebarMobile items={itemsForMobile} />
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Button, IconButton, Tooltip, Stack, Typography } from "@mui/material";
-import { Heart, MessageCircle, Bookmark, ShareIcon } from "lucide-react";
+import { Heart, MessageCircle, Bookmark, ShareIcon, Repeat2} from "lucide-react";
 import api from "../api/index";
 import toast from "react-hot-toast";
 
@@ -148,12 +148,13 @@ export const Reaction = ({
       </Stack>
 
       <IconButton onClick={handleShare} size="small" disabled={shared}>
-        <ShareIcon
-          size={20}
-          className={shared ? "text-blue-600" : "text-gray-500"}
-        />
-      </IconButton>
+      <Repeat2 
+              className={shared ? "text-blue-600" : "text-gray-600"}
+              fill={shared ? "blue" : "none"}
+            />
+          </IconButton>
 
     </Stack>
+     
   );
 };

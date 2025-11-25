@@ -39,6 +39,7 @@ export default function ProfileHeader({
       try {
         const res = await api.get(`/countries/${profile.country_iso}/flag`);
         setFlag(res.data.flag);
+        console.log("FLAG", res.data.flag)
       } catch (err) {
         console.error("Error al traer la bandera:", err);
       }
@@ -117,23 +118,31 @@ export default function ProfileHeader({
               setFollowStatus={setFollowStatus}
             />
           )}
-{profile.country_iso ? (
-  <Typography variant="body2" color="text.secondary" display="flex" sx={{ mt: 0.5, justifyContent: "center", alignItems: "center"}}>
-    {profile.country_iso && (
-      <>
-       {flag && (
-  <img
-  src={flag}
-  alt={profile.country_iso}
-  style={{ width: 18, marginLeft: 6 }}/>
-  
+{profile.country_iso && (
+  <Typography
+    variant="body2"
+    color="text.secondary"
+    display="flex"
+    sx={{ mt: 0.5, justifyContent: "center", alignItems: "center" }}
+  >
+    {flag && flag.startsWith("http") ? (
+      <img
+        src={flag}
+        alt={profile.country_iso}
+        style={{ width: 18, marginLeft: 4 }}
+        onError={(e) => {
+          (e.target as HTMLImageElement).replaceWith(
+            document.createTextNode(profile.country_iso!)
+          );
+        }}
+      />
+    ) : (
+      <strong style={{ marginLeft: 4 }}>{profile.country_iso}</strong>
+    )}
+  </Typography>
 )}
 
 
-      </>
-    )}
-  </Typography>
-) : null}
           <Stack
             direction="row"
             justifyContent="center"

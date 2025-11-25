@@ -163,7 +163,7 @@ export default function PostBody({
           <CardMedia
             component="img"
             image={media.url}
-            alt="media"
+            alt= "imagen del post"
             sx={{
               width: "100%",
               height: { xs: 200, sm: 320 },
@@ -287,6 +287,8 @@ export default function PostBody({
                     <IconButton
                       onClick={handleTranslate}
                       disabled={translating}
+                      title="Traducir al idioma de tu navegador"
+                      aria-label="Traducir al idioma de tu navegador"
                     >
                       {translating ? (
                         <CircularProgress size={18} />

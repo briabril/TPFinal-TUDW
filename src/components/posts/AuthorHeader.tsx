@@ -94,7 +94,6 @@ export default function AuthorHeader({
       }}
     >
 
-      {/* Avatar clickable */}
       <Avatar
         src={getImageUrl(author.profile_picture_url)}
         alt={author.username}

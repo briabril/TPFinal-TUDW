@@ -47,7 +47,6 @@ export default function AdminDashboard() {
   return (
     <div className="p-6 md:p-10 max-w-6xl mx-auto space-y-8">
 
-      {/* HEADER */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Panel de administración</h1>
@@ -56,14 +55,12 @@ export default function AdminDashboard() {
         <ThemeToggle />
       </div>
 
-      {/* KPI CARDS */}
       <div className="grid grid-cols-3 gap-4 text-center">
         <Metric icon={Users} label="Totales" value={total} />
         <Metric icon={UserCheck} label="Activos" value={active} />
         <Metric icon={UserX} label="Suspendidos" value={suspended} />
       </div>
 
-      {/* SEARCH */}
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
         <input
@@ -75,7 +72,6 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* RESPONSIVE LIST */}
       <div className="hidden md:block">
         <table className="w-full text-sm">
           <thead className="text-left text-gray-500 border-b dark:border-gray-700">
@@ -108,7 +104,6 @@ export default function AdminDashboard() {
         </table>
       </div>
 
-      {/* MOBILE CARDS */}
       <div className="space-y-3 md:hidden">
         {filteredUsers.map((u) => (
           <div
@@ -142,7 +137,6 @@ export default function AdminDashboard() {
   );
 }
 
-/* SMALL REUSABLE METRIC COMPONENT */
 function Metric({ icon: Icon, label, value }: { icon: any; label: string; value: number }) {
   return (
     <div className="p-4 rounded-lg bg-gray-100 dark:bg-gray-800 flex flex-col items-center gap-1">

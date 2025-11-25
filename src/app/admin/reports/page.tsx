@@ -39,7 +39,6 @@ export default function AdminReportsPage() {
   const [tab, setTab] = useState<"pending" | "blocked" | "dismissed">("pending");
   const [search, setSearch] = useState("");
 
-  // ✅ Fetch list y actualizar stats basados en front
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -47,7 +46,6 @@ export default function AdminReportsPage() {
         const listRes = await api.get<Report[]>(`/reports/${tab}`);
         setReports(listRes.data);
 
-        // ✅ Actualizar solo el contador de la pestaña actual
         setStats((prev) => ({
           ...prev,
           [tab]: listRes.data.length,
@@ -59,7 +57,6 @@ export default function AdminReportsPage() {
     fetchData();
   }, [tab]);
 
-  // ✅ Filter
   const filtered = useMemo(() => {
     return reports.filter(
       (r) =>
@@ -69,17 +66,14 @@ export default function AdminReportsPage() {
     );
   }, [reports, search]);
 
-  // ✅ Actions
   const handleAction = async (id: string, target_id: string | number, action: "blocked" | "dismissed") => {
     setActionLoading(id);
     try {
       await api.patch(`/reports/${id}`, { action, target_id });
 
-      // ✅ Sacar el reporte de la lista actual
       setReports((prev) => {
         const updated = prev.filter((r) => r.id !== id);
 
-        // ✅ Actualizar contador
         setStats((prevStats) => ({
           ...prevStats,
           [tab]: updated.length,
@@ -97,11 +91,9 @@ export default function AdminReportsPage() {
     try {
       await api.patch(`/reports/${id}/revert`, { target_id });
 
-      // ✅ Sacar el reporte de la lista actual
       setReports((prev) => {
         const updated = prev.filter((r) => r.id !== id);
 
-        // ✅ Actualizar contador
         setStats((prevStats) => ({
           ...prevStats,
           [tab]: updated.length,
@@ -116,7 +108,6 @@ export default function AdminReportsPage() {
 
   return (
     <Stack spacing={4} sx={{ maxWidth: 900, mx: "auto", p: { xs: 2, md: 5 } }}>
-      {/* ✅ TITLE */}
       <Stack textAlign="center" spacing={0.5}>
         <Typography variant="h4" fontWeight="bold">
           Gestión de Reportes
@@ -126,7 +117,6 @@ export default function AdminReportsPage() {
         </Typography>
       </Stack>
 
-      {/* ✅ DASHBOARD CARDS */}
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
         <StatCard
           icon={<ErrorOutline />}
@@ -151,7 +141,6 @@ export default function AdminReportsPage() {
         />
       </Stack>
 
-      {/* ✅ SEARCH */}
       <Box sx={{ maxWidth: 400, mx: "auto", position: "relative" }}>
         <Search sx={{ position: "absolute", top: 11, left: 10, fontSize: 18, color: "text.secondary" }} />
         <TextField
@@ -165,14 +154,12 @@ export default function AdminReportsPage() {
         />
       </Box>
 
-      {/* ✅ LOADING */}
       {loading && (
         <Box display="flex" justifyContent="center" py={10}>
           <CircularProgress />
         </Box>
       )}
 
-      {/* ✅ EMPTY */}
       {!loading && filtered.length === 0 && (
         <Paper sx={{ p: 4, textAlign: "center", borderRadius: 3 }} elevation={0}>
           <ReportProblem sx={{ fontSize: 40, mb: 1, color: "warning.main" }} />
@@ -180,7 +167,6 @@ export default function AdminReportsPage() {
         </Paper>
       )}
 
-      {/* ✅ REPORT LIST */}
       {!loading &&
         filtered.map((report) => (
           <Card
@@ -231,7 +217,6 @@ export default function AdminReportsPage() {
 
                 <Info label="Motivo" value={report.reason} />
 
-                {/* ✅ ACTIONS */}
                 {tab === "pending" && (
                   <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} mt={1}>
                     <Button

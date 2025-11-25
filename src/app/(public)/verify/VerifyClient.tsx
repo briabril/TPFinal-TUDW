@@ -14,7 +14,6 @@ export default function VerifyClient() {
 
     (async () => {
       try {
-        // Probar varias variantes de endpoint y método para máxima compatibilidad
         const base = process.env.NEXT_PUBLIC_BACKEND_URL;
         const candidates = [
           { url: `${base}/api/auth/verify?token=${token}`, method: "GET" },

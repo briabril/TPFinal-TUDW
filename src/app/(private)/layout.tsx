@@ -16,10 +16,8 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-  // 👇 PANEL LATERAL QUE ABRE SEARCH, SETTINGS, MESSAGES, ETC
   const [activePanel, setActivePanel] = useState<"none" | "search" | "settings" | "messages">("none");
 
-  // 👇 SOLO PARA SETTINGS el contenido se desplaza
   const shouldPush = activePanel === "settings";
   const pushAmount = shouldPush ? 250 : 0;
 

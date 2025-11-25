@@ -13,7 +13,6 @@ interface PostListProps {
 export default function PostList({ initialMode, username }: PostListProps) {
   const { posts, error, loading } = usePosts(initialMode, username);
 
-  // 👉 Loader con skeletons agradables
   if (loading) {
     return (
       <Stack spacing={4} sx={{ width: "100%", maxWidth: 800, mx: "auto" }}>
@@ -25,8 +24,6 @@ export default function PostList({ initialMode, username }: PostListProps) {
       </Stack>
     );
   }
-
-  // 👉 Error elegante
   if (error) {
     return (
       <Box
@@ -44,7 +41,6 @@ export default function PostList({ initialMode, username }: PostListProps) {
     );
   }
 
-  // 👉 Estado vacío con lindo mensaje
   if (!posts || posts.length === 0) {
     return (
       <Fade in timeout={400}>
@@ -66,7 +62,6 @@ export default function PostList({ initialMode, username }: PostListProps) {
     );
   }
 
-  // 👉 Render de posts con animación suave
   return (
     <Fade in timeout={300}>
       <Stack sx={{ width: "100%", maxWidth: 800, mx: "auto" }}>

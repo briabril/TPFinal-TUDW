@@ -6,7 +6,7 @@ import api from "../api/index";
 import toast from "react-hot-toast";
 
 interface PostReactionProps {
-  commentCounter: number,
+  commentCounter?: number,
   userId?: string;
   targetId: string;
   type: "post" | "comment";

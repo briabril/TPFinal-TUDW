@@ -68,8 +68,6 @@ export default function PostCard({ post }: PostCardProps) {
         mb: 4,
         cursor: "pointer",
         position: "relative",
-
-        // ⭐ SOMBRA SOLO A LOS COSTADOS
         boxShadow:
           "-6px 0 18px rgba(0,0,0,0.06), 6px 0 18px rgba(0,0,0,0.06)",
 

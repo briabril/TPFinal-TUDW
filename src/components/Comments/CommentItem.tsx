@@ -99,7 +99,6 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply, onEdit, onD
          </Stack>
          
 
-             {/* Texto del comentario o campo de edición */}
           {isEditing ? (
             <Box sx={{mt:1 }}>
               <TextField

@@ -157,12 +157,10 @@ export default function EditProfilePage() {
         </Typography>
 
         <Box component="form" onSubmit={handleSubmit(onSubmit)} display="flex" flexDirection="column" gap={2.5}>
-          {/* País */}
           <Controller
             name="country_iso"
             control={control}
             render={({ field }) => {
-              // selectedOption: objeto que Autocomplete espera
               const selectedOption = countries.find((c) => c.value === field.value) || null;
               return (
                 <Autocomplete

@@ -10,7 +10,7 @@ import {
   Stack,
   useTheme,
 } from "@mui/material";
-import { alpha } from "@mui/material/styles"; // ✅ Import necesario
+import { alpha } from "@mui/material/styles"; 
 import { PersonAdd, PersonRemove, Block, LockOpen } from "@mui/icons-material";
 
 interface Props {

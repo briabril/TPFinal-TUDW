@@ -44,7 +44,6 @@ export function usePosts(mode: string, username?: string) {
     useEffect(() => {
         const handleNewPost = (newPost: Post) => {
             setPosts((prev) => {
-                // evita duplicados
                 if (prev.find((p) => p.id === newPost.id)) return prev
                 return [newPost, ...prev]
             })

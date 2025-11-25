@@ -48,7 +48,6 @@ export default function Sidebar({ userRole = "USER" }) {
     }
   }, []);
 
-  // Guardar preferencia en localStorage
   useEffect(() => {
     if (isExpanded === null) return;
     try {
@@ -73,7 +72,6 @@ export default function Sidebar({ userRole = "USER" }) {
 
   const visibleAdminItems = adminItems.filter((it) => it.roles?.includes(userRole));
 
-  // Detecta el item activo según pathname
   useEffect(() => {
     const current = mainNavItems.find((item) => item.path && pathname.startsWith(item.path));
     if (current) setActiveItem(current.id);
@@ -95,7 +93,6 @@ export default function Sidebar({ userRole = "USER" }) {
     };
   }, [user?.city, user?.country_iso]);
 
-  // Click en item
   const handleItemClick = (item: NavItem) => {
     setActiveItem(item.id);
 
@@ -130,12 +127,10 @@ export default function Sidebar({ userRole = "USER" }) {
           padding: 8,
         }}
       >
-        {/* Logo */}
         <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
           <img src="/logo.png" alt="Bloop" style={{ width: 130 }} />
         </Box>
 
-        {/* Navegación */}
         <motion.nav className="flex-1 overflow-y-auto px-1 space-y-2">
           {mainNavItems.map((item) => (
             <SidebarItem
@@ -168,7 +163,6 @@ export default function Sidebar({ userRole = "USER" }) {
           ))}
         </motion.nav>
 
-        {/* Usuario */}
         {user && (
           <Box
             sx={{
@@ -238,7 +232,6 @@ export default function Sidebar({ userRole = "USER" }) {
         )}
       </motion.div>
 
-      {/* ░░░░░░ OVERLAY — SOLO SE MUESTRA SI HAY PANEL ACTIVO ░░░░░░ */}
       {activePanel !== "none" && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -249,7 +242,7 @@ export default function Sidebar({ userRole = "USER" }) {
           style={{
             position: "fixed",
             top: 0,
-            left: isExpanded ? 250 : 70, // para que NO tape el sidebar
+            left: isExpanded ? 250 : 70, 
             width: `calc(100vw - ${isExpanded ? 250 : 70}px)`,
             height: "100vh",
             background: "rgba(0,0,0,0.5)",

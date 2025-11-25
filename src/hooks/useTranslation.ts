@@ -47,7 +47,6 @@ export default function useTranslation(): Result {
     const targetLang = getBrowserLang();
     const key = cacheKey(postId, targetLang);
 
-    // try cache first
     if (!force) {
       const cached = typeof window !== "undefined" ? window.localStorage.getItem(key) : null;
       if (cached) {

@@ -12,7 +12,6 @@ export default function UserFeed() {
   const [feedMode, setFeedMode] = useState<"all" | "following">("all")
   const [hydrated, setHydrated] = useState(false)
 
-  // Leer modo guardado (solo al montar)
   useEffect(() => {
     try {
       const saved = localStorage.getItem("feedMode")
@@ -28,7 +27,6 @@ export default function UserFeed() {
     }
   }, [])
 
-  // Guardar modo cada vez que cambie
   useEffect(() => {
     if (hydrated) {
       localStorage.setItem("feedMode", feedMode)

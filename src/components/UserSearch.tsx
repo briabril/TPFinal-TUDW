@@ -106,7 +106,6 @@ export default function UserSearch({ onSelect, showTitle = false }: Props) {
                   />
                 </ListItemAvatar>
 
-                {/* Usar slotProps en lugar de primaryTypographyProps (deprecado) */}
                 <ListItemText
                   primary={u.displayname}
                   secondary={`@${u.username}`}

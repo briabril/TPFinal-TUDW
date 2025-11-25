@@ -34,14 +34,12 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(e.target.files || []);
 
-    // ✅ Límite de 4 archivos
     if (selected.length + files.length > 4) {
       toast.error("Máximo 4 archivos por post");
       e.currentTarget.value = "";
       return;
     }
 
-    // ✅ Límite de 10MB por archivo
     for (const f of selected) {
       if (f.size > 10 * 1024 * 1024) {
         toast.error(`El archivo ${f.name} debe ser menor a 10MB`);
@@ -77,7 +75,6 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
 
       const json = res.data;
 
-      // ✅ Normalización de datos del post creado
       const created = json?.post || null;
       if (created) {
         created.author = created.author || { id: created.author_id || user?.id };
@@ -88,7 +85,6 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
         created.medias = json.medias || [];
         created.weather = json.weather || null;
 
-        // ✅ Emitir evento global
         try {
           window.dispatchEvent(new CustomEvent("post-created", { detail: created }));
         } catch {}
@@ -96,7 +92,6 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
 
       toast.success("Post creado ✨");
 
-      // ✅ Reset
       setContenido("");
       setFiles([]);
       setPreviews([]);
@@ -110,7 +105,6 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
     }
   };
 
-  // ✅ Obtener clima
   useEffect(() => {
     if (!attachWeather || !user?.city) return;
     (async () => {
@@ -136,7 +130,6 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
         bgcolor: theme.palette.background.default,
       }}
     >
-      {/* ✅ Header con avatar */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
         <Avatar
           src={user?.profile_picture_url || undefined}
@@ -160,7 +153,6 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
         </Box>
       </Box>
 
-      {/* ✅ Input */}
       <TextField
         fullWidth
         multiline
@@ -170,7 +162,6 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
         placeholder="Comparte tus ideas, fotos, música o clima…"
       />
 
-      {/* ✅ Acciones */}
       <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Box sx={{ display: "flex", gap: 1 }}>
           <input
@@ -212,7 +203,6 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
         </Button>
       </Box>
 
-      {/* ✅ Previews */}
       {previews.length > 0 && (
         <Box sx={{ mt: 3 }}>
           <Divider sx={{ mb: 2 }} />
@@ -255,7 +245,6 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
         </Box>
       )}
 
-      {/* ✅ Botón Limpiar */}
       {files.length > 0 || contenido.trim() ? (
         <Button
           variant="text"

@@ -22,10 +22,6 @@ import { updatePost } from "@/services/postService";
 import useTranslation from "@/hooks/useTranslation";
 import { comment } from "postcss";
 
-/* ---------------------------------------------
-   TIPOS
---------------------------------------------- */
-
 interface PostBodyProps {
   post: any;
   description: string;

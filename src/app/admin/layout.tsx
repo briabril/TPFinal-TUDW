@@ -28,13 +28,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {children}
       </main>
 
-      {isMobile && (
-        <SidebarMobile
-          items={adminItems}
-          isAdmin={true}
-          adminItems={adminItems}
-        />
-      )}
+      {isMobile && <SidebarMobile items={adminItems} />}
     </div>
   );
 }

@@ -1,30 +1,100 @@
 "use client";
 
-import { Box } from "@mui/material";
+import {
+  Box,
+  Avatar,
+  Menu,
+  MenuItem,
+  Badge,
+} from "@mui/material";
 import { useRouter, usePathname } from "next/navigation";
-import type { NavItem } from "@/types/nav_item";
-import { motion } from "framer-motion";
-import { useState } from "react";
-import { ShieldCheck, User } from "lucide-react"; 
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
+import { useState, useRef } from "react";
+import { LogOut } from "lucide-react";
 
-type SidebarMobileProps = {
-  items: NavItem[];
-  isAdmin?: boolean;
-  adminItems?: NavItem[];
-};
-
-export default function SidebarMobile({
-  items,
-  isAdmin = false,
-  adminItems = [],
-}: SidebarMobileProps) {
+export default function SidebarMobile({ items }: { items: any[] }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [adminOpen, setAdminOpen] = useState(false);
+  const { user, logout } = useAuth();
 
-  const handleNavigate = (item: NavItem) => {
-    if (item.path) router.push(item.path);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [tapCount, setTapCount] = useState(0);
+
+  const profileSize = 70;
+  const longPressRef = useRef<any>(null);
+
+  const isActive = (path?: string) => path && pathname.startsWith(path);
+
+  const profilePath = `/${user?.username}`;
+
+  const handleLongPress = (e: any) => {
+    e.preventDefault();
+    setAnchorEl(e.currentTarget);
   };
+
+  const handlePressStart = (e: any) => {
+    longPressRef.current = setTimeout(() => handleLongPress(e), 600);
+  };
+
+  const handlePressEnd = () => {
+    clearTimeout(longPressRef.current);
+  };
+
+  const handleProfileTap = () => {
+    setTapCount((prev) => prev + 1);
+
+    setTimeout(() => setTapCount(0), 350);
+
+    if (tapCount >= 1) logout();
+    else router.push(profilePath);
+  };
+
+  const renderItem = (item: any) => (
+    <Box
+      key={item.id}
+      onClick={() => {
+        if (item.path) router.push(item.path);
+        if (item.onClick) item.onClick();
+      }}
+      sx={{
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "pointer",
+        color: isActive(item.path) ? "primary.main" : "text.secondary",
+        position: "relative",
+        paddingY: 1,
+        "&:active": { transform: "scale(0.92)" },
+      }}
+    >
+      {item.badge ? (
+        <Badge badgeContent={item.badge} max={9} color="primary">
+          <item.icon size={25} />
+        </Badge>
+      ) : (
+        <item.icon size={25} />
+      )}
+
+      <motion.span
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isActive(item.path) ? 1 : 0 }}
+        transition={{ duration: 0.2 }}
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: "50%",
+          background: "rgb(var(--mui-palette-primary-main))",
+          marginTop: 4,
+        }}
+      />
+    </Box>
+  );
+
+  const leftItems = items.slice(0, Math.floor(items.length / 2));
+  const rightItems = items.slice(Math.floor(items.length / 2));
 
   return (
     <Box
@@ -33,144 +103,94 @@ export default function SidebarMobile({
         bottom: 0,
         left: 0,
         right: 0,
-        height: adminOpen ? 120 : 65,
+        height: 80,
         display: "flex",
-        flexDirection: "column",
-        borderTop: "1px solid rgba(0,0,0,0.1)",
-        backgroundColor: "background.paper",
+        justifyContent: "space-between",
+        alignItems: "center",
+        backgroundColor: "rgba(255,255,255,0.75)",
+        backdropFilter: "blur(12px)",
+        borderTop: "1px solid rgba(0,0,0,0.12)",
         zIndex: 2000,
-        transition: "height 0.25s ease",
+        px: 1,
       }}
     >
-      {isAdmin && adminOpen && (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-around",
-            padding: "6px 0 10px 0",
-            borderBottom: "1px solid rgba(0,0,0,0.08)",
-          }}
-        >
-          {adminItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname.startsWith(item.path!);
+      {/* LEFT */}
+      <Box sx={{ flex: 1, display: "flex", justifyContent: "space-around" }}>
+        {leftItems.map(renderItem)}
+      </Box>
 
-            return (
-              <Box
-                key={item.id}
-                onClick={() => handleNavigate(item)}
-                sx={{
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "3px",
-                  color: isActive ? "primary.main" : "text.secondary",
-                }}
-              >
-                <Icon size={22} strokeWidth={isActive ? 2.4 : 2} />
-                <Box
-                  component="span"
-                  sx={{
-                    fontSize: 9,
-                    fontWeight: isActive ? 600 : 400,
-                  }}
-                >
-                  {item.label}
-                </Box>
-              </Box>
-            );
-          })}
-        </Box>
-      )}
-
-      <Box
-        sx={{
-          height: 65,
+      {/* PROFILE CENTER */}
+      <motion.div
+        onClick={handleProfileTap}
+        onPointerDown={handlePressStart}
+        onPointerUp={handlePressEnd}
+        onContextMenu={handleLongPress}
+        animate={{
+          scale: isActive(profilePath) ? 1.12 : 1,
+          y: isActive(profilePath) ? -8 : 0,
+        }}
+        transition={{ type: "spring", stiffness: 240, damping: 17 }}
+        style={{
+          width: profileSize,
+          height: profileSize,
+          borderRadius: "50%",
+          background: "white",
+          boxShadow: isActive(profilePath)
+            ? "0 0 12px rgba(0,120,255,0.45)"
+            : "0 6px 20px rgba(0,0,0,0.18)",
           display: "flex",
-          justifyContent: "space-around",
+          justifyContent: "center",
           alignItems: "center",
+          position: "relative",
+          cursor: "pointer",
+          transition: "box-shadow .25s ease",
+          border: isActive(profilePath)
+            ? "3px solid rgba(0,120,255,0.6)"
+            : "3px solid transparent",
         }}
       >
-        {items
-          .filter((item) => item.path)
-          .map((item) => {
-            const Icon =
-              isAdmin && item.id === "profile"
-                ? ShieldCheck
-                : item.icon;
+        <Avatar
+          src={user?.profile_picture_url || undefined}
+          sx={{ width: profileSize - 8, height: profileSize - 8 }}
+        />
 
-            const isActive = pathname.startsWith(item.path!);
-
-            return (
-              <Box
-                key={item.id}
-                onClick={() => handleNavigate(item)}
-                sx={{
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "3px",
-                  position: "relative",
-                  color: isActive ? "primary.main" : "text.secondary",
-                }}
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="mobile-active-indicator"
-                    style={{
-                      position: "absolute",
-                      top: -6,
-                      width: 36,
-                      height: 3,
-                      borderRadius: 4,
-                      backgroundColor:
-                        "rgb(var(--mui-palette-primary-main))",
-                    }}
-                  />
-                )}
-
-                <Icon size={24} strokeWidth={isActive ? 2.6 : 2} />
-
-                <Box
-                  component="span"
-                  sx={{
-                    fontSize: 10,
-                    fontWeight: isActive ? 600 : 400,
-                  }}
-                >
-                  {item.label}
-                </Box>
-              </Box>
-            );
-          })}
-
-        {isAdmin && (
-          <Box
-            onClick={() => setAdminOpen((prev) => !prev)}
-            sx={{
-              cursor: "pointer",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "3px",
-              color: adminOpen ? "primary.main" : "text.secondary",
-            }}
-          >
-            <ShieldCheck size={24} strokeWidth={adminOpen ? 2.6 : 2} />
-            <Box
-              component="span"
-              sx={{
-                fontSize: 10,
-                fontWeight: adminOpen ? 600 : 400,
+        <AnimatePresence>
+          {isActive(profilePath) && (
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 8 }}
+              exit={{ opacity: 0, y: 4 }}
+              style={{
+                position: "absolute",
+                bottom: -10,
+                width: 36,
+                height: 4,
+                background: "rgb(var(--mui-palette-primary-main))",
+                borderRadius: 4,
               }}
-            >
-              Admin
-            </Box>
-          </Box>
-        )}
+            />
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      {/* RIGHT */}
+      <Box sx={{ flex: 1, display: "flex", justifyContent: "space-around" }}>
+        {rightItems.map(renderItem)}
       </Box>
+
+      {/* PROFILE MENU */}
+      <Menu
+        open={!!anchorEl}
+        anchorEl={anchorEl}
+        onClose={() => setAnchorEl(null)}
+      >
+        <MenuItem onClick={() => router.push(profilePath)}>
+          Ver perfil
+        </MenuItem>
+        <MenuItem onClick={logout}>
+          <LogOut size={18} style={{ marginRight: 8 }} /> Cerrar sesión
+        </MenuItem>
+      </Menu>
     </Box>
   );
 }

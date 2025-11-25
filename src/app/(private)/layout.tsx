@@ -29,12 +29,11 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
     () =>
       user
         ? [
-            { id: "home", label: "Inicio", icon: Home, path: "/feed", expandable: false },
-            { id: "search", label: "Buscar", icon: SearchIcon, path: "/search", expandable: false, onClick: () => setActivePanel("search") },
-            { id: "profile", label: "Perfil", icon: User, path: `/${user.username}`, expandable: false },
-            { id: "settings", label: "Configuración", icon: Settings, path: "/settings", expandable: false, onClick: () => setActivePanel("settings") },
+            { id: "home", label: "Inicio", icon: Home, path: "/feed" },
+            { id: "search", label: "Buscar", icon: SearchIcon, path: "/search" },
+            { id: "settings", label: "Configuración", icon: Settings, path: "/settings" },
             // { id: "notifications", label: "Notificaciones", icon: BellDotIcon, path: '/notifications', expandable: true },
-            { id: "messages", label: "Mensajes", icon: MessageSquare, path: "/messages", expandable: false, onClick: () => setActivePanel("messages") },
+            { id: "messages", label: "Mensajes", icon: MessageSquare, path: "/messages" },
           ]
         : [],
     [user?.username]

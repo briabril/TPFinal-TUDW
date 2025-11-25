@@ -163,7 +163,6 @@ export default function PostBody({
           <CardMedia
             component="img"
             image={media.url}
-            alt="media"
             sx={{
               width: "100%",
               height: { xs: 200, sm: 320 },

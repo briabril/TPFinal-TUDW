@@ -130,7 +130,7 @@ export default function ProfileHeader({
     {flag && flag.startsWith("http") ? (
 
       <img
-        src={flag.replace(/^http:/, "https:")}
+        src={`https://flagcdn.com/16x12/${profile.country_iso.toLowerCase()}.png`}
         alt={profile.country_iso}
         style={{ width: 18, marginLeft: 4 }}
         onError={(e) => {

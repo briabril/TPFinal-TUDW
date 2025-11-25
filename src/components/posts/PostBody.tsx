@@ -20,7 +20,6 @@ import { Media } from "../../types/post";
 import { Reaction } from "../Reaction";
 import { updatePost } from "@/services/postService";
 import useTranslation from "@/hooks/useTranslation";
-import { comment } from "postcss";
 import {MessageCircle} from "lucide-react"
 
 interface PostBodyProps {

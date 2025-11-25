@@ -186,7 +186,7 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
                     aria-label="Toggle clima"
                     sx={{ width: 40, height: 40, p: 0.5, borderRadius: 1, border: '1px solid', borderColor: 'divider', color: 'primary.main' }}
                   >
-                    <Wind size={16} />
+                    <Wind size={20} />
                   </IconButton>
                 </Tooltip>
               </Box>
@@ -211,7 +211,7 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
                       }}
                       aria-label="Eliminar archivo"
                     >
-                      <X size={14} />
+                      <X size={20} />
                     </IconButton>
                   </Paper>
                 ))}

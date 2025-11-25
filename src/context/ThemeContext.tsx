@@ -105,7 +105,7 @@ export function ThemeProviderCustom({ children }: { children: React.ReactNode })
         '--text': '#0F1724',
         '--muted': '#6B7280',
         '--border': '#E6E9F0',
-        '--accent': '#0891B2',
+        '--accent': '#046177',
         '--success': '#16A34A',
         '--warning': '#F59E0B',
         '--danger': '#DC2626',

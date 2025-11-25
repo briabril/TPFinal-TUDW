@@ -287,6 +287,8 @@ export default function PostBody({
                     <IconButton
                       onClick={handleTranslate}
                       disabled={translating}
+                      title="Traducir al idioma de tu navegador"
+                      aria-label="Traducir al idioma de tu navegador"
                     >
                       {translating ? (
                         <CircularProgress size={18} />

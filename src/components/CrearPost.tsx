@@ -160,6 +160,8 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
         value={contenido}
         onChange={(e) => setContenido(e.target.value)}
         placeholder="Comparte tus ideas, fotos, música o clima…"
+        label="Texto para post"
+
       />
 
       <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -172,7 +174,7 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
             onChange={handleFileChange}
             style={{ display: "none" }}
           />
-          <Tooltip title="Añadir imágenes, videos o audio">
+          <Tooltip title="Añadir imágenes, videos o audio" aria-label="Añadir imágenes, videos o audio">
             <label htmlFor="upload-file" style={{ cursor: "pointer" }}>
               <IconButton color="primary" component="span" sx={{ bgcolor: "action.hover" }}>
                 <FileUp size={18} />

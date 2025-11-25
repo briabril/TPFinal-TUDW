@@ -6,6 +6,7 @@ import {
   Menu,
   MenuItem,
   Badge,
+  useTheme,
 } from "@mui/material";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,6 +18,7 @@ export default function SidebarMobile({ items }: { items: any[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const theme = useTheme(); // 👈 USAMOS EL TEMA
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [tapCount, setTapCount] = useState(0);
@@ -64,7 +66,9 @@ export default function SidebarMobile({ items }: { items: any[] }) {
         alignItems: "center",
         justifyContent: "center",
         cursor: "pointer",
-        color: isActive(item.path) ? "primary.main" : "text.secondary",
+        color: isActive(item.path)
+          ? theme.palette.primary.main
+          : theme.palette.text.secondary,
         position: "relative",
         paddingY: 1,
         "&:active": { transform: "scale(0.92)" },
@@ -86,7 +90,7 @@ export default function SidebarMobile({ items }: { items: any[] }) {
           width: 6,
           height: 6,
           borderRadius: "50%",
-          background: "rgb(var(--mui-palette-primary-main))",
+          background: theme.palette.primary.main,
           marginTop: 4,
         }}
       />
@@ -107,19 +111,17 @@ export default function SidebarMobile({ items }: { items: any[] }) {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        backgroundColor: "rgba(255,255,255,0.75)",
+        backgroundColor: theme.palette.background.paper,
         backdropFilter: "blur(12px)",
-        borderTop: "1px solid rgba(0,0,0,0.12)",
+        borderTop: `1px solid ${theme.palette.divider}`,
         zIndex: 2000,
         px: 1,
       }}
     >
-      {/* LEFT */}
       <Box sx={{ flex: 1, display: "flex", justifyContent: "space-around" }}>
         {leftItems.map(renderItem)}
       </Box>
 
-      {/* PROFILE CENTER */}
       <motion.div
         onClick={handleProfileTap}
         onPointerDown={handlePressStart}
@@ -134,18 +136,22 @@ export default function SidebarMobile({ items }: { items: any[] }) {
           width: profileSize,
           height: profileSize,
           borderRadius: "50%",
-          background: "white",
+
+          background: theme.palette.background.paper,
+
           boxShadow: isActive(profilePath)
-            ? "0 0 12px rgba(0,120,255,0.45)"
-            : "0 6px 20px rgba(0,0,0,0.18)",
+            ? `0 0 12px ${theme.palette.primary.main}66`
+            : theme.shadows[6],
+
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           position: "relative",
           cursor: "pointer",
           transition: "box-shadow .25s ease",
+
           border: isActive(profilePath)
-            ? "3px solid rgba(0,120,255,0.6)"
+            ? `3px solid ${theme.palette.primary.main}`
             : "3px solid transparent",
         }}
       >
@@ -165,7 +171,7 @@ export default function SidebarMobile({ items }: { items: any[] }) {
                 bottom: -10,
                 width: 36,
                 height: 4,
-                background: "rgb(var(--mui-palette-primary-main))",
+                background: theme.palette.primary.main,
                 borderRadius: 4,
               }}
             />
@@ -173,12 +179,10 @@ export default function SidebarMobile({ items }: { items: any[] }) {
         </AnimatePresence>
       </motion.div>
 
-      {/* RIGHT */}
       <Box sx={{ flex: 1, display: "flex", justifyContent: "space-around" }}>
         {rightItems.map(renderItem)}
       </Box>
 
-      {/* PROFILE MENU */}
       <Menu
         open={!!anchorEl}
         anchorEl={anchorEl}

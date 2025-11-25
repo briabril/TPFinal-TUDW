@@ -32,6 +32,7 @@ export default function ProfileHeader({
 }: Props) {
 
   const [flag, setFlag] = useState<string | null>(null);
+      const secureFlag = flag?.replace(/^http:/, "https:");
 
     useEffect(() => {
     async function fetchFlag() {
@@ -125,9 +126,11 @@ export default function ProfileHeader({
     display="flex"
     sx={{ mt: 0.5, justifyContent: "center", alignItems: "center" }}
   >
+
     {flag && flag.startsWith("http") ? (
+
       <img
-        src={flag}
+        src={secureFlag}
         alt={profile.country_iso}
         style={{ width: 18, marginLeft: 4 }}
         onError={(e) => {

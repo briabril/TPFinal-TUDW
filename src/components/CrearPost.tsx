@@ -128,6 +128,7 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
           <Box>
             <TextField
               label="Contenido & Descripción"
+              aria-label="Contenido y descripción"
               value={contenido}
               onChange={(e) => setContenido(e.target.value)}
               placeholder="¿Qué estás pensando?"

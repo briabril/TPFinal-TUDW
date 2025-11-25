@@ -13,7 +13,7 @@ const ThemeToggle = () => {
    variant="outlined"
     size="small"
     onClick={toggleDarkMode}
-            sx={{ borderRadius: 2, p: 1, color: darkMode ? 'common.white' : undefined }}
+            sx={{ borderRadius: 2, p: 1, color: darkMode ? 'common.white' : undefined }} aria-label='Cambiar modo' title='modo'
    >
     {darkMode ? <SunMedium color={iconColor} /> : <Moon color={iconColor} />}
    </Button>

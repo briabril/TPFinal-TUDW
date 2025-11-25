@@ -102,7 +102,7 @@ export default function UserFeed() {
                   textAlign: "center",
                 }}
               >
-                <Typography variant="h6" fontWeight={active ? 600 : 400}>
+                <Typography variant="h6" component="h2" fontWeight={active ? 600 : 400}>
                   {item.label}
                 </Typography>
                 <Box

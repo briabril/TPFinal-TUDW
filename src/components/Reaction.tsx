@@ -6,7 +6,6 @@ import api from "../api/index";
 import toast from "react-hot-toast";
 
 interface PostReactionProps {
-  commentCounter?: number,
   userId?: string;
   targetId: string;
   type: "post" | "comment";
@@ -25,7 +24,6 @@ interface ShareStatusResponse {
 }
 
 export const Reaction = ({
-  commentCounter,
   userId,
   targetId,
   type
@@ -134,18 +132,7 @@ export const Reaction = ({
         )}
       </Stack>
 
-      <Stack direction="row" alignItems="center" spacing={0.5}>
-        <MessageCircle size={20} className="text-gray-500" />
-        {type === "post" && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ cursor: "pointer" }}
-          >
-            {commentCounter}
-          </Typography>
-        )}
-      </Stack>
+     
 
       <IconButton onClick={handleShare} size="small" disabled={shared}>
       <Repeat2 

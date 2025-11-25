@@ -14,7 +14,6 @@ import { Box, Button, Container, TextField, Typography, Paper, Link } from "@mui
 export default function LoginPage() {
   const router = useRouter();
   const { setUser } = useAuth();
-  {console.log("dirección de google", `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`)}
   const {
     register,
     handleSubmit,
@@ -25,12 +24,10 @@ export default function LoginPage() {
 
   const onSubmit = async (data: loginData) => {
     try {
-      console.log("API", api)
       await api.post("/auth/login", data, { withCredentials: true });
       const me = await api.get<User>("/auth/me", { withCredentials: true });
       setUser(me.data);
       toast.success("Login exitoso 🎉");
-      console.log("DATA", me.data)
       if (me.data.role === "ADMIN") {
         router.push("/admin/dashboard");
       } else {
@@ -42,6 +39,7 @@ export default function LoginPage() {
   };
 
   return (
+    <main className="w-full ">
      <Box
       minHeight="100vh"
       display="flex"
@@ -52,7 +50,7 @@ export default function LoginPage() {
       px={4}
       sx={{position:"relative", width: '100%'}}
     >
-      <div className="absolute top-3 right-4">
+        <div className="absolute top-3 right-4">
          <ThemeToggle  />
       </div>
     <Container
@@ -77,7 +75,7 @@ export default function LoginPage() {
           gap: 3,
         }}
       >
-        <Typography variant="h4" align="center" fontWeight="bold" gutterBottom>
+        <Typography variant="h4" component="h1" align="center" fontWeight="bold" gutterBottom >
           Iniciar Sesión
         </Typography>
 
@@ -113,6 +111,7 @@ export default function LoginPage() {
             size="large"
             disabled={isSubmitting}
             sx={{ borderRadius: 2, py: 1.5, fontWeight: 600 }}
+            
           >
             {isSubmitting ? "Ingresando..." : "Ingresar"}
           </Button>
@@ -135,7 +134,7 @@ export default function LoginPage() {
    >
      Continuar con Google
    </Button>
-        <Typography variant="body2" align="center" color="text.secondary">
+        <Typography variant="body2" align="center" color="text.primary">
           ¿No tienes cuenta?{" "}
           <Link
             href="/register"
@@ -148,6 +147,6 @@ export default function LoginPage() {
       </Paper>
     </Container>
     </Box>
-    
+    </main>
   );
 }

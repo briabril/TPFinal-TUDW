@@ -68,6 +68,7 @@ const renderList = (items: any[]) =>
     });
 
   return (
+    <nav>
       <Box
          sx={{
            width: 250,
@@ -87,6 +88,7 @@ const renderList = (items: any[]) =>
             {renderList(settingItems)}
         </List>
     </Box>
+    </nav>
   );
 }
 

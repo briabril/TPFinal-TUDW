@@ -53,10 +53,10 @@ export default function UserFeed() {
         <ThemeToggle />
       </Box>
 
-      <Typography variant="h4" fontWeight={600} sx={{ mb: 4, textAlign: "center" }}>
+      <Typography variant="h4" component="h1" fontWeight={600} sx={{ mb: 4, textAlign: "center" }}>
         Mi Feed
       </Typography>
-
+<main className="w-full ">
       <Box
         sx={{
           width: "100%",
@@ -99,6 +99,7 @@ export default function UserFeed() {
           <PostList initialMode={initialMode} />
         </Box>
       </Box>
+      </main>
     </Box>
   )
 }

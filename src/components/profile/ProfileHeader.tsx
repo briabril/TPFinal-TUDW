@@ -92,7 +92,7 @@ export default function ProfileHeader({
           </Typography>
 
           {profile.displayname && (
-            <Typography variant="subtitle1" color="text.secondary">
+            <Typography variant="subtitle1" component="h2" color="text.secondary">
               {profile.displayname}
             </Typography>
           )}

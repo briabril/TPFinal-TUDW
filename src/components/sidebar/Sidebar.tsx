@@ -113,6 +113,7 @@ const [weather, setWeather] = React.useState<any | null>(null);
     });
 
   return (
+    <nav>
     <Box
       sx={{
         width: 250,
@@ -223,5 +224,6 @@ const [weather, setWeather] = React.useState<any | null>(null);
         </Box>
       )}
     </Box>
+    </nav>
   );
 }

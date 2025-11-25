@@ -135,7 +135,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply, onEdit, onD
           )}
           <Stack direction="row" alignItems="center" spacing={1} mt={1}>
             <Reaction userId={comment.author_id} targetId={comment.id} type="comment" />
-            <IconButton size="small" onClick={()=> setShowReply((prev)=> !prev)} sx={{color: "text.secondary", "&:hover":{color:"#00d600"}}}><MessageCircle size={16}/></IconButton>
+            <IconButton size="small" onClick={()=> setShowReply((prev)=> !prev)} sx={{color: "text.secondary", "&:hover":{color:"#00d600"}}} aria-label="Mostrar comentarios" title="Mostrar comentarios"><MessageCircle size={16}/></IconButton>
        
             {user?.id === comment.author_id && (
               <>
@@ -150,7 +150,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply, onEdit, onD
                 <IconButton
                   size="small"
                   sx={{color: "text.secondary" , "&:hover":{color:"#e00000"}}}
-                  onClick={ handleDelete}
+                  onClick={ handleDelete} aria-label="Eliminar comentarios" title="Eliminar comentarios"
                 >
                 <Trash2 size={16}/>
                 </IconButton>

@@ -24,8 +24,6 @@ function pathMatchesAny(path: string, list: string[]) {
 
 export default async function middleware(req: NextRequest) {
   const path = normalize(req.nextUrl.pathname);
-    console.log("🔍 PATH:", req.nextUrl.pathname);
-  console.log("🔍 COOKIES:", req.cookies.getAll());
   const requiresAdmin = pathMatchesAny(path, ADMIN_PATHS);
   const requiresAuth = pathMatchesAny(path, AUTH_PATHS);
 

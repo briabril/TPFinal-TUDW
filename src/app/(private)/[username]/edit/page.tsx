@@ -152,7 +152,7 @@ export default function EditProfilePage() {
     <Container maxWidth="lg" sx={{ minHeight: "100vh", display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
       
       <Paper elevation={6} sx={{ p: 5, flex: 1, width: "100%", display: "flex", flexDirection: "column", gap: 3, minHeight: "100vh" }}>
-        <Typography variant="h3" align="center" fontWeight="bold" gutterBottom>
+        <Typography variant="h3" component="h1" align="center" fontWeight="bold" gutterBottom>
           Editar Perfil
         </Typography>
 

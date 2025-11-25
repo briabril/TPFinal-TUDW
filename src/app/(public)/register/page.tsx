@@ -32,6 +32,7 @@ export default function RegisterPage() {
   };
 
   return (
+    <main className="w-full ">
      <Box
       minHeight="100vh"
       display="flex"
@@ -106,7 +107,7 @@ export default function RegisterPage() {
           <Button
             type="submit"
             variant="contained"
-            color="primary"
+            color="secondary"
             size="large"
             disabled={isSubmitting}
             sx={{ borderRadius: 2, py: 1.5, fontWeight: 600 }}
@@ -131,7 +132,7 @@ export default function RegisterPage() {
 >
   Continuar con Google
 </Button>
-        <Typography variant="body2" align="center" color="text.secondary">
+        <Typography variant="body2" align="center" color="text.primary">
           ¿Ya tienes cuenta?{" "}
           <Link
             href="/login"
@@ -143,5 +144,6 @@ export default function RegisterPage() {
         </Typography>
       </Paper>
     </Box>
+    </main>
   );
 }

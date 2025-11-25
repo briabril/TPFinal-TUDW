@@ -72,11 +72,11 @@ export default function MessagesPage() {
     <Box sx={{ display: 'flex', gap: 2, p: 2, height: '100vh', flexDirection: 'row', flexWrap: 'nowrap' }}>
       <Box sx={{ width: { xs: 160, sm: 220, md: 320 }, minWidth: 140, maxWidth: 320, flexShrink: 0, overflow: 'auto' }}>
         <Typography variant="h6" component="h1">Mensajes</Typography>
-
+        
         <Box sx={{ mt: 2 }}>
           <UserSearch showTitle onSelect={(u) => setSelected(u)} />
         </Box>
-
+        <main className="w-full ">
         <Box sx={{ mt: 3 }}>
           <Typography variant="subtitle1">Conversaciones</Typography>
           <List>
@@ -108,8 +108,9 @@ export default function MessagesPage() {
             )}
           </List>
         </Box>
+           </main>
       </Box>
-
+      
       <Box sx={{ flex: 1, height: '100%', minWidth: 0, minHeight: 0 }}>
         {selected ? (
           <DirectChat otherUserId={selected.id} otherUserDisplay={selected.displayname || selected.username} />
@@ -118,7 +119,9 @@ export default function MessagesPage() {
             <Typography variant="body1">Seleccioná un usuario para iniciar el chat o buscá uno arriba.</Typography>
           </Box>
         )}
+        
       </Box>
+      
     </Box>
   );
 }

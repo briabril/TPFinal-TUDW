@@ -37,6 +37,20 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
   const [typing, setTyping] = useState(false);
   const listRef = useRef<HTMLUListElement | null>(null);
 
+  // Eliminar mensajes duplicados por `id`, preservando el orden de la primera ocurrencia
+  const dedupeMessages = (arr: any[]) => {
+    const seen = new Set<string>();
+    return arr.filter((m) => {
+      if (!m) return false;
+      if (m.id) {
+        if (seen.has(String(m.id))) return false;
+        seen.add(String(m.id));
+        return true;
+      }
+      return true;
+    });
+  };
+
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   let typingTimeout: any;
 
@@ -49,8 +63,26 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
 
     const handler = (msg: any) => {
       setMessages((m) => {
+        // Si el mensaje con el mismo id del servidor ya existe, ignorar
         if (msg.id && m.some((ex) => ex.id === msg.id)) return m;
-        return [...m, msg];
+
+        // Si el mensaje es del usuario actual, intentar reemplazar un mensaje temporal coincidente
+        if (msg.from === user?.id) {
+          const tempIndex = m.findIndex(
+            (ex) =>
+              ex.sending &&
+              ex.from === user?.id &&
+              ex.to === msg.to &&
+              ex.text === msg.text
+          );
+
+          if (tempIndex !== -1) {
+            const replaced = m.map((ex, idx) => (idx === tempIndex ? msg : ex));
+            return dedupeMessages(replaced);
+          }
+        }
+
+        return dedupeMessages([...m, msg]);
       });
     };
 
@@ -79,7 +111,7 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
       try {
         const res = await api.get(`/messages/${otherUserId}`);
         const normalized = res.data.map((m: any) => ({ ...m, from: m.from || m.sender_id }));
-        setMessages(normalized);
+        setMessages((prev) => dedupeMessages([...prev, ...normalized]));
       } catch { }
     })();
   }, [otherUserId]);
@@ -114,7 +146,7 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
     try {
       const res = await api.post("/messages", { to: otherUserId, text: trimmed });
       const saved = res.data;
-      setMessages((prev) => prev.map((m) => (m.id === tempId ? saved : m)));
+      setMessages((prev) => dedupeMessages(prev.map((m) => (m.id === tempId ? saved : m))));
     } catch { }
   };
 
@@ -154,6 +186,7 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
           const mine = m.from === user?.id;
 
           return (
+            
             <React.Fragment key={m.id}>
               {isNewDate(i) && (
                 <Box sx={{ textAlign: "center", my: 1 }}>

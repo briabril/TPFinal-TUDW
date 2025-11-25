@@ -21,6 +21,7 @@ import { Reaction } from "../Reaction";
 import { updatePost } from "@/services/postService";
 import useTranslation from "@/hooks/useTranslation";
 import { comment } from "postcss";
+import {MessageCircle} from "lucide-react"
 
 interface PostBodyProps {
   post: any;
@@ -279,7 +280,7 @@ export default function PostBody({
             flexWrap="wrap"
           >
             <Stack direction="row" spacing={1.5} alignItems="center">
-              <Reaction commentCounter={commentCounter} userId={user?.id} type="post" targetId={post.id} />
+              <Reaction  userId={user?.id} type="post" targetId={post.id} />
 
               {showTranslateBtn && (
                 <Tooltip title="Traducir al idioma de tu navegador">
@@ -322,13 +323,15 @@ export default function PostBody({
               href={`/posts/${post.id}`}
               style={{ textDecoration: "none" }}
             >
-              <Typography
-                variant="body2"
-                color="primary"
-                sx={{ fontWeight: 700, "&:hover": { textDecoration: "underline" } }}
-              >
-                Ver
-              </Typography>
+        <MessageCircle size={20} className="text-gray-500" aria-label="comments"/>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ cursor: "pointer" }}
+          >
+            {commentCounter}
+          </Typography>
+      
             </Link>
           </Stack>
         </>

@@ -1,5 +1,6 @@
 "use client";
-import  { useState, useMemo, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import api from "@/api";
 import {
   Typography,
   Box,
@@ -11,60 +12,91 @@ import {
   CircularProgress,
   Tooltip,
   Link,
+  Paper,
+  Divider,
 } from "@mui/material";
 import { Save, Close, Translate, Language, Share } from "@mui/icons-material";
 import { Media } from "../../types/post";
 import { Reaction } from "../Reaction";
 import { updatePost } from "@/services/postService";
 import useTranslation from "@/hooks/useTranslation";
+import { comment } from "postcss";
+
+/* ---------------------------------------------
+   TIPOS
+--------------------------------------------- */
 
 interface PostBodyProps {
   post: any;
   description: string;
   isOwn?: boolean;
+  user?: any;
   onDelete?: () => void;
   onReport?: (reason: string) => void;
   editRequested?: boolean;
   clearEditRequested?: () => void;
-  user?: any;
 }
-
-export default function PostBody({ post, description, isOwn = false, onDelete, onReport, editRequested, clearEditRequested, user }: PostBodyProps) {
+export default function PostBody({
+  post,
+  description,
+  isOwn = false,
+  user,
+  onDelete,
+  onReport,
+  editRequested,
+  clearEditRequested,
+}: PostBodyProps) {
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(description);
+  const [loadingSave, setLoadingSave] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState<{ type: "error" | "success" | null; text?: string } | null>(null);
-  const { translated, sourceLang, loading: tlLoading, error: tlError, translate, clear } = useTranslation();
+  const [commentCounter, setCommentCounter] = useState<number>(0);
+
+
+  const [alert, setAlert] = useState<{
+    type: "error" | "success" | null;
+    text?: string;
+  } | null>(null);
+  const {
+    translated,
+    sourceLang,
+    loading: translating,
+    translate,
+    clear: clearTranslation,
+  } = useTranslation();
 
   const postId = post.id.toString();
 
-  const browserLang =
-    (typeof navigator !== "undefined"
-      ? navigator.language || (navigator.languages && navigator.languages[0])
-      : "en")?.slice(0, 2).toUpperCase() || "EN";
-
-  const showTranslateButton = useMemo(() => {
-    if (translated) return false;
-    if (sourceLang && sourceLang.toUpperCase() === browserLang) return false;
-    return true;
-  }, [translated, sourceLang, browserLang]);
-
-  const getMediaUrl = (media?: Media) => media?.url ?? null;
-
-
-  const handleSave = async () => {
+  const fetchComments = async () => {
     setLoading(true);
     try {
-      await updatePost(post.id, { text });
-      setEditing(false);
-      window.location.reload();
-    } catch (err: any) {
-      setMsg({ type: "error", text: err.response?.data?.error?.message || err.message });
+      const { data } = await api.get<Comment[]>(`/comments/post/${postId}`);
+      setCommentCounter(data.length)
+    } catch (error) {
+      setLoading(false)
     } finally {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    fetchComments();
+  }, []);
 
+
+  const browserLang =
+    (typeof navigator !== "undefined"
+      ? navigator.language ||
+      (navigator.languages && navigator.languages[0])
+      : "en"
+    )
+      ?.slice(0, 2)
+      .toUpperCase() || "EN";
+
+  const showTranslateBtn = useMemo(() => {
+    if (translated) return false;
+    if (sourceLang && sourceLang.toUpperCase() === browserLang) return false;
+    return true;
+  }, [translated, sourceLang, browserLang]);
 
   useEffect(() => {
     if (editRequested) {
@@ -73,51 +105,73 @@ export default function PostBody({ post, description, isOwn = false, onDelete, o
     }
   }, [editRequested, clearEditRequested]);
 
-  const medias = post.medias ?? [];
+  const handleSave = async () => {
+    setLoadingSave(true);
+    try {
+      await updatePost(post.id, { text });
+      setAlert({ type: "success", text: "Post actualizado." });
+      setEditing(false);
+      window.location.reload();
+    } catch (err: any) {
+      setAlert({
+        type: "error",
+        text:
+          err.response?.data?.error?.message ||
+          "Ocurrió un error al guardar.",
+      });
+    } finally {
+      setLoadingSave(false);
+    }
+  };
 
-  const renderMediaItem = (media: Media, idx: number) => {
-    const url = getMediaUrl(media);
-    if (!url) return null;
+  const renderMedia = (media: Media, i: number) => {
+    if (!media?.url) return null;
 
-    const isAudio = media.type === "AUDIO";
     const isVideo = media.type === "VIDEO";
+    const isAudio = media.type === "AUDIO";
 
     return (
       <Box
-        key={idx}
+        key={i}
         sx={{
           width: "100%",
           borderRadius: 2,
           overflow: "hidden",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
           bgcolor: "background.default",
         }}
       >
-        {isVideo ? (
+        {isVideo && (
           <CardMedia
             component="video"
-            src={url}
+            src={media.url}
             controls
             sx={{
               width: "100%",
               height: { xs: 200, sm: 320 },
               objectFit: "contain",
-              backgroundColor: "black",
+              background: "black",
             }}
           />
-        ) : isAudio ? (
-          <CardMedia component="audio" src={url} controls sx={{ width: "100%" }} />
-        ) : (
+        )}
+
+        {isAudio && (
+          <CardMedia
+            component="audio"
+            src={media.url}
+            controls
+            sx={{ width: "100%" }}
+          />
+        )}
+
+        {!isVideo && !isAudio && (
           <CardMedia
             component="img"
-            image={url}
-            alt={`media-${idx}`}
+            image={media.url}
+            alt="media"
             sx={{
               width: "100%",
               height: { xs: 200, sm: 320 },
-              objectFit: "contain",
+              objectFit: "cover",
             }}
           />
         )}
@@ -125,47 +179,53 @@ export default function PostBody({ post, description, isOwn = false, onDelete, o
     );
   };
 
-  const handleTranslateClick = async () => {
+  const medias = post.medias ?? [];
+
+  const handleTranslate = async () => {
     await translate({ text: description, postId });
   };
 
-  const handleClearTranslation = () => {
-    clear();
-  };
-
   return (
-    <Box sx={{ fontSize: "1.1rem", width: "100%", px: { xs: 1, sm: 2 } }}>
-      {!editing ? (
+    <Box sx={{ px: { xs: 1, sm: 2 }, pt: 1, pb: 2 }}>
+      {editing ? (
+        <Paper elevation={1} sx={{ p: 2, borderRadius: 2 }}>
+          <TextField
+            fullWidth
+            multiline
+            minRows={4}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+
+          <Stack direction="row" spacing={1.5} mt={2} justifyContent="flex-end">
+            <IconButton onClick={handleSave} disabled={loadingSave}>
+              {loadingSave ? <CircularProgress size={20} /> : <Save />}
+            </IconButton>
+            <IconButton onClick={() => setEditing(false)}>
+              <Close />
+            </IconButton>
+          </Stack>
+        </Paper>
+      ) : (
         <>
           {post.shared_post && (
-            <Box
+            <Paper
+              elevation={0}
               sx={{
                 borderLeft: "4px solid #1976d2",
-                borderRadius: 2,
-                p: { xs: 1.5, sm: 2 },
-                mt: 2,
-                mb: 2,
+                p: 2,
+                my: 2,
                 bgcolor: "background.paper",
-                boxShadow: 1,
               }}
             >
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={0.5}
-                alignItems={{ xs: "flex-start", sm: "center" }}
-                mb={1}
-              >
+              <Stack direction="row" alignItems="center" spacing={1} mb={1}>
                 <Share fontSize="small" color="primary" />
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ wordBreak: "break-word" }}
-                >
+                <Typography variant="body2" color="text.secondary">
                   Compartido de{" "}
                   <strong>
-                    {post.shared_post.author?.username ||
-                      post.shared_post.author?.displayname ||
-                      "usuario desconocido"}
+                    {post.shared_post.author?.displayname ||
+                      post.shared_post.author?.username ||
+                      "usuario"}
                   </strong>
                 </Typography>
               </Stack>
@@ -173,40 +233,32 @@ export default function PostBody({ post, description, isOwn = false, onDelete, o
               <Typography
                 variant="body1"
                 sx={{
-                  whiteSpace: "pre-wrap",
                   fontStyle: "italic",
+                  whiteSpace: "pre-wrap",
                   color: "text.secondary",
-                  fontSize: { xs: "0.95rem", sm: "1rem" },
                 }}
               >
                 {post.shared_post.text}
               </Typography>
-            </Box>
+            </Paper>
           )}
-
-          {/* Texto del post */}
           <Typography
             variant="body1"
             sx={{
-              mb: 2,
               whiteSpace: "pre-wrap",
-              width: "100%",
-              fontSize: { xs: "1rem", sm: "1.1rem" },
+              mb: 2,
               lineHeight: 1.8,
-              wordBreak: "break-word",
+              fontSize: { xs: "1rem", sm: "1.1rem" },
             }}
           >
-            {translated ?? text}
+            {translated ?? description}
           </Typography>
-
-          {/* Medias */}
           {medias.length > 0 && (
             <Box
               sx={{
-                width: "100%",
-                mt: 1,
                 display: "grid",
-                gap: 1,
+                gap: 1.5,
+                mt: 1,
                 gridTemplateColumns: {
                   xs: "1fr",
                   sm:
@@ -218,125 +270,81 @@ export default function PostBody({ post, description, isOwn = false, onDelete, o
                 },
               }}
             >
-              {medias.map((m: Media, i: number) => renderMediaItem(m, i))}
+              {medias.map(renderMedia)}
             </Box>
           )}
+          <Divider sx={{ my: 2 }} />
 
-          {/* Acciones */}
           <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={1}
-            sx={{ mt: 1, alignItems: { xs: "stretch", sm: "center" } }}
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            justifyContent="space-between"
+            flexWrap="wrap"
           >
-            </Stack>
-        </>
-      ) : (
-        <Box>
-          <TextField
-            fullWidth
-            multiline
-            minRows={4}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            sx={{
-              fontSize: { xs: "1rem", sm: "1.1rem" },
-              "& .MuiOutlinedInput-root": {
-                fontSize: { xs: "1rem", sm: "1.1rem" },
-                borderRadius: 2,
-              },
-            }}
-          />
-          <Stack direction="row" spacing={1.5} mt={1.5} sx={{ justifyContent: "flex-end" }}>
-            <IconButton size="medium" onClick={handleSave} disabled={loading}>
-              <Save fontSize="medium" />
-            </IconButton>
-            <IconButton size="medium" onClick={() => setEditing(false)}>
-              <Close fontSize="medium" />
-            </IconButton>
-          </Stack>
-        </Box>
-      )}
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <Reaction commentCounter={commentCounter} userId={user?.id} type="post" targetId={post.id} />
 
-      {msg && (
+              {showTranslateBtn && (
+                <Tooltip title="Traducir al idioma de tu navegador">
+                  <span>
+                    <IconButton
+                      onClick={handleTranslate}
+                      disabled={translating}
+                    >
+                      {translating ? (
+                        <CircularProgress size={18} />
+                      ) : (
+                        <Translate />
+                      )}
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              )}
+
+              {translated && (
+                <>
+                  <Tooltip title={`Idioma detectado: ${sourceLang || "—"}`}>
+                    <IconButton>
+                      <Language />
+                    </IconButton>
+                  </Tooltip>
+
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => clearTranslation()}
+                    sx={{ textTransform: "none" }}
+                  >
+                    Ver original
+                  </Button>
+                </>
+              )}
+            </Stack>
+
+            <Link
+              href={`/posts/${post.id}`}
+              style={{ textDecoration: "none" }}
+            >
+              <Typography
+                variant="body2"
+                color="primary"
+                sx={{ fontWeight: 700, "&:hover": { textDecoration: "underline" } }}
+              >
+                Ver
+              </Typography>
+            </Link>
+          </Stack>
+        </>
+      )}
+      {alert && (
         <Typography
-          variant="body2"
-          color={msg.type === "error" ? "error" : "success.main"}
-          mt={1.5}
-          display="block"
-          sx={{ fontSize: { xs: "0.85rem", sm: "0.95rem" } }}
+          mt={2}
+          color={alert.type === "error" ? "error" : "success.main"}
         >
-          {msg.text}
+          {alert.text}
         </Typography>
       )}
-
-      <Stack
-        direction={{ xs: "row", sm: "row" }}
-        alignItems="center"
-        spacing={1.5}
-        sx={{
-          p: 1.5,
-          mt: 1,
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-        }}
-      >
-        <Stack direction="row" alignItems="center" spacing={1}>
-          {/* Reacciones */}
-          <Reaction userId={user?.id} type="post" targetId={post.id} />
-
-          {/* Traducción junto a reacciones */}
-          {showTranslateButton && (
-            <Tooltip title="Traducir al idioma de tu navegador">
-              <span>
-                <IconButton onClick={handleTranslateClick} disabled={tlLoading} aria-label="Traducir" title="Traducir">
-                  {tlLoading ? <CircularProgress size={18} /> : <Translate />}
-                </IconButton>
-              </span>
-            </Tooltip>
-          )}
-
-          {translated && (
-            <>
-              <Tooltip title={`Detectado: ${sourceLang ?? "—"}`}>
-                <IconButton aria-label="source-language">
-                  <Language />
-                </IconButton>
-              </Tooltip>
-              <Button
-                size="small"
-                variant="outlined"
-                onClick={handleClearTranslation}
-                sx={{
-                  fontSize: { xs: "0.75rem", sm: "0.85rem" },
-                  textTransform: "none",
-                }}
-              >
-                Ver original
-              </Button>
-            </>
-          )}
-        </Stack>
-
-        <Link
-          href={`/posts/${post.id}`}
-          style={{
-            textDecoration: "none",
-            color: "inherit",
-          }}
-        >
-          <Typography
-            variant="body2"
-            color="primary"
-            sx={{
-              fontWeight: 800,
-              fontSize: { xs: "0.85rem", sm: "0.95rem" },
-              "&:hover": { textDecoration: "underline" },
-            }}
-          >
-            Comentarios
-          </Typography>
-        </Link>
-      </Stack>
     </Box>
   );
 }

@@ -7,34 +7,35 @@ import CrearPost from "@/components/CrearPost"
 import { Box, Typography, Button, ButtonGroup, useTheme } from "@mui/material"
 
 export default function UserFeed() {
-  const [initialMode, setInitialMode] = useState<"all" | "following">("all")
+  const theme = useTheme()
+
+  const [feedMode, setFeedMode] = useState<"all" | "following">("all")
   const [hydrated, setHydrated] = useState(false)
+
+  // Leer modo guardado (solo al montar)
   useEffect(() => {
-
     try {
-      const savedMode = localStorage.getItem("feedMode")
-
-      if (savedMode === "all" || savedMode === "following") {
-        setInitialMode(savedMode)
+      const saved = localStorage.getItem("feedMode")
+      if (saved === "all" || saved === "following") {
+        setFeedMode(saved)
       } else {
-        setInitialMode("all")
         localStorage.setItem("feedMode", "all")
       }
-    }catch {
-      setInitialMode("all")
+    } catch {
+      setFeedMode("all")
     } finally {
-      setHydrated(true)      
+      setHydrated(true)
     }
   }, [])
 
+  // Guardar modo cada vez que cambie
   useEffect(() => {
-     if (hydrated) {
-      localStorage.setItem("feedMode", initialMode);
-    } 
-  }, [initialMode, hydrated])
-  
+    if (hydrated) {
+      localStorage.setItem("feedMode", feedMode)
+    }
+  }, [feedMode, hydrated])
+
   if (!hydrated) return null
-  const theme = useTheme();
 
   return (
     <Box
@@ -42,7 +43,6 @@ export default function UserFeed() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "flex-start",
         minHeight: "100vh",
         pt: 6,
         px: 2,
@@ -53,53 +53,79 @@ export default function UserFeed() {
         <ThemeToggle />
       </Box>
 
-      <Typography variant="h4" component="h1" fontWeight={600} sx={{ mb: 4, textAlign: "center" }}>
-        Mi Feed
+      <Typography
+        variant="h4"
+        component="h1"
+        fontWeight={600}
+        sx={{ mb: 1, textAlign: "center" }}
+      >
+        Feed
       </Typography>
-<main className="w-full ">
+
       <Box
         sx={{
           width: "100%",
-          maxWidth: "800px",
+          maxWidth: 800,
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          gap: 4,
+          mb: 3
         }}
       >
         <Box
-          id="crear-post"
           sx={{
-            width: "100%",
             display: "flex",
-            flexDirection: "column",
-            gap: 2,
+            width: "100%",
+            borderBottom: "1px solid",
+            borderColor: theme.palette.divider,
+            mb: 2,
           }}
         >
-          <ButtonGroup variant="outlined" aria-label="feed toggle">
-            <Button
-              variant={initialMode === "all" ? "contained" : "outlined"}
-              onClick={() => setInitialMode("all")}
-              sx={{ color: initialMode === 'all' && theme.palette.mode === 'dark' ? 'common.white' : undefined }}
-            >
-              Todos
-            </Button>
-            <Button
-              variant={initialMode === "following" ? "contained" : "outlined"}
-              onClick={() => setInitialMode("following")}
-              sx={{ color: initialMode === 'following' && theme.palette.mode === 'dark' ? 'common.white' : undefined }}
-            >
-              Seguidos
-            </Button>
-          </ButtonGroup>
-          <CrearPost />
-        </Box>
+          {[
+            { key: "all", label: "Todos" },
+            { key: "following", label: "Seguidos" },
+          ].map((item) => {
+            const active = feedMode === item.key
 
-        <Box sx={{ width: "100%" }}>
-          <PostList initialMode={initialMode} />
+            return (
+              <Box
+                key={item.key}
+                onClick={() => setFeedMode(item.key as "all" | "following")}
+                sx={{
+                  flex: 1,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  py: 2,
+                  cursor: "pointer",
+                  position: "relative",
+                  color: active ? "primary.main" : "text.secondary",
+                  "&:hover": { color: "primary.main" },
+                  transition: "color 0.2s",
+                  textAlign: "center",
+                }}
+              >
+                <Typography variant="h6" fontWeight={active ? 600 : 400}>
+                  {item.label}
+                </Typography>
+                <Box
+                  sx={{
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: active ? 4 : 2,
+                    backgroundColor: active ? "primary.main" : "transparent",
+                    transition: "all 0.25s",
+                    borderRadius: 2,
+                  }}
+                />
+              </Box>
+            )
+          })}
         </Box>
+        <CrearPost />
       </Box>
-      </main>
+      <PostList initialMode={feedMode} />
     </Box>
   )
 }

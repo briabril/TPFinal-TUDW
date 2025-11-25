@@ -1,6 +1,7 @@
 "use client";
+
 import React from "react";
-import { Card, CardContent, Box } from "@mui/material";
+import { Box, Divider } from "@mui/material";
 import AuthorHeader from "./AuthorHeader";
 import PostBody from "./PostBody";
 import PostActions from "./PostActions";
@@ -10,38 +11,28 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import WeatherBackground from "../common/WeatherBackground";
 
-export default function PostCard({ post }: { post: Post }) {
+interface PostCardProps {
+  post: Post;
+}
+
+export default function PostCard({ post }: PostCardProps) {
   const { user } = useAuth();
   const description = post.text ?? "(sin descripción)";
-  const created = post.created_at ?? "";
+  const isShared = Boolean(post.shared_post);
 
-  const isShared = !!post.shared_post;
   const [editRequested, setEditRequested] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
   const isOwn = Boolean(user && String(post.author.id) === String(user.id));
 
   const handleDelete = async () => {
-    // deletion confirmation is handled by PostActions dialog
     setLoading(true);
     try {
-      const res = await (await import("@/services/postService")).deletePost(post.id);
-      
-      try {
-        window.dispatchEvent(new CustomEvent('post-deleted', { detail: post.id }));
-      } catch (e) {}
-      toast.success('Post eliminado');
-    } catch (err: any) {
-      console.error(err);
-      setLoading(false);
-    }
-  };
-
-  const handleReport = async (reason: string) => {
-    setLoading(true);
-    try {
-      await (await import("@/services/postService")).reportPost(post.id, reason);
-      
+      await (await import("@/services/postService")).deletePost(post.id);
+      window.dispatchEvent(
+        new CustomEvent("post-deleted", { detail: post.id })
+      );
+      toast.success("Post eliminado");
     } catch (err: any) {
       console.error(err);
     } finally {
@@ -49,59 +40,114 @@ export default function PostCard({ post }: { post: Post }) {
     }
   };
 
-  const handleEditRequest = () => setEditRequested(true);
+  const handleReport = async (reason: string) => {
+    setLoading(true);
+    try {
+      await (await import("@/services/postService")).reportPost(
+        post.id,
+        reason
+      );
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditRequest = () => {
+    setEditRequested(true);
+  };
 
   return (
-    <Card
-      variant="outlined"
+    <Box
       sx={{
-        borderRadius: 4,
+        width: "100%",
+        borderRadius: 3,
         overflow: "hidden",
-        boxShadow: 3,
-        transition: "transform 0.25s ease, box-shadow 0.25s ease",
-        "&:hover": { transform: "translateY(-4px)", boxShadow: 6 },
         bgcolor: "background.paper",
-        maxWidth: 800,
-        mx: "auto",
+        mb: 4,
+        cursor: "pointer",
+        position: "relative",
+
+        // ⭐ SOMBRA SOLO A LOS COSTADOS
+        boxShadow:
+          "-6px 0 18px rgba(0,0,0,0.06), 6px 0 18px rgba(0,0,0,0.06)",
+
+        transition: "transform 0.2s ease, box-shadow 0.2s ease",
+
+        "&:hover": {
+          transform: "translateY(-2px)",
+          boxShadow:
+            "-10px 0 22px rgba(0,0,0,0.10), 10px 0 22px rgba(0,0,0,0.10)",
+        },
+
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "6px",
+          height: "100%",
+          background: "transparent",
+          transition: "background 0.25s ease",
+        },
+        "&:hover::before": {
+          background: "primary.main",
+        },
       }}
     >
-      <CardContent sx={{ px: 0, py: 0 }}>
-        {/* 🔹 Si es un post compartido → mostrar SharedPost */}
-        {isShared ? (
-          <SharedPost post={post} />
-        ) : (
-          <>
-           <WeatherBackground weather={(post as any).weather} postId={post.id} className="post-header-bg" imageOpacity={0.50}>
-            <AuthorHeader
-              author={post.author}
-              actions={
-                <PostActions
-                  onEdit={handleEditRequest}
-                  onDelete={handleDelete}
-                  onReport={handleReport}
-                  loading={loading}
-                  isOwn={isOwn}
-                  postId={post.id}
-                />
-              }
-              postId={post.id}
-            />
-            </WeatherBackground>
-            <Box sx={{ px: 2 }}>
-              <PostBody
-                post={post}
-                description={description}
-                isOwn={isOwn}
-                onDelete={handleDelete}
-                onReport={handleReport}
-                editRequested={editRequested}
-                clearEditRequested={() => setEditRequested(false)}
-                user={user}
+      {isShared ? (
+        <SharedPost post={post} />
+      ) : (
+        <>
+          <WeatherBackground
+            weather={(post as any).weather}
+            postId={post.id}
+            imageOpacity={0.45}
+          >
+            <Box sx={{ px: 2, pt: 2 }}>
+              <AuthorHeader
+                author={post.author}
+                sharedBy={post.shared_post?.author ?? null}
+                actions={
+                  <PostActions
+                    onEdit={handleEditRequest}
+                    onDelete={handleDelete}
+                    onReport={handleReport}
+                    loading={loading}
+                    isOwn={isOwn}
+                    postId={post.id}
+                  />
+                }
+                weather={(post as any).weather}
+                postId={post.id}
               />
             </Box>
-          </>
-        )}
-      </CardContent>
-    </Card>
+          </WeatherBackground>
+
+          <Box sx={{ px: 2, pt: 1 }}>
+            <PostBody
+              post={post}
+              description={description}
+              isOwn={isOwn}
+              onDelete={handleDelete}
+              onReport={handleReport}
+              editRequested={editRequested}
+              clearEditRequested={() => setEditRequested(false)}
+              user={user}
+            />
+          </Box>
+        </>
+      )}
+
+      <Divider
+        sx={{
+          borderColor: "rgba(0,0,0,0.06)",
+          opacity: 0.5,
+          width: "92%",
+          mx: "auto",
+        }}
+      />
+    </Box>
   );
 }

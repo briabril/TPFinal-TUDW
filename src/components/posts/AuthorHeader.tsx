@@ -1,12 +1,13 @@
 "use client";
 
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar, Box, Typography, Stack } from "@mui/material";
 import getImageUrl from "@/utils/getImageUrl";
 import { Author } from "../../types/post";
 import WeatherBadge from "@/components/common/WeatherBadge";
 import { fetchWeatherByCity } from "@/services/weatherService";
 import api from "../../api/index";
+import { useRouter } from "next/navigation";
 
 interface AuthorHeaderProps {
   author: Author;
@@ -14,56 +15,62 @@ interface AuthorHeaderProps {
   actions?: React.ReactNode;
   weather?: any | null;
   postId?: string;
+  createdAt?: string;
 }
 
-export default function AuthorHeader({ author, sharedBy, actions, weather, postId }: AuthorHeaderProps) {
-  
+export default function AuthorHeader({
+  author,
+  sharedBy,
+  actions,
+  weather,
+  postId,
+  createdAt,
+}: AuthorHeaderProps) {
+  const router = useRouter();
   const [localWeather, setLocalWeather] = useState<any | null>(weather ?? null);
-  const [loadingWeather, setLoadingWeather] = useState(false);
 
+  const city = (author as any)?.city;
+  const country = (author as any)?.country_iso;
+
+  const goToProfile = () => {
+    router.push(`/${author.username}`);
+  };
+
+  // Cargar clima desde ciudad del autor
   useEffect(() => {
     let mounted = true;
-    async function load() {
-      if (localWeather) return;
+
+    async function loadWeather() {
+      if (localWeather || !city) return;
+
       try {
-        if (!author) return;
-        const city = (author as any).city;
-        const country = (author as any).country_iso;
-        // if (typeof window !== "undefined") console.log("AuthorHeader: will fetch weather for", city, country);
-        if (!city) return;
-        setLoadingWeather(true);
         const w = await fetchWeatherByCity(city, country);
-        // if (typeof window !== "undefined") console.log("AuthorHeader: weather fetched", w);
         if (mounted) setLocalWeather(w);
       } catch (e) {
-        console.warn("Failed to fetch weather for author", e);
-      } finally {
-        if (mounted) setLoadingWeather(false);
+        console.warn("Weather fetch failed", e);
       }
     }
-    load();
-    return () => { mounted = false };
-  }, [author]);
 
-  // If we still don't have weather, try fetching from the post endpoint (useful for older posts
-  // where weather was saved on the post but not passed down).
+    loadWeather();
+    return () => { mounted = false };
+  }, [city, country, localWeather]);
+
+  // Cargar desde el post si no hay datos
   useEffect(() => {
     let mounted = true;
+
     async function loadFromPost() {
-      if (localWeather) return;
-      if (!postId) return;
+      if (localWeather || !postId) return;
+
       try {
-        // if (typeof window !== "undefined") console.log("AuthorHeader: fetching post by id for weather", postId);
         const res = await api.get(`/posts/${postId}`);
         const payload = res.data?.data;
-        if (payload?.weather && mounted) {
-          // if (typeof window !== "undefined") console.log("AuthorHeader: weather from post endpoint", payload.weather);
-          setLocalWeather(payload.weather);
-        }
+        if (mounted && payload?.weather) setLocalWeather(payload.weather);
       } catch (e) {
-        // ignore
+        console.warn("Post weather fetch failed", e);
       }
     }
+
     loadFromPost();
     return () => { mounted = false };
   }, [postId, localWeather]);
@@ -74,56 +81,71 @@ export default function AuthorHeader({ author, sharedBy, actions, weather, postI
     <Stack
       direction="row"
       alignItems="center"
-      spacing={2.5}
       sx={{
-        mb: 2,
-        p: 1.5,
-        borderRadius: 3,
-        backgroundColor: "rgba(0, 0, 0, 0.02)",
+        width: "100%",
+        px: 2,
+        py: 1.5,
+        gap: 1.5,
+
+        borderBottom: "1px solid rgba(0,0,0,0.06)",
+
         position: "relative",
-        pr: 8,
-        "&:hover": {
-          backgroundColor: "rgba(0, 0, 0, 0.04)",
-          transition: "background-color 0.3s ease",
-        },
+        zIndex: 3,
       }}
     >
-      {/* Avatar del autor original */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, flex: 1 }}>
-        <Avatar
-          src={getImageUrl(author.profile_picture_url) ?? "/default-avatar.png"}
-          alt={author.displayname ?? author.username}
-          sx={{
-            width: 56,
-            height: 56,
-            border: "2px solid rgba(0,0,0,0.1)",
-            boxShadow: 1,
-          }}
-        />
 
-        <Box>
-          {/* Nombre principal: autor original */}
-          <Typography variant="h6" component="h1" fontWeight={600} sx={{ lineHeight: 1.2, color: "text.primary" }}>
-            {author.displayname || author.username}
+      {/* Avatar clickable */}
+      <Avatar
+        src={getImageUrl(author.profile_picture_url)}
+        alt={author.username}
+        onClick={goToProfile}
+        sx={{
+          width: 44,
+          height: 44,
+          borderRadius: "12px",
+          cursor: "pointer",
+          transition: "opacity 0.2s",
+          "&:hover": { opacity: 0.85 },
+        }}
+      />
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          cursor: "pointer",
+          "&:hover": { opacity: 0.85 },
+        }}
+        onClick={goToProfile}
+      >
+        <Typography variant="body1" fontWeight={600} sx={{ lineHeight: 1.2 }}>
+          {author.displayname || author.username}
+        </Typography>
+
+        <Typography variant="body2" color="text.secondary">
+          @{author.username} • {createdAt || ""}
+        </Typography>
+
+        {sharedBy && (
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ mt: 0.4 }}
+          >
+            Compartido por {sharedBy.displayname || sharedBy.username}
           </Typography>
+        )}
+      </Box>
 
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.3, fontStyle: "italic" }}>
-            @{author.username}
-          </Typography>
+      <Box sx={{ flexGrow: 1 }} />
 
-          {/* Si el post fue compartido */}
-          {sharedBy && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              Compartido por <strong>{sharedBy.displayname || sharedBy.username}</strong>
-            </Typography>
-          )}
+      {localWeather && (
+        <Box sx={{ mr: 1 }}>
+          <WeatherBadge weather={localWeather} variant="inline" />
         </Box>
-      </Box>
+      )}
 
-      <Box sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
-        <WeatherBadge weather={localWeather} variant="inline" />
-      </Box>
-      <Box sx={{ position: "absolute", top: 12, right: 12 }}>{actions}</Box>
+      {actions}
     </Stack>
   );
 }

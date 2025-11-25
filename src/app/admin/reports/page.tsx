@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import api from "../../../api/index";
+
 import {
   Card,
   CardContent,
@@ -14,178 +15,231 @@ import {
   Divider,
   CircularProgress,
   Paper,
-  Tabs,
-  Tab,
+  TextField,
 } from "@mui/material";
+
 import {
   ReportProblem,
   Delete,
   CheckCircle,
   OpenInNew,
+  Search,
+  ErrorOutline,
+  Block,
+  DoneAll,
 } from "@mui/icons-material";
+
 import { Report } from "../../../types/report";
 
 export default function AdminReportsPage() {
   const [reports, setReports] = useState<Report[]>([]);
+  const [stats, setStats] = useState({ pending: 0, blocked: 0, dismissed: 0 });
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-const [tab, setTab] = useState<"pending" | "blocked" | "dismissed">("pending");
+  const [tab, setTab] = useState<"pending" | "blocked" | "dismissed">("pending");
+  const [search, setSearch] = useState("");
 
-
-  // carga los reportes según la pestaña activa
+  // ✅ Fetch list y actualizar stats basados en front
   useEffect(() => {
-    const fetchReports = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await api.get<Report[]>(`/reports/${tab}`);
-        setReports(res.data);
-      } catch (error) {
-        console.error("Error al obtener reportes:", error);
+        const listRes = await api.get<Report[]>(`/reports/${tab}`);
+        setReports(listRes.data);
+
+        // ✅ Actualizar solo el contador de la pestaña actual
+        setStats((prev) => ({
+          ...prev,
+          [tab]: listRes.data.length,
+        }));
       } finally {
         setLoading(false);
       }
     };
-    fetchReports();
+    fetchData();
   }, [tab]);
 
-const handleAction = async (id: string, target_id: string | number, action: "blocked" | "dismissed") => {
-  setActionLoading(id);
-  try {
-    await api.patch(`/reports/${id}`, { action, target_id });
+  // ✅ Filter
+  const filtered = useMemo(() => {
+    return reports.filter(
+      (r) =>
+        r.reporter_username?.toLowerCase().includes(search.toLowerCase()) ||
+        r.reason?.toLowerCase().includes(search.toLowerCase()) ||
+        r.target_id?.toString().includes(search)
+    );
+  }, [reports, search]);
 
+  // ✅ Actions
+  const handleAction = async (id: string, target_id: string | number, action: "blocked" | "dismissed") => {
+    setActionLoading(id);
+    try {
+      await api.patch(`/reports/${id}`, { action, target_id });
 
-    setReports(prev => prev.filter(r => r.id !== id));
-  } catch (error) {
-    console.error("Error al actualizar reporte:", error);
-  } finally {
-    setActionLoading(null);
-  }
-};
+      // ✅ Sacar el reporte de la lista actual
+      setReports((prev) => {
+        const updated = prev.filter((r) => r.id !== id);
 
-const handleRevert = async (id: string, target_id: string | number) => {
-  setActionLoading(id);
-  try {
-    await api.patch(`/reports/${id}/revert`, { target_id });
-    // remove report from list or refresh
-    setReports(prev => prev.filter(r => r.id !== id));
-  } catch (error) {
-    console.error('Error al revertir reporte:', error);
-  } finally {
-    setActionLoading(null);
-  }
-}
+        // ✅ Actualizar contador
+        setStats((prevStats) => ({
+          ...prevStats,
+          [tab]: updated.length,
+        }));
 
+        return updated;
+      });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRevert = async (id: string, target_id: string | number) => {
+    setActionLoading(id);
+    try {
+      await api.patch(`/reports/${id}/revert`, { target_id });
+
+      // ✅ Sacar el reporte de la lista actual
+      setReports((prev) => {
+        const updated = prev.filter((r) => r.id !== id);
+
+        // ✅ Actualizar contador
+        setStats((prevStats) => ({
+          ...prevStats,
+          [tab]: updated.length,
+        }));
+
+        return updated;
+      });
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   return (
-    <Stack spacing={3} sx={{ maxWidth: 800, mx: "auto", mt: 4, mb: 6 }}>
-      <Typography variant="h4" component="h1" fontWeight="bold" textAlign="center">
-        Gestión de Reportes
-      </Typography>
-      <Tabs
-        value={tab}
-        onChange={(_, newValue) => setTab(newValue)}
-        centered
-        textColor="primary"
-        indicatorColor="primary"
-      >
-        <Tab label="Pendientes" value="pending" />
-        <Tab label="Bloqueados" value="blocked" />
-        <Tab label="Descartados" value="dismissed" />
-      </Tabs>
+    <Stack spacing={4} sx={{ maxWidth: 900, mx: "auto", p: { xs: 2, md: 5 } }}>
+      {/* ✅ TITLE */}
+      <Stack textAlign="center" spacing={0.5}>
+        <Typography variant="h4" fontWeight="bold">
+          Gestión de Reportes
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Moderación y control del contenido reportado
+        </Typography>
+      </Stack>
 
-      {loading ? (
-        <Box
+      {/* ✅ DASHBOARD CARDS */}
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+        <StatCard
+          icon={<ErrorOutline />}
+          label="Pendientes"
+          value={stats.pending}
+          active={tab === "pending"}
+          onClick={() => setTab("pending")}
+        />
+        <StatCard
+          icon={<Block />}
+          label="Bloqueados"
+          value={stats.blocked}
+          active={tab === "blocked"}
+          onClick={() => setTab("blocked")}
+        />
+        <StatCard
+          icon={<DoneAll />}
+          label="Descartados"
+          value={stats.dismissed}
+          active={tab === "dismissed"}
+          onClick={() => setTab("dismissed")}
+        />
+      </Stack>
+
+      {/* ✅ SEARCH */}
+      <Box sx={{ maxWidth: 400, mx: "auto", position: "relative" }}>
+        <Search sx={{ position: "absolute", top: 11, left: 10, fontSize: 18, color: "text.secondary" }} />
+        <TextField
+          fullWidth
+          placeholder="Buscar por usuario, motivo o ID..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
           sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "50vh",
+            "& .MuiInputBase-input": { pl: 4 },
           }}
-        >
+        />
+      </Box>
+
+      {/* ✅ LOADING */}
+      {loading && (
+        <Box display="flex" justifyContent="center" py={10}>
           <CircularProgress />
         </Box>
-      ) : reports.length === 0 ? (
-        <Paper
-          sx={{
-            p: 4,
-            textAlign: "center",
-            color: "text.secondary",
-            borderRadius: 3,
-          }}
-          elevation={0}
-        >
+      )}
+
+      {/* ✅ EMPTY */}
+      {!loading && filtered.length === 0 && (
+        <Paper sx={{ p: 4, textAlign: "center", borderRadius: 3 }} elevation={0}>
           <ReportProblem sx={{ fontSize: 40, mb: 1, color: "warning.main" }} />
-          <Typography variant="h6" component="h2">
-            No hay reportes {tab === "pending" ? "pendientes" : "en esta categoría"} 🎉
-          </Typography>
+          <Typography variant="h6">No hay reportes para mostrar</Typography>
         </Paper>
-      ) : (
-        reports.map((report) => (
+      )}
+
+      {/* ✅ REPORT LIST */}
+      {!loading &&
+        filtered.map((report) => (
           <Card
             key={report.id}
             sx={{
               borderRadius: 3,
-              boxShadow: 3,
               borderLeft: `6px solid ${
                 report.target_type === "post" ? "#1976d2" : "#9c27b0"
               }`,
             }}
           >
             <CardContent>
-              <Stack spacing={1.2}>
+              <Stack spacing={1.5}>
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <ReportProblem color="warning" />
-                  <Typography variant="h6" component="h2" fontWeight="bold">
+                  <Typography fontWeight="bold" variant="h6">
                     Reporte #{report.id}
                   </Typography>
                 </Stack>
 
-                <Divider sx={{ my: 1 }} />
+                <Divider />
 
-                <Typography>
-                  <strong>Reportado por:</strong> {report.reporter_username}
-                </Typography>
+                <Info label="Reportado por" value={report.reporter_username} />
 
-                <Typography component="div">
-                  <strong>Tipo de contenido:</strong>{" "}
-                  <Chip
-                    label={report.target_type.toUpperCase()}
-                    color={
-                      report.target_type === "post" ? "primary" : "secondary"
-                    }
-                    size="small"
-                  />
-                </Typography>
+                <Info
+                  label="Tipo"
+                  value={
+                    <Chip
+                      label={report.target_type.toUpperCase()}
+                      color={report.target_type === "post" ? "primary" : "secondary"}
+                      size="small"
+                    />
+                  }
+                />
 
-                <Typography>
-                  <strong>ID del contenido:</strong>{" "}
-                  {report.target_type === "post" ? (
-                    <Link
-                      href={`/posts/${report.target_id}`}
-                      style={{
-                        color: "#1976d2",
-                        textDecoration: "none",
-                        fontWeight: 500,
-                      }}
-                    >
-                      Ver post <OpenInNew fontSize="small" sx={{ ml: 0.5 }} />
-                    </Link>
-                  ) : (
-                    report.target_id
-                  )}
-                </Typography>
+                <Info
+                  label="Contenido"
+                  value={
+                    report.target_type === "post" ? (
+                      <Link href={`/posts/${report.target_id}`} style={{ color: "#1976d2", fontWeight: 500 }}>
+                        Ver post <OpenInNew sx={{ fontSize: 16 }} />
+                      </Link>
+                    ) : (
+                      report.target_id
+                    )
+                  }
+                />
 
-                <Typography>
-                  <strong>Motivo:</strong> {report.reason}
-                </Typography>
+                <Info label="Motivo" value={report.reason} />
 
+                {/* ✅ ACTIONS */}
                 {tab === "pending" && (
-                  <Stack direction="row" spacing={1.5} mt={2}>
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} mt={1}>
                     <Button
                       variant="contained"
                       color="error"
+                      fullWidth
                       startIcon={<Delete />}
-                      onClick={() => handleAction(report.id, report.target_id, "blocked" )}
+                      onClick={() => handleAction(report.id, report.target_id, "blocked")}
                       disabled={actionLoading === report.id}
                     >
                       Eliminar contenido
@@ -194,19 +248,21 @@ const handleRevert = async (id: string, target_id: string | number) => {
                     <Button
                       variant="outlined"
                       color="success"
+                      fullWidth
                       startIcon={<CheckCircle />}
                       onClick={() => handleAction(report.id, report.target_id, "dismissed")}
                       disabled={actionLoading === report.id}
                     >
-                      Descartar reporte
+                      Descartar
                     </Button>
                   </Stack>
                 )}
+
                 {tab === "blocked" && (
-                  <Stack direction="row" spacing={1.5} mt={2}>
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} mt={1}>
                     <Button
                       variant="outlined"
-                      color="primary"
+                      fullWidth
                       startIcon={<OpenInNew />}
                       href={`/posts/${report.target_id}`}
                     >
@@ -215,6 +271,7 @@ const handleRevert = async (id: string, target_id: string | number) => {
                     <Button
                       variant="contained"
                       color="secondary"
+                      fullWidth
                       startIcon={<CheckCircle />}
                       onClick={() => handleRevert(report.id, report.target_id)}
                       disabled={actionLoading === report.id}
@@ -226,8 +283,48 @@ const handleRevert = async (id: string, target_id: string | number) => {
               </Stack>
             </CardContent>
           </Card>
-        ))
-      )}
+        ))}
+    </Stack>
+  );
+}
+
+function Info({ label, value }: { label: string; value: any }) {
+  return (
+    <Box display="flex" gap={1} alignItems="center">
+      <Typography component="span" fontWeight="bold">
+        {label}:
+      </Typography>
+      <Box component="span" fontWeight={400}>
+        {value}
+      </Box>
+    </Box>
+  );
+}
+
+function StatCard({ icon, label, value, active, onClick }: any) {
+  return (
+    <Stack
+      flex={1}
+      alignItems="center"
+      onClick={onClick}
+      spacing={0.5}
+      sx={{
+        p: 2,
+        borderRadius: 3,
+        border: active ? "2px solid #1976d2" : "1px solid rgba(0,0,0,0.1)",
+        transition: "0.2s",
+        cursor: "pointer",
+        "&:hover": { boxShadow: 3 },
+        textAlign: "center",
+      }}
+    >
+      <Box fontSize={22}>{icon}</Box>
+      <Typography variant="body2" color="text.secondary">
+        {label}
+      </Typography>
+      <Typography variant="h6" fontWeight="bold">
+        {value}
+      </Typography>
     </Stack>
   );
 }

@@ -1,11 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Button, IconButton, Tooltip } from "@mui/material";
-import { Heart, ShareIcon } from "lucide-react";
+import { Button, IconButton, Tooltip, Stack, Typography } from "@mui/material";
+import { Heart, MessageCircle, Bookmark, ShareIcon } from "lucide-react";
 import api from "../api/index";
 import toast from "react-hot-toast";
 
 interface PostReactionProps {
+  commentCounter: number,
   userId?: string;
   targetId: string;
   type: "post" | "comment";
@@ -23,13 +24,17 @@ interface ShareStatusResponse {
   shared: boolean;
 }
 
-export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
-  const [liked, setLiked] = useState<boolean>(false);
-  const [shared, setShared] = useState<boolean>(false);
-  const [count, setCount] = useState<number>(0);
+export const Reaction = ({
+  commentCounter,
+  userId,
+  targetId,
+  type
+}: PostReactionProps) => {
+  const [liked, setLiked] = useState(false);
+  const [shared, setShared] = useState(false);
+  const [count, setCount] = useState(0);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // 🔹 Like (toggle)
   const toggleReaction = async () => {
     try {
       const endpoint =
@@ -50,7 +55,6 @@ export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
     }
   };
 
-  // 🔹 Obtener cantidad de likes
   const fetchCount = async () => {
     try {
       const endpoint =
@@ -64,7 +68,6 @@ export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
     }
   };
 
-  // 🔹 Saber si el usuario ya dio like
   const fetchUserLiked = async () => {
     try {
       const endpoint =
@@ -82,7 +85,6 @@ export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
     }
   };
 
-  // 🔹 Saber si el usuario ya compartió el post
   const fetchUserShared = async () => {
     try {
       const result = await api.get<ShareStatusResponse>(
@@ -95,7 +97,6 @@ export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
     }
   };
 
-  // 🔹 Compartir post
   const handleShare = async () => {
     try {
       setLoading(true);
@@ -116,39 +117,43 @@ export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
   }, []);
 
   return (
-    <>
-      {/* ❤️ Botón de like */}
-      <Button onClick={toggleReaction} className="flex items-center" aria-label="Reaccionar" title="Reaccionar">
-        {liked ? (
-          <Heart className="text-red-500 size-5" fill="red" />
-        ) : (
-          <Heart className="text-gray-600 size-6" />
-        )}
-        {count > 0 && (
-          <span className="text-gray-600 ml-1 text-s">{count}</span>
-        )}
-      </Button>
+    <Stack direction="row" spacing={3} alignItems="center">
 
-      <Tooltip
-        title={
-          shared
-            ? "Compartiste este post"
-            : "Compartir este post"
-        }
-      >
-        <span>
-          <IconButton
-            onClick={handleShare}
-            disabled={loading || shared}
-            color={shared ? "primary" : "default"} aria-label="Compartir post" title="Compartir post"
+      <Stack direction="row" alignItems="center" spacing={0.5}>
+        <IconButton onClick={toggleReaction} size="small">
+          <Heart
+            size={20}
+            className={liked ? "text-red-500" : "text-gray-500"}
+            fill={liked ? "red" : "none"}
+          />
+        </IconButton>
+        {count > 0 && (
+          <Typography variant="body2" color="text.secondary">
+            {count}
+          </Typography>
+        )}
+      </Stack>
+
+      <Stack direction="row" alignItems="center" spacing={0.5}>
+        <MessageCircle size={20} className="text-gray-500" />
+        {type === "post" && (
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ cursor: "pointer" }}
           >
-            <ShareIcon
-              className={shared ? "text-blue-600" : "text-gray-600"}
-              fill={shared ? "blue" : "none"}
-            />
-          </IconButton>
-        </span>
-      </Tooltip>
-    </>
+            {commentCounter}
+          </Typography>
+        )}
+      </Stack>
+
+      <IconButton onClick={handleShare} size="small" disabled={shared}>
+        <ShareIcon
+          size={20}
+          className={shared ? "text-blue-600" : "text-gray-500"}
+        />
+      </IconButton>
+
+    </Stack>
   );
 };

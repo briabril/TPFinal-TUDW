@@ -22,10 +22,8 @@ export default function SharedPost({ post }: any) {
         borderRadius: 3,
         bgcolor: "background.paper",
         boxShadow: 1,
-        mb: 2,
       }}
     >
-      {/* 🔹 Header: autor que compartió */}
       <Stack direction="row" alignItems="center" spacing={1} mb={1}>
         <Typography variant="body2" color="text.secondary" fontStyle="italic">
           Compartido por {sharedBy.displayname || sharedBy.username}

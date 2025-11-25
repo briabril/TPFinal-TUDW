@@ -1,44 +1,85 @@
 "use client";
 
-import React, { useEffect } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import React, { useEffect, useLayoutEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import {
-  Box,
-  Button,
-  Divider,
-  Avatar,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Box, Button, Avatar, Typography } from "@mui/material";
 import getImageUrl from "@/utils/getImageUrl";
 import {
   Home,
   User,
   MessageSquare,
   Settings,
-  PenSquare,
+  SearchIcon,
   LayoutDashboard,
-  Users,
+  BellDotIcon,
+  Compass,
   Flag,
   LogOut,
 } from "lucide-react";
-import UserSearch from "../UserSearch";
+import { motion } from "framer-motion";
+import { SidebarItem } from "./SidebarItem";
+import { NavItem } from "@/types/nav_item";
 import { fetchWeatherByCity } from "@/services/weatherService";
+import SidebarPanel from "./SidebarPanel";
 
-export default function Sidebar() {
-  const { user, loading, logout } = useAuth();
+export default function Sidebar({ userRole = "USER" }) {
+  const router = useRouter();
   const pathname = usePathname();
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
-const [weather, setWeather] = React.useState<any | null>(null);
+  const { user, loading, logout } = useAuth();
 
+  const [activeItem, setActiveItem] = useState("home");
+  const [isExpanded, setIsExpanded] = useState<boolean | null>(null);
+  const [weather, setWeather] = useState<any | null>(null);
 
+  const [activePanel, setActivePanel] =
+    useState<"none" | "messages" | "search" | "settings">("none");
+
+  useLayoutEffect(() => {
+    try {
+      const saved = localStorage.getItem("sidebar-expanded");
+      if (saved !== null) {
+        setIsExpanded(saved === "true");
+      } else {
+        setIsExpanded(true);
+      }
+    } catch {
+      setIsExpanded(true);
+    }
+  }, []);
+
+  // Guardar preferencia en localStorage
+  useEffect(() => {
+    if (isExpanded === null) return;
+    try {
+      localStorage.setItem("sidebar-expanded", String(isExpanded));
+    } catch {}
+  }, [isExpanded]);
+
+  const mainNavItems: NavItem[] = [
+    { id: "home", label: "Inicio", icon: Home, path: "/feed", expandable: true },
+    { id: "profile", label: "Perfil", icon: User, path: `/${user?.username}`, expandable: true },
+    { id: "search", label: "Buscar", icon: SearchIcon, expandable: false },
+    { id: "notifications", label: "Notificaciones", icon: BellDotIcon, path: '/notifications', expandable: true },
+    { id: "settings", label: "Configuración", icon: Settings, path: "/settings", expandable: true },
+    { id: "messages", label: "Mensajes", icon: MessageSquare, path: "/messages", expandable: true },
+  ];
+
+  // Admin
+  const adminItems: NavItem[] = [
+    { id: "admin-dashboard", label: "Admin Panel", icon: LayoutDashboard, roles: ["ADMIN"], path: "/admin/dashboard", expandable: true },
+    { id: "admin-reports", label: "Reportes", icon: Flag, roles: ["ADMIN"], path: "/admin/reports", expandable: true },
+  ];
+
+  const visibleAdminItems = adminItems.filter((it) => it.roles?.includes(userRole));
+
+  // Detecta el item activo según pathname
+  useEffect(() => {
+    const current = mainNavItems.find((item) => item.path && pathname.startsWith(item.path));
+    if (current) setActiveItem(current.id);
+  }, [pathname]);
+
+  // Weather
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -47,182 +88,178 @@ const [weather, setWeather] = React.useState<any | null>(null);
           const w = await fetchWeatherByCity(user.city, user.country_iso);
           if (mounted) setWeather(w);
         }
-      } catch (e) {
-        console.warn('sidebar weather fetch failed', e);
-      }
+      } catch {}
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [user?.city, user?.country_iso]);
 
-  // 🔹 Ítems del menú principal
-  const navItems = [
-    { icon: <Home size={18} />, text: "Inicio", path: "/feed" },
-    { icon: <User size={18} />, text: "Perfil", path: `/${user?.username}` },
-    { icon: <MessageSquare size={18} />, text: "Mensajes", path: "/messages" },
-    { icon: <Settings size={18} />, text: "Configuración", path: "/settings" },
-  ];
+  // Click en item
+  const handleItemClick = (item: NavItem) => {
+    setActiveItem(item.id);
 
-  // 🔹 Ítems de administrador
-  const adminItems = [
-    { icon: <LayoutDashboard size={18} />, text: "Panel Admin", path: "/admin/dashboard" },
-    { icon: <Users size={18} />, text: "Gestión de usuarios", path: "/admin/users" },
-    { icon: <Flag size={18} />, text: "Reportes", path: "/admin/reports" },
-  ];
+    if (item.expandable) {
+      setIsExpanded(true);
+      setActivePanel("none");
+      if (item.path) router.push(item.path);
+    } else {
+      setIsExpanded(false);
+      setActivePanel(item.id as any);
+    }
+  };
 
-    if (loading) {
-    return (
-      <Box sx={{ width: 250, p: 2 }}>
-        <h1 className="text-center py-10 text-lg">Cargando...</h1>
-      </Box>
-    );
-  }
-  // 🔹 Renderizado con estilo activo
-  const renderList = (items: any[]) =>
-    items.map(({ icon, text, path }) => {
-  const basePath = typeof path === "string" ? path.split("#")[0] : path;
-  const active = pathname === basePath;
+  const sidebarVariants = {
+    expanded: { width: 250 },
+    collapsed: { width: 70 },
+  };
 
-      return (
-        <ListItemButton
-          key={path}
-          component={Link}
-          href={path}
-          sx={{
-            borderRadius: 2,
-            mb: 0.5,
-            transition: "all 0.2s ease",
-            backgroundColor: active ? "primary.main" : "transparent",
-            color: active ? (isDark ? "common.white" : "primary.contrastText") : "text.primary",
-            "&:hover": {
-              backgroundColor: active ? "primary.dark" : "action.hover",
-            },
-          }}
-        >
-          <ListItemIcon
-            sx={{ color: active ? (isDark ? "common.white" : "primary.contrastText") : "text.secondary", minWidth: 36 }}
-          >
-            {icon}
-          </ListItemIcon>
-          <ListItemText
-            primary={
-              <Typography sx={{ color: active ? (isDark ? 'common.white' : undefined) : undefined }} fontWeight={active ? 600 : 500}>{text}</Typography>
-            }
-          />
-        </ListItemButton>
-      );
-    });
+  if (isExpanded === null) return null;
 
   return (
-    <nav>
-    <Box
-      sx={{
-        width: 250,
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-start",
-        borderRight: "1px solid",
-        borderColor: "divider",
-        boxShadow: "2px 0 8px rgba(0,0,0,0.05)",
-        p: 1,
-        position: "sticky",
-        top: 0,
-      }}
-    >
-      <div>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2, mt: 2 }}>
-          <img
-            src="/logo.png"
-            alt="Bloop"
-            style={{ width: 130, objectFit: 'contain', display: 'block' }}
-            onError={(e: any) => { e.target.style.display = 'none'; }}
-          />
+    <nav style={{ position: "relative" }}>
+      <motion.div
+        variants={sidebarVariants}
+        initial={false}
+        animate={isExpanded ? "expanded" : "collapsed"}
+        className="h-screen flex flex-col border-r-0"
+        style={{
+          boxShadow: "2px 0 8px rgba(0,0,0,0.05)",
+          position: "sticky",
+          top: 0,
+          padding: 8,
+        }}
+      >
+        {/* Logo */}
+        <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
+          <img src="/logo.png" alt="Bloop" style={{ width: 130 }} />
         </Box>
 
-        <Box sx={{ mb: 1 }}>
-          <UserSearch />
-        </Box>
+        {/* Navegación */}
+        <motion.nav className="flex-1 overflow-y-auto px-1 space-y-2">
+          {mainNavItems.map((item) => (
+            <SidebarItem
+              key={item.id}
+              id={item.id}
+              label={item.label}
+              icon={item.icon}
+              isActive={activeItem === item.id}
+              isExpanded={isExpanded}
+              onClick={() => handleItemClick(item)}
+            />
+          ))}
 
-        <List>{renderList(navItems)}</List>
-
-        {user?.role === "ADMIN" && (
-          <>
-            <Divider sx={{ my: 2 }} />
-            <Typography
-              variant="caption"
-              sx={{
-                fontWeight: 600,
-                textTransform: "uppercase",
-                color: "text.secondary",
-                ml: 2,
-              }}
-            >
+          {visibleAdminItems.length > 0 && isExpanded && (
+            <p className="text-xs font-semibold text-muted-foreground uppercase px-3 mt-4">
               Admin
-            </Typography>
-            <List sx={{ mt: 1 }}>{renderList(adminItems)}</List>
-          </>
-        )}
-      </div>
-
-      {user && (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "stretch",
-            justifyContent: "space-between",
-            p: 1.5,
-            borderRadius: 2,
-            mt: "auto",
-          }}
-        >
-          
-          {weather?.current && (
-            <Box sx={{ mb: 1 }}>
-              
-              <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-                
-                <Box sx={{ backgroundColor: 'rgba(0,0,0,0.03)', borderRadius: 1, px: 0.8, py: 0.3 }}>
-                  <Typography variant="caption" fontWeight={700}>
-                    {Math.round(weather.current.temp)}° • {weather.current.weather?.[0]?.description}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
+            </p>
           )}
 
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Avatar
-                src={getImageUrl(user.profile_picture_url) ?? undefined}
-                alt={user.displayname ?? user.username}
-                sx={{ width: 36, height: 36 }}
-              />
-              <Box>
-                <Typography fontWeight={600} lineHeight={1.1}>
-                  {user.displayname}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  @{user.username}
+          {visibleAdminItems.map((item) => (
+            <SidebarItem
+              key={item.id}
+              id={item.id}
+              label={item.label}
+              icon={item.icon}
+              isActive={activeItem === item.id}
+              isExpanded={isExpanded}
+              onClick={() => handleItemClick(item)}
+            />
+          ))}
+        </motion.nav>
+
+        {/* Usuario */}
+        {user && (
+          <Box
+            sx={{
+              p: 1.5,
+              borderRadius: 2,
+              mt: "auto",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            {isExpanded && weather?.current && (
+              <Box sx={{ mb: 1, textAlign: "center" }}>
+                <Typography variant="caption" fontWeight={700}>
+                  {Math.round(weather.current.temp)}° • {weather.current.weather?.[0]?.description}
                 </Typography>
               </Box>
-            </Box>
+            )}
 
-            <Button
-              onClick={logout}
-              size="small"
-              color="error"
-              variant="text"
-              sx={{ minWidth: 0 }}
-               aria-label="Cerrar sesión"
-  title="Cerrar sesión"
-            >
-              <LogOut size={18} />
-            </Button>
+            {isExpanded ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "100%",
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Avatar
+                    src={getImageUrl(user.profile_picture_url) || undefined}
+                    alt={user.displayname ?? user.username}
+                    sx={{ width: 36, height: 36 }}
+                  />
+                  <Box>
+                    <Typography fontWeight={600}>{user.displayname}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      @{user.username}
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Button onClick={logout} size="small" color="error">
+                  <LogOut size={18} />
+                </Button>
+              </Box>
+            ) : (
+              <>
+                <Avatar
+                  src={getImageUrl(user.profile_picture_url) || undefined}
+                  alt={user.displayname ?? user.username}
+                  sx={{ width: 36, height: 36 }}
+                />
+
+                <Button
+                  onClick={logout}
+                  size="small"
+                  color="error"
+                  sx={{ minWidth: 0, p: 0.5, borderRadius: "50%" }}
+                >
+                  <LogOut size={18} />
+                </Button>
+              </>
+            )}
           </Box>
-        </Box>
+        )}
+      </motion.div>
+
+      {/* ░░░░░░ OVERLAY — SOLO SE MUESTRA SI HAY PANEL ACTIVO ░░░░░░ */}
+      {activePanel !== "none" && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.35 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.25 }}
+          onClick={() => setActivePanel("none")}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: isExpanded ? 250 : 70, // para que NO tape el sidebar
+            width: `calc(100vw - ${isExpanded ? 250 : 70}px)`,
+            height: "100vh",
+            background: "rgba(0,0,0,0.5)",
+            zIndex: 1500,
+          }}
+        />
       )}
-    </Box>
+      {!isExpanded && (
+        <SidebarPanel activePanel={activePanel} onClose={() => setActivePanel("none")} />
+      )}
     </nav>
   );
 }

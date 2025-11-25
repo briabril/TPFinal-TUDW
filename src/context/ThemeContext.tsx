@@ -59,10 +59,9 @@ export function ThemeProviderCustom({ children }: { children: React.ReactNode })
         palette: {
           mode: darkMode ? "dark" : "light",
 
-          
           primary: {
-            main: darkMode ? '#384EA3' : '#C2185B',
-            contrastText: darkMode ? '#0B1020' : '#FFFFFF',
+            main: darkMode ? '#384EA3' : '#6D609E',
+            contrastText: darkMode ? '#FFFFFF' : '#FFFFFF',
           },
           secondary: {
             main: darkMode ? '#8C82FF' : '#6C5CE7',
@@ -97,7 +96,7 @@ export function ThemeProviderCustom({ children }: { children: React.ReactNode })
       };
 
       const light = {
-        '--color-primary': '#C2185B',  
+        '--color-primary': '#6D609E',  
         '--color-primary-contrast': '#FFFFFF',
         '--color-secondary': '#6C5CE7',
         '--bg': '#FFFFFF',

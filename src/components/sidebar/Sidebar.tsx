@@ -59,7 +59,7 @@ export default function Sidebar({ userRole = "USER" }) {
     { id: "home", label: "Inicio", icon: Home, path: "/feed", expandable: true },
     { id: "profile", label: "Perfil", icon: User, path: `/${user?.username}`, expandable: true },
     { id: "search", label: "Buscar", icon: SearchIcon, expandable: false },
-    { id: "notifications", label: "Notificaciones", icon: BellDotIcon, path: '/notifications', expandable: true },
+    // { id: "notifications", label: "Notificaciones", icon: BellDotIcon, path: '/notifications', expandable: true },
     { id: "settings", label: "Configuración", icon: Settings, path: "/settings", expandable: true },
     { id: "messages", label: "Mensajes", icon: MessageSquare, path: "/messages", expandable: true },
   ];

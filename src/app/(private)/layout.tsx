@@ -3,7 +3,7 @@
 import Sidebar from "@/components/sidebar/Sidebar";
 import SidebarMobile from "@/components/sidebar/SidebarMobile";
 import SidebarPanel from "@/components/sidebar/SidebarPanel"
-import { Home, SearchIcon, User, Settings, MessageSquare, LayoutDashboard, Flag } from "lucide-react";
+import { Home, SearchIcon, User, Settings, MessageSquare, LayoutDashboard, Flag, BellDotIcon } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -33,6 +33,7 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
             { id: "search", label: "Buscar", icon: SearchIcon, path: "/search", expandable: false, onClick: () => setActivePanel("search") },
             { id: "profile", label: "Perfil", icon: User, path: `/${user.username}`, expandable: false },
             { id: "settings", label: "Configuración", icon: Settings, path: "/settings", expandable: false, onClick: () => setActivePanel("settings") },
+            // { id: "notifications", label: "Notificaciones", icon: BellDotIcon, path: '/notifications', expandable: true },
             { id: "messages", label: "Mensajes", icon: MessageSquare, path: "/messages", expandable: false, onClick: () => setActivePanel("messages") },
           ]
         : [],

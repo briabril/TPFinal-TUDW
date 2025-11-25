@@ -159,7 +159,6 @@ export default function PostMedia({ medias }: { medias: Media[] }) {
             ) : (
               <img
                 src={selectedMedia.url}
-                alt="media-preview"
                 style={{
                   maxWidth: "100%",
                   maxHeight: "70vh",

@@ -19,7 +19,6 @@ export function usePosts(mode: string, username?: string) {
 
     useEffect(() => {
         async function fetchPosts() {
-            console.log("Modo desde hook", mode)
 
             let endpoint = "/posts"
             try {

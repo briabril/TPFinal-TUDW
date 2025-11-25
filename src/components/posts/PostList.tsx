@@ -10,7 +10,7 @@ interface PostListProps {
 }
 
 export default function PostList({ initialMode,  username  }: PostListProps) {
-  const { posts, error, loading } = usePosts(initialMode);
+  const { posts, error, loading } = usePosts(initialMode, username);
   if (loading) return <Typography>Cargando posts...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;
   if (posts.length === 0) return <Typography>No hay posts todavía</Typography>;

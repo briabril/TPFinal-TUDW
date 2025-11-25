@@ -1,7 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
+<<<<<<< Updated upstream
 import { Button, IconButton, Tooltip, Stack, Typography } from "@mui/material";
 import { Heart, MessageCircle, Bookmark, ShareIcon, Repeat2} from "lucide-react";
+=======
+import { Button, IconButton, Tooltip } from "@mui/material";
+import { Heart, Repeat2  } from "lucide-react";
+>>>>>>> Stashed changes
 import api from "../api/index";
 import toast from "react-hot-toast";
 

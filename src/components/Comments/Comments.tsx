@@ -149,7 +149,7 @@ useEffect(() => {
         sx={{
           fontWeight: 600,
           mb: 2,
-          color: "text.primary",
+          color: "text.a",
         }}
       >
         Comentarios

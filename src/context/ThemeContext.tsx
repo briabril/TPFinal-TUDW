@@ -113,7 +113,7 @@ export function ThemeProviderCustom({ children }: { children: React.ReactNode })
       } as Record<string, string>;
 
       const dark = {
-        '--color-primary': '#384EA3',
+        '--color-primary': '#4C6FFF',
         '--color-primary-contrast': '#0B1020',
         '--color-secondary': '#8C82FF',
         '--bg': '#071226',

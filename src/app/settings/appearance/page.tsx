@@ -14,8 +14,8 @@ export default function AppearancePage() {
 
       {/* Contenido principal */}
       <Box sx={{ flex: 1, p: 4 }}>
-        <Typography variant="h5" sx={{ mt: 2 }}>Apariencia</Typography>
-        <Typography variant="h6" sx={{ mt: 1 }}>
+        <Typography variant="h5" component="h1" sx={{ mt: 2 }}>Apariencia</Typography>
+        <Typography variant="h6" component="h2" sx={{ mt: 1 }}>
           Seleccioná el modo que prefieras:
         </Typography>
 

@@ -103,7 +103,7 @@ export default function AuthorHeader({ author, sharedBy, actions, weather, postI
 
         <Box>
           {/* Nombre principal: autor original */}
-          <Typography variant="h6" fontWeight={600} sx={{ lineHeight: 1.2, color: "text.primary" }}>
+          <Typography variant="h6" component="h1" fontWeight={600} sx={{ lineHeight: 1.2, color: "text.primary" }}>
             {author.displayname || author.username}
           </Typography>
 

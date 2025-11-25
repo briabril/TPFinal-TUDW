@@ -78,7 +78,7 @@ const handleRevert = async (id: string, target_id: string | number) => {
 
   return (
     <Stack spacing={3} sx={{ maxWidth: 800, mx: "auto", mt: 4, mb: 6 }}>
-      <Typography variant="h4" fontWeight="bold" textAlign="center">
+      <Typography variant="h4" component="h1" fontWeight="bold" textAlign="center">
         Gestión de Reportes
       </Typography>
       <Tabs
@@ -115,7 +115,7 @@ const handleRevert = async (id: string, target_id: string | number) => {
           elevation={0}
         >
           <ReportProblem sx={{ fontSize: 40, mb: 1, color: "warning.main" }} />
-          <Typography variant="h6">
+          <Typography variant="h6" component="h2">
             No hay reportes {tab === "pending" ? "pendientes" : "en esta categoría"} 🎉
           </Typography>
         </Paper>
@@ -135,7 +135,7 @@ const handleRevert = async (id: string, target_id: string | number) => {
               <Stack spacing={1.2}>
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <ReportProblem color="warning" />
-                  <Typography variant="h6" fontWeight="bold">
+                  <Typography variant="h6" component="h2" fontWeight="bold">
                     Reporte #{report.id}
                   </Typography>
                 </Stack>

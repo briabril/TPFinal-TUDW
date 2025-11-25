@@ -14,7 +14,6 @@ export function useNotificationsSocket(onNotification: OnNotification) {
     if (!socket) return;
 
     const handler = (notif: Notification) => {
-      console.log("[Notification received]", notif);
       onNotification(notif); 
     };
 

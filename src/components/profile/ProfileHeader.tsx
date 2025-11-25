@@ -40,7 +40,6 @@ export default function ProfileHeader({
       try {
         const res = await api.get(`/countries/${profile.country_iso}/flag`);
         setFlag(res.data.flag);
-        console.log("FLAG", res.data.flag)
       } catch (err) {
         console.error("Error al traer la bandera:", err);
       }

@@ -155,10 +155,21 @@ export default function SidebarMobile({ items }: { items: any[] }) {
             : "3px solid transparent",
         }}
       >
-        <Avatar
-          src={user?.profile_picture_url || undefined}
-          sx={{ width: profileSize - 8, height: profileSize - 8 }}
-        />
+        {(() => {
+          const raw = user?.profile_picture_url as any;
+          let avatarSrc: string | undefined = undefined;
+          if (raw) {
+            if (typeof raw === "string") avatarSrc = raw;
+            else if (raw && typeof raw === "object") avatarSrc = raw.secure_url || raw.url;
+          }
+          return (
+            <Avatar
+              src={avatarSrc || undefined}
+              sx={{ width: profileSize - 8, height: profileSize - 8 }}
+              imgProps={{ onError: (e: any) => (e.currentTarget.src = "/default-avatar-icon.jpg") }}
+            />
+          );
+        })()}
 
         <AnimatePresence>
           {isActive(profilePath) && (

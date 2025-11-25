@@ -12,8 +12,6 @@ import {
   Settings,
   SearchIcon,
   LayoutDashboard,
-  BellDotIcon,
-  Compass,
   Flag,
   LogOut,
 } from "lucide-react";
@@ -114,6 +112,7 @@ export default function Sidebar({ userRole = "USER" }) {
   if (isExpanded === null) return null;
 
   return (
+
     <nav style={{ position: "relative" }}>
       <motion.div
         variants={sidebarVariants}
@@ -193,11 +192,29 @@ export default function Sidebar({ userRole = "USER" }) {
                 }}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Avatar
-                    src={getImageUrl(user.profile_picture_url) || undefined}
-                    alt={user.displayname ?? user.username}
-                    sx={{ width: 36, height: 36 }}
-                  />
+                  {(() => {
+                    const raw = user.profile_picture_url as any;
+                    let avatarSrc: string | undefined = undefined;
+                    if (raw) {
+                      if (typeof raw === "string") avatarSrc = getImageUrl(raw) ?? raw;
+                      else if (raw && typeof raw === "object") {
+                        avatarSrc = getImageUrl(raw.secure_url || raw.url) ?? (raw.secure_url || raw.url);
+                      }
+                    }
+
+                    return (
+                      <Avatar
+                        src={avatarSrc || undefined}
+                        alt={user.displayname ?? user.username}
+                        sx={{ width: 36, height: 36 }}
+                        imgProps={{
+                          onError: (e: any) => {
+                            e.currentTarget.src = "/default-avatar-icon.jpg";
+                          },
+                        }}
+                      />
+                    );
+                  })()}
                   <Box>
                     <Typography fontWeight={600}>{user.displayname}</Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -212,11 +229,29 @@ export default function Sidebar({ userRole = "USER" }) {
               </Box>
             ) : (
               <>
-                <Avatar
-                  src={getImageUrl(user.profile_picture_url) || undefined}
-                  alt={user.displayname ?? user.username}
-                  sx={{ width: 36, height: 36 }}
-                />
+                {(() => {
+                  const raw = user.profile_picture_url as any;
+                  let avatarSrc: string | undefined = undefined;
+                  if (raw) {
+                    if (typeof raw === "string") avatarSrc = getImageUrl(raw) ?? raw;
+                    else if (raw && typeof raw === "object") {
+                      avatarSrc = getImageUrl(raw.secure_url || raw.url) ?? (raw.secure_url || raw.url);
+                    }
+                  }
+
+                  return (
+                    <Avatar
+                      src={avatarSrc || undefined}
+                      alt={user.displayname ?? user.username}
+                      sx={{ width: 36, height: 36 }}
+                      imgProps={{
+                        onError: (e: any) => {
+                          e.currentTarget.src = "/default-avatar-icon.jpg";
+                        },
+                      }}
+                    />
+                  );
+                })()}
 
                 <Button
                   onClick={logout}

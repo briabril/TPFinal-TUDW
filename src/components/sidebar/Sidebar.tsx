@@ -134,7 +134,6 @@ const [weather, setWeather] = React.useState<any | null>(null);
           <img
             src="/logo.png"
             alt="Bloop"
-            title="Bloop"
             style={{ width: 130, objectFit: 'contain', display: 'block' }}
             onError={(e: any) => { e.target.style.display = 'none'; }}
           />

@@ -301,7 +301,7 @@ export default function PostBody({
               {translated && (
                 <>
                   <Tooltip title={`Idioma detectado: ${sourceLang || "—"}`}>
-                    <IconButton>
+                    <IconButton title="traducir" aria-label="traducir">
                       <Language />
                     </IconButton>
                   </Tooltip>

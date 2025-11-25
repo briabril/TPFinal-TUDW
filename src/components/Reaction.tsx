@@ -118,7 +118,7 @@ export const Reaction = ({
     <Stack direction="row" spacing={3} alignItems="center">
 
       <Stack direction="row" alignItems="center" spacing={0.5}>
-        <IconButton onClick={toggleReaction} size="small">
+        <IconButton onClick={toggleReaction} size="small" aria-label="Poner me gusta al post" title="Poner me gusta al post">
           <Heart
             size={20}
             className={liked ? "text-red-500" : "text-gray-500"}
@@ -133,7 +133,7 @@ export const Reaction = ({
       </Stack>
 
       {type === "post" && (
-        <IconButton onClick={handleShare} size="small" disabled={shared}>
+        <IconButton onClick={handleShare} size="small" disabled={shared} aria-label="Compartir post" title="Compartir post">
           <Repeat2
             className={shared ? "text-blue-600" : "text-gray-600"}
             fill={shared ? "blue" : "none"}

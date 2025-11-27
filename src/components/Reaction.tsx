@@ -135,7 +135,7 @@ export const Reaction = ({
   return (
     <Stack direction="row" spacing={3} alignItems="center">
 
-      <Stack direction="row" alignItems="center" spacing={0.5}>
+      <Stack direction="row" alignItems="center" >
         <IconButton onClick={toggleReaction} size="small" aria-label="Poner me gusta al post" title="Poner me gusta al post">
           <Heart
             size={20}

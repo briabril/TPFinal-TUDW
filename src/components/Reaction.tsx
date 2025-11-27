@@ -159,10 +159,7 @@ export const Reaction = ({
             {count}
           </Typography>
            </Button>
-             <ModalBase title="Likes del post" open={showLikes} onClose={() => setShowLikes(false)}  cancelText="Cerrar"   sx={{
-    maxWidth: { xs: "90%", sm: "400px" },
-    margin: "auto"
-  }}>{
+             <ModalBase title="Likes del post" open={showLikes} onClose={() => setShowLikes(false)}  cancelText="Cerrar"   >{
           users.map((u)=>(
                 <Stack
   key={u.id}

@@ -1,9 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
-import { IconButton, Stack, Typography } from "@mui/material";
-import { Heart, Repeat2} from "lucide-react";
+import { Button, IconButton, Stack, Typography, Box, Avatar } from "@mui/material";
+import { AlignJustify, Heart, Repeat2} from "lucide-react";
 import api from "../api/index";
 import toast from "react-hot-toast";
+import { User } from "@/types";
+import ModalBase from "./common/Modal";
+import { useRouter } from "next/navigation";
 
 interface PostReactionProps {
   userId?: string;
@@ -32,7 +35,9 @@ export const Reaction = ({
   const [shared, setShared] = useState(false);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState<boolean>(false);
-
+  const [showLikes, setShowLikes] =useState<boolean>(false)
+  const [users, setUsers] = useState<User[]>([])
+   const router =useRouter()
   const toggleReaction = async () => {
     try {
       const endpoint =
@@ -45,13 +50,26 @@ export const Reaction = ({
         {},
         { withCredentials: true }
       );
-
+     
       setLiked(result.data.liked);
       fetchCount();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Error al dar like");
     }
   };
+  useEffect(()=>{
+    const fetchLikesUsers = async ()=>{
+      try{const users = await api.get(`reactions/post/${targetId}/users`)
+      setUsers(users.data)
+    }catch(error){
+      console.error("Error al traer los usuarios que dieron like", error)
+      toast.error("Error al traer los usuarios que dieron like")
+    }
+  } 
+  fetchLikesUsers()
+  }, [showLikes])
+  
+
 
   const fetchCount = async () => {
     try {
@@ -125,13 +143,70 @@ export const Reaction = ({
             fill={liked ? "red" : "none"}
           />
         </IconButton>
+       
         {count > 0 && (
-          <Typography variant="body2" color="text.secondary">
+          <>
+          
+           <Button title="Ver likes del post" onClick={() => setShowLikes(true)}  aria-label="Ver likes del post"   sx={{
+    cursor: "pointer",
+    transition: "0.2s",
+    "&:hover": {
+      color: "primary.main",
+      textDecoration: "underline",
+    },
+  }}>
+             <Typography variant="body2" color="text.secondary" >
             {count}
           </Typography>
+           </Button>
+             <ModalBase title="Likes del post" open={showLikes} onClose={() => setShowLikes(false)}  cancelText="Cerrar"   sx={{
+    maxWidth: { xs: "90%", sm: "400px" },
+    margin: "auto"
+  }}>{
+          users.map((u)=>(
+                <Stack
+  key={u.id}
+  direction="row"
+  alignItems="center"
+  spacing={2}
+  sx={{
+    width: "100%",
+    p: 2,
+    borderRadius: "12px",
+    backgroundColor: "background.paper",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+    transition: "all 0.2s ease",
+    cursor: "pointer",
+    "&:hover": {
+      transform: "translateY(-2px)",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+    },
+    
+  }}
+  onClick={() => router.push(`/${u.username}`)} 
+>
+  <Avatar
+    src={u.profile_picture_url || "/default-avatar-icon.png"}
+    sx={{ width: 48, height: 48 }}
+  />
+
+  <Stack direction="column" spacing={0.2}>
+    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+      {u.username}
+    </Typography>
+    <Typography variant="body2" color="text.secondary">
+      {u.displayname}
+    </Typography>
+  </Stack>
+</Stack>
+      
+
+          ))
+          }</ModalBase>
+          </>
         )}
       </Stack>
-
+    
       {type === "post" && (
         <IconButton onClick={handleShare} size="small" disabled={shared} aria-label="Compartir post" title="Compartir post">
           <Repeat2

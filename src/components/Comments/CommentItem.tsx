@@ -188,7 +188,14 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply, onEdit, onD
 
     <Collapse in={showReplies} timeout={300} unmountOnExit sx={{ mt: 1 }}>
       {comment.children?.map((child) => (
-        <CommentItem key={child.id} comment={child} onReply={onReply} />
+               <CommentItem
+  key={child.id}
+  comment={child}
+  onReply={onReply}
+  onEdit={onEdit}
+  onDelete={onDelete}
+/>
+
       ))}
  
     </Collapse>

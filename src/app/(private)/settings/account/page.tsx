@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import api from "../../../../api/index";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -139,6 +139,14 @@ export default function EditProfilePage() {
         setValue("displayname", updatedUser.displayname ?? "");
         setValue("bio", updatedUser.bio ?? "");
         setValue("profile_picture_url", undefined);
+        try {
+          if (profileInputRef.current) {
+            profileInputRef.current.value = "";
+            (profileInputRef.current as any).files = null;
+          }
+        } catch (err) {
+          console.warn("Could not clear profile input ref", err);
+        }
       }
 
       toast.success("¡Perfil actualizado correctamente!");
@@ -150,6 +158,7 @@ export default function EditProfilePage() {
   // Avatar cropper
   const [cropOpen, setCropOpen] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const profileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -196,7 +205,12 @@ export default function EditProfilePage() {
 
         <Box
           component="form"
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(
+            onSubmit,
+            (errs) => {
+              toast.error("Corrige los errores del formulario antes de guardar.");
+            }
+          )}
           display="flex"
           flexDirection="column"
           gap={2.3}
@@ -315,6 +329,7 @@ export default function EditProfilePage() {
             Foto de perfil (opcional):
           </label>
           <input
+            ref={profileInputRef}
             type="file"
             id="profile_picture_url"
             accept="image/png, image/jpeg"
@@ -329,9 +344,25 @@ export default function EditProfilePage() {
               if (imageSrc) URL.revokeObjectURL(imageSrc);
             }}
             onCropped={(file) => {
-              setValue("profile_picture_url", file);
+              if (file instanceof File) {
+                try {
+                  const dt = new DataTransfer();
+                  dt.items.add(file);
+                  if (profileInputRef.current) {
+                    profileInputRef.current.files = dt.files;
+                  }
+                } catch (err) {
+                }
+              }
+              setValue("profile_picture_url", file, { shouldValidate: true, shouldDirty: true });
               toast.success("Imagen lista para guardar");
             }}
+          />
+
+          <Controller
+            name="profile_picture_url"
+            control={control}
+            render={() => <></>}
           />
 
           {/* Botón */}

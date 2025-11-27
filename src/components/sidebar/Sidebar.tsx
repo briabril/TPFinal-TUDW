@@ -113,7 +113,7 @@ export default function Sidebar({ userRole = "USER" }) {
 
   return (
 
-    <nav style={{ position: "relative" }}>
+    <nav style={{ position: "fixed" }}>
       <motion.div
         variants={sidebarVariants}
         initial={false}

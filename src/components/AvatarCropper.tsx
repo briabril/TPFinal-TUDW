@@ -22,12 +22,22 @@ export default function AvatarCropper({ open, imageSrc, onClose, onCropped, aspe
   }, []);
 
   const handleSave = async () => {
-    if (!imageSrc) return;
-    const blob = await getCroppedImg(imageSrc, croppedPixels, 300);
-    if (!blob) return;
-    const file = new File([blob], "avatar.jpg", { type: "image/jpeg" });
-    onCropped(file);
-    onClose();
+    try {
+      if (!imageSrc) {
+        console.error("AvatarCropper: no imageSrc available when saving");
+        return;
+      }
+      const blob = await getCroppedImg(imageSrc, croppedPixels, 300);
+      if (!blob) {
+        console.error("AvatarCropper: getCroppedImg returned null blob", { croppedPixels });
+        return;
+      }
+      const file = new File([blob], "avatar.jpg", { type: "image/jpeg" });
+      onCropped(file);
+      onClose();
+    } catch (err) {
+      console.error("AvatarCropper: error during save", err);
+    }
   };
 
   return (

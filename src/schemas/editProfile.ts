@@ -10,8 +10,8 @@ export const editProfilSchema = z.object({
         bio: z.string().max(160, "El máximo son 160 caracteres").optional(),
         country_iso: z
             .string()
-            .optional()
-            .transform((v) => (typeof v === "string" && v ? v.toUpperCase() : v))
+            .nullable()
+            .transform((v) => (v ? v.toUpperCase() : null))
             .refine((v) => {
                 if (!v) return true;
                 return typeof v === "string" && v.length >= 2 && v.length <= 100;

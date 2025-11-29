@@ -122,15 +122,25 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
   };
 
   useEffect(() => {
-    if (!attachWeather || !user?.city) return;
+    if (!attachWeather) return;
+
+    if (!user?.city || !user?.country_iso || user.country_iso.trim() === "") {
+      toast.error("Debes agregar tu ciudad y país en tu perfil para usar el clima.");
+      setAttachWeather(false);
+      return;
+    }
+
     (async () => {
       try {
         const w = await fetchWeatherByCity(user.city as string, user.country_iso as string);
         setWeatherData(w);
         toast.success("Clima agregado al post");
-      } catch {}
+      } catch {
+        toast.error("Error al obtener el clima. Intenta nuevamente.");
+        setAttachWeather(false);
+      }
     })();
-  }, [attachWeather, user?.city]);
+  }, [attachWeather, user?.city, user?.country_iso]);
 
   const canSubmit = contenido.trim().length > 0 || files.length > 0;
 

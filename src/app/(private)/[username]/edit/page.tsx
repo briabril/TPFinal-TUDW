@@ -25,7 +25,7 @@ export default function EditProfilePage() {
       password: "",
       new_password: "",
       profile_picture_url: undefined,
-      country_iso: "",
+      country_iso: null,
       city: "",
     },
   });

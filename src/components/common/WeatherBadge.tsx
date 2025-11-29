@@ -10,7 +10,7 @@ interface WeatherBadgeProps {
 }
 
 export default function WeatherBadge({ weather, variant = "inline" }: WeatherBadgeProps) {
-  if (!weather || !weather.current) return null;
+  if (!weather || !weather.current || !weather.current.temp || !weather.current.weather) return null;
 
   const temp = Math.round(weather.current.temp);
   const desc = weather.current.weather?.[0]?.description;

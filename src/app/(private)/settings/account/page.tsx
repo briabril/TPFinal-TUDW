@@ -119,15 +119,19 @@ export default function EditProfilePage() {
       if (data.password?.trim()) formData.append("password", data.password);
       if (data.new_password?.trim())
         formData.append("new_password", data.new_password);
-      if (data.bio?.trim()) formData.append("bio", data.bio);
+      // Allow saving an empty bio (to clear the field). If the bio key exists
+      // we append it even when it's an empty string.
+      if (data.bio !== undefined) formData.append("bio", data.bio ?? "");
 
       if (data.profile_picture_url instanceof File) {
         formData.append("profile_picture_url", data.profile_picture_url);
       }
 
       if (data.city) formData.append("city", data.city);
-      if (data.country_iso)
-        formData.append("country_iso", data.country_iso.toUpperCase());
+      // Append country_iso when provided. If user cleared the country we append
+      // an empty string so the server can clear the value as well.
+      if (data.country_iso !== undefined)
+        formData.append("country_iso", data.country_iso ? data.country_iso.toUpperCase() : "");
 
       const res = await api.put(`/users/${userId}`, formData, {
         withCredentials: true,

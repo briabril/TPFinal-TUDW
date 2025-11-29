@@ -7,8 +7,15 @@ export const editProfilSchema = z.object({
     displayname: z.string().min(2, "El nombre a mostrar es obligatorio"),
     password: z.string().optional(),
     new_password: z.string().optional(), 
-    bio: z.string().max(160, "El máximo son 160 caracteres").optional(),
-    country_iso: z.string().max(100, "El máximo son 2 caracteres").min(2, "El mínimo son 2 caracteres").toUpperCase(),
+        bio: z.string().max(160, "El máximo son 160 caracteres").optional(),
+        country_iso: z
+            .string()
+            .optional()
+            .transform((v) => (typeof v === "string" && v ? v.toUpperCase() : v))
+            .refine((v) => {
+                if (!v) return true;
+                return typeof v === "string" && v.length >= 2 && v.length <= 100;
+            }, "El código de país debe tener entre 2 y 100 caracteres"),
     city: z.string().max(100, "El máximo son 100 caracteres"),
     /*profile_picture_url: z
       .instanceof(File, { message: "Se espera un archivo" })

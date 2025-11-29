@@ -49,9 +49,25 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
     }
 
     const newFiles = [...files, ...selected].slice(0, 4);
+    // revoke previous previews (cleanup) will run in effect, but revoke here defensively
+    previews.forEach((u) => {
+      try {
+        URL.revokeObjectURL(u);
+      } catch {}
+    });
+
     setFiles(newFiles);
     setPreviews(newFiles.map((f) => URL.createObjectURL(f)));
   };
+
+  // Revoke object URLs when previews change or component unmounts
+  useEffect(() => {
+    return () => {
+      try {
+        previews.forEach((u) => URL.revokeObjectURL(u));
+      } catch {}
+    };
+  }, [previews]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -221,10 +237,27 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
           >
             {previews.map((p, i) => (
               <Box key={i} sx={{ position: "relative", borderRadius: 2, overflow: "hidden", height: 120 }}>
-                <img src={p} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                {files[i]?.type?.startsWith("video") ? (
+                  <video
+                    src={p}
+                    controls
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                ) : files[i]?.type?.startsWith("audio") ? (
+                  <Box sx={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", bgcolor: theme.palette.background.paper }}>
+                    <audio src={p} controls style={{ width: "90%" }} />
+                  </Box>
+                ) : (
+                  <img src={p} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                )}
                 <IconButton
                   onClick={() => {
                     const nf = files.filter((_, idx) => idx !== i);
+                    // revoke the removed preview URL
+                    try {
+                      URL.revokeObjectURL(p);
+                    } catch {}
+
                     setFiles(nf);
                     setPreviews(nf.map((f) => URL.createObjectURL(f)));
                     toast.success("Archivo eliminado");

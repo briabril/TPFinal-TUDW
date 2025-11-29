@@ -4,6 +4,7 @@ import { Box, CardMedia } from "@mui/material";
 import { Media } from "../../types/post";
 import ModalBase from "../common/Modal";
 
+
 export default function PostMedia({ medias }: { medias: Media[] }) {
   const [open, setOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);

@@ -136,29 +136,41 @@ export const Reaction = ({
     <Stack direction="row" spacing={3} alignItems="center">
 
       <Stack direction="row" alignItems="center" >
-        <IconButton onClick={toggleReaction} size="small" aria-label="Poner me gusta al post" title="Poner me gusta al post">
+        <Box sx={{width: 35}} display="flex" alignItems="center">
+          <IconButton onClick={toggleReaction} size="small" aria-label="Poner me gusta al post" title="Poner me gusta al post">
           <Heart
             size={20}
             className={liked ? "text-red-500" : "text-gray-500"}
             fill={liked ? "red" : "none"}
           />
         </IconButton>
-       
-        {count > 0 && (
-          <>
+          {count > 0 && (
+         
           
-           <Button title="Ver likes del post" onClick={() => setShowLikes(true)}  aria-label="Ver likes del post"   sx={{
+           <IconButton title="Ver likes del post"  size="small" onClick={() => setShowLikes(true)}  aria-label="Ver likes del post"   sx={{
     cursor: "pointer",
+  padding: "2px",
+    minWidth: 0,
+    width: "20px",
+    height: "20px",
     transition: "0.2s",
     "&:hover": {
       color: "primary.main",
       textDecoration: "underline",
     },
+   
   }}>
-             <Typography variant="body2" color="text.secondary" >
+             <Typography variant="body2" color="text.secondary"  sx={{maxWidth: 5}}>
             {count}
           </Typography>
-           </Button>
+           </IconButton>
+           )}
+        </Box>
+        
+       
+        {count > 0 && (
+          <>
+          
              <ModalBase title="Likes del post" open={showLikes} onClose={() => setShowLikes(false)}  cancelText="Cerrar"   >{
           users.map((u)=>(
                 <Stack

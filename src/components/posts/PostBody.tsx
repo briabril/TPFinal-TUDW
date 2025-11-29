@@ -320,7 +320,7 @@ export default function PostBody({
               )}
             </Stack>
 
-            <Link
+     <Link display="flex" justifyContent="center" alignItems="center" sx={{gap: 1}}
               href={`/posts/${post.id}`}
               style={{ textDecoration: "none" }}
             >
@@ -334,6 +334,8 @@ export default function PostBody({
           </Typography>
       
             </Link>
+
+         
           </Stack>
         </>
       )}

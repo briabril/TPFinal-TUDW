@@ -22,8 +22,7 @@ export default function SettingsPanel() {
   const pathname = usePathname();
   const settingItems = [
     { text: "Cuenta", path: "/settings/account", icon: <User size={18} /> },
-    { text: "Privacidad", path: "/settings/privacy", icon: <Shield size={18} /> },
-    { text: "Seguridad", path: "/settings/security", icon: <Lock size={18} /> },
+ 
     { text: "Notificaciones", path: "/settings/notifications", icon: <Bell size={18} /> },
     { text: "Apariencia", path: "/settings/appearance", icon: <Palette size={18} /> },
     { text: "Tu actividad", path: "/settings/activity", icon: <History size={18} /> },

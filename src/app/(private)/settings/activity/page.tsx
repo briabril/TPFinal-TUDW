@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Box, Typography, Tabs, Tab, Card, CardContent, Avatar } from "@mui/material";
+import { OpenInNew } from "@mui/icons-material";
+import { Box, Typography, Tabs, Tab, Card, CardContent, Avatar, Link, CardMedia , Stack, Paper} from "@mui/material";
 import Sidebar from "@/components/sidebar/Sidebar";
 import SettingsSidebar from "@/components/sidebar/SettingsPanel";
 import api from "../../../../api/index";
 import { Main } from "next/document";
-
+import { Media } from "../../../../types/post";
+import MediaGrid from "@/components/media/MediaGrid";
 export default function ActivityPage() {
   const [tab, setTab] = useState(0);
 
@@ -14,6 +16,24 @@ const [likedPosts, setLikedPosts] = useState<any[]>([]);
 const [sharedPosts, setSharedPosts] = useState<any[]>([]);
 const [myComments, setMyComments] = useState<any[]>([]);
 
+  const formatDate = (dateString: string | Date) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - date.getTime()) / 1000); // diferencia en segundos
+
+    if (diff < 60) return "ahora";
+    if (diff < 3600) {
+      const m = Math.floor(diff / 60);
+      return `${m} min${m > 1 ? "s" : ""}`;
+    }
+    if (diff < 86400) {
+      const h = Math.floor(diff / 3600);
+      return `${h} h${h > 1 ? "s" : ""}`;
+    }
+    const d = Math.floor(diff / 86400);
+    if (d < 7) return `${d} día${d > 1 ? "s" : ""}`;
+    return date.toLocaleDateString();
+  };
   useEffect(() => {
     async function fetchData() {
       try {
@@ -34,6 +54,7 @@ const [myComments, setMyComments] = useState<any[]>([]);
 
     fetchData();
   }, []);
+  
 
   return (
     <Box sx={{ display: "flex", gap: 4, p: 4 }}>
@@ -58,19 +79,44 @@ const [myComments, setMyComments] = useState<any[]>([]);
            {likedPosts.map((post: any) => (
   <Card key={post.id} sx={{ mb: 2 }}>
     <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Avatar
-          src={post.post_author_avatar || "/default-avatar.png"}
-          alt={post.author_username}
-          sx={{ width: 40, height: 40 }}
-        />
-        <Typography variant="subtitle1" fontWeight={600}>
-          {post.author_username}
-        </Typography>
-      </Box>
 
-      <Typography>{post.content}</Typography>
+            {/* --- MINI HEADER: autor del post --- */}
+
+       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Avatar
+            src={post.post_author_avatar || "/default-avatar.png"}
+            sx={{ width: 32, height: 32 }}
+          />
+          <Typography fontWeight={600} sx={{ fontSize: 14 }}>
+            {post.author_username}
+          </Typography>
+        </Box>
+<Typography 
+          sx={{ mt: 0.5, mb: 1, fontSize: 14, color: "text.secondary" }}
+        >
+          {post.content}
+        </Typography>   
+        {/* --- MINI Media:  --- */}
+
+        {post.media?.length > 0 && (
+            
+                    <MediaGrid media={post.media} />
+
+          )}
+     {/* --- MINI Link:  --- */}
+
+        <Link 
+          href={`/posts/${post.id}`} 
+          style={{ 
+            marginTop: 8,
+            display: "inline-block",
+            fontSize: 13,
+            color: "#1976d2",
+            fontWeight: 500 
+          }}
+        >
+          Ver post
+        </Link>
     </CardContent>
   </Card>
 ))}
@@ -87,53 +133,130 @@ const [myComments, setMyComments] = useState<any[]>([]);
             {sharedPosts.map((post: any) => (
               <Card key={post.id} sx={{ mb: 2, display: "flex"}}>
                 <CardContent sx={{display: "flex", flexDirection: "column", gap:3 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Avatar
-          src={post.post_author_avatar || "/default-avatar.png"}
-          alt={post.author_username}
-          sx={{ width: 40, height: 40 }}
-        />
-        <Typography variant="subtitle1" fontWeight={600}>
-          {post.author_username}
-        </Typography>
-      </Box>
-                  
-                  <Typography>{post.original_content}</Typography>
+       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Avatar
+            src={post.post_author_avatar || "/default-avatar.png"}
+            sx={{ width: 32, height: 32 }}
+          />
+          <Typography fontWeight={600} sx={{ fontSize: 14 }}>
+            {post.author_username}
+          </Typography>
+        </Box>
+<Typography 
+          sx={{ mt: 0.5, mb: 1, fontSize: 14, color: "text.secondary" }}
+        >
+          {post.original_content}
+        </Typography>   
+                           {/* --- MINI MEDIA  --- */}
+
+        { post.media?.length>0 && ( 
+                            <MediaGrid media={post.media} />
+
+          )}
+     
+                  {/*---- MINI LINK ---- */}
+        <Link 
+          href={`/posts/${post.id}`} 
+          style={{ 
+            marginTop: 8,
+            display: "inline-block",
+            fontSize: 13,
+            color: "#1976d2",
+            fontWeight: 500 
+          }}
+        >
+          Ver post
+        </Link>
                 </CardContent>
+
+                
+                
+       
               </Card>
             ))}
           </Box>
         )}
 
        
-        {tab === 2 && (
-          <Box>
-           {myComments.map((comment: any) => (
-  <Card key={comment.id} sx={{ mb: 2 }}>
-    <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-
-    
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Avatar
-          src={comment.post_author_avatar || "/default-avatar.png"}
-          alt={comment.post_author}
-          sx={{ width: 40, height: 40 }}
-        />
-
-        <Typography variant="subtitle1" fontWeight={600}>
-          {comment.post_author}
-        </Typography>
-      </Box>
-
-      {/* Texto del comentario */}
-      <Typography sx={{ ml: 5 }}>
-        {comment.content}
+   {tab === 2 && (
+  <Box>
+    {myComments.length === 0 && (
+      <Typography color="text.secondary">
+        No comentaste ningún post aún.
       </Typography>
+    )}
 
-    </CardContent>
-  </Card>
-))}
-</Box>)}
+    {myComments.map((comment: any) => (
+      <Card 
+        key={comment.id} 
+        sx={{ mb: 2, p: 1.5, borderRadius: 2 }}
+      >
+        
+        {/* --- MINI HEADER: autor del post --- */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Avatar
+            src={comment.post_author_avatar || "/default-avatar.png"}
+            sx={{ width: 32, height: 32 }}
+          />
+          <Typography fontWeight={600} sx={{ fontSize: 14 }}>
+            {comment.post_author}
+          </Typography>
+        </Box>
+
+        {/* ---  MINI TEXTO DEL POST ORIGINAL --- */}
+        <Typography 
+          sx={{ mt: 0.5, mb: 1, fontSize: 14, color: "text.secondary" }}
+        >
+          {comment.post_content}
+        </Typography>
+
+        {/* --- MINI MEDIA  --- */}
+        {comment.media?.length > 0 && (
+                           <MediaGrid media={comment.media} />
+        )}
+
+        
+
+        {/* --- TU COMENTARIO --- */}
+        <Box sx={{ mt: 1.5, display: "flex", gap: 1 }}>
+          <Avatar
+            src={comment.comment_author_avatar || "/default-avatar.png"}
+            sx={{ width: 26, height: 26 }}
+          />
+
+          <Box>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Typography sx={{ fontWeight: 600, fontSize: 13 }}>
+                {comment.comment_author}
+              </Typography>
+              <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
+                {formatDate(comment.created_at)}
+              </Typography>
+            </Box>
+
+            <Typography sx={{ fontSize: 14 }}>
+              {comment.content}
+            </Typography>
+          </Box>
+        </Box>
+{/*---- MINI LINK ---- */}
+        <Link 
+          href={`/posts/${comment.post_id}`} 
+          style={{ 
+            marginTop: 8,
+            display: "inline-block",
+            fontSize: 13,
+            color: "#1976d2",
+            fontWeight: 500 
+          }}
+        >
+          Ver post
+        </Link>
+
+      </Card>
+    ))}
+  </Box>
+)}
       </Box>
         </Box>
   )

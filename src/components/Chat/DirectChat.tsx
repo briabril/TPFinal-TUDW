@@ -99,6 +99,9 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
     if (socket?.connected) socket.emit("join_dm", otherUserId);
 
     return () => {
+      try {
+        socket?.emit("leave_dm", otherUserId);
+      } catch (e) {}
       socket?.off("connect", onConnect);
       socket?.off("dm_message", handler);
       socket?.off("typing", typingHandler);
@@ -111,7 +114,8 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
       try {
         const res = await api.get(`/messages/${otherUserId}`);
         const normalized = res.data.map((m: any) => ({ ...m, from: m.from || m.sender_id }));
-        setMessages((prev) => dedupeMessages([...prev, ...normalized]));
+        // Reemplazar los mensajes actuales por el historial de la conversación seleccionada
+        setMessages(dedupeMessages(normalized));
       } catch { }
     })();
   }, [otherUserId]);

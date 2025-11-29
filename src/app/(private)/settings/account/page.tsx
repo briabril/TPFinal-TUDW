@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import api from "../../../../api/index";
-import { useForm, Controller, useWatch } from "react-hook-form";
+import { useForm, Controller, useWatch, SubmitHandler, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { editProfilSchema, ProfileData } from "../../../../schemas/editProfile";
 import {
@@ -27,7 +27,7 @@ export default function EditProfilePage() {
     watch,
     formState: { errors, isSubmitting },
   } = useForm<ProfileData>({
-    resolver: zodResolver(editProfilSchema),
+    resolver: zodResolver(editProfilSchema) as unknown as Resolver<ProfileData>,
     defaultValues: {
       displayname: "",
       bio: "",
@@ -85,7 +85,6 @@ export default function EditProfilePage() {
     })();
   }, [countryIso]);
 
-  // Fetch user data
   useEffect(() => {
     async function fetchMe() {
       setLoading(true);
@@ -108,56 +107,53 @@ export default function EditProfilePage() {
     fetchMe();
   }, [setValue]);
 
-  // Submit
-  const onSubmit = async (data: ProfileData) => {
-    if (!userId) return toast.error("No autenticado");
-
-    try {
-      const formData = new FormData();
-      formData.append("displayname", data.displayname);
-
-      if (data.password?.trim()) formData.append("password", data.password);
-      if (data.new_password?.trim())
-        formData.append("new_password", data.new_password);
-      // Allow saving an empty bio (to clear the field). If the bio key exists
-      // we append it even when it's an empty string.
-      if (data.bio !== undefined) formData.append("bio", data.bio ?? "");
-
-      if (data.profile_picture_url instanceof File) {
-        formData.append("profile_picture_url", data.profile_picture_url);
-      }
-
-      if (data.city) formData.append("city", data.city);
-      // Append country_iso when provided. If user cleared the country we append
-      // an empty string so the server can clear the value as well.
-      if (data.country_iso !== undefined)
-        formData.append("country_iso", data.country_iso ? data.country_iso.toUpperCase() : "");
-
-      const res = await api.put(`/users/${userId}`, formData, {
-        withCredentials: true,
-      });
-
-      const updatedUser = res.data?.user;
-      if (updatedUser) {
-        setUser(updatedUser);
-        setValue("displayname", updatedUser.displayname ?? "");
-        setValue("bio", updatedUser.bio ?? "");
-        setValue("profile_picture_url", undefined);
-        try {
-          if (profileInputRef.current) {
-            profileInputRef.current.value = "";
-            (profileInputRef.current as any).files = null;
-          }
-        } catch (err) {
-          console.warn("Could not clear profile input ref", err);
+    const onSubmit: SubmitHandler<ProfileData> = async (data) => {
+      if (!userId) return toast.error("No autenticado");
+  
+      try {
+        const formData = new FormData();
+        formData.append("displayname", data.displayname);
+  
+        if (data.password?.trim()) formData.append("password", data.password);
+        if (data.new_password?.trim())
+          formData.append("new_password", data.new_password);
+ 
+        if (data.bio !== undefined) formData.append("bio", data.bio ?? "");
+  
+        if (data.profile_picture_url instanceof File) {
+          formData.append("profile_picture_url", data.profile_picture_url);
         }
-      }
+  
+        if (data.city) formData.append("city", data.city);
 
-      toast.success("¡Perfil actualizado correctamente!");
-    } catch (err: any) {
-      toast.error("Error actualizando el perfil.");
-    }
-  };
+        if (data.country_iso !== undefined)
+          formData.append("country_iso", data.country_iso ? data.country_iso.toUpperCase() : "");
+  
+        const res = await api.put(`/users/${userId}`, formData, {
+          withCredentials: true,
+        });
+  
+        const updatedUser = res.data?.user;
+        if (updatedUser) {
+          setUser(updatedUser);
+          setValue("displayname", updatedUser.displayname ?? "");
+          setValue("bio", updatedUser.bio ?? "");
+          setValue("profile_picture_url", undefined);
+          try {
+            if (profileInputRef.current) {
+              profileInputRef.current.value = "";
+              (profileInputRef.current as any).files = null;
+            }
+          } catch (err) {
+            console.warn("Could not clear profile input ref", err);
+          }
+        }
+  
+        toast.success("¡Perfil actualizado correctamente!");
+      } catch (err: any) {
+        toast.error("Error actualizando el perfil.");
+      }
+    };
 
   // Avatar cropper
   const [cropOpen, setCropOpen] = useState(false);

@@ -1,6 +1,6 @@
 "use client";
 
-import { Box } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchPanel from "./SearchPanel";
 import SettingsPanel from "./SettingsPanel";
@@ -12,6 +12,7 @@ interface SidebarPanelProps {
 
 export default function SidebarPanel({ activePanel, onClose }: SidebarPanelProps) {
   const isOpen = activePanel !== "none";
+  const theme = useTheme();
 
   return (
     <AnimatePresence>
@@ -28,10 +29,16 @@ export default function SidebarPanel({ activePanel, onClose }: SidebarPanelProps
             left: 70,
             width: 270,
             height: "100vh",
-            background: "rgba(255, 255, 255, 0.85)",
+            background:
+              theme.palette.mode === "dark"
+                ? "rgba(7, 18, 38, 0.85)"
+                : "rgba(255, 255, 255, 0.85)",
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
-            borderRight: "1px solid rgba(0,0,0,0.08)",
+            borderRight:
+              theme.palette.mode === "dark"
+                ? "1px solid rgba(255,255,255,0.06)"
+                : "1px solid rgba(0,0,0,0.08)",
             borderRadius: "0 18px 18px 0",
             boxShadow: "4px 0 25px rgba(0,0,0,0.07)",
             zIndex: 2000,

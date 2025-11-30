@@ -182,11 +182,13 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
       <TextField
         fullWidth
         multiline
-        minRows={4}
+        minRows={1}
+        maxRows={8}
         value={contenido}
         onChange={(e) => setContenido(e.target.value)}
         placeholder="Comparte tus ideas, fotos, música o clima…"
         label="Texto para post"
+
 
       />
 

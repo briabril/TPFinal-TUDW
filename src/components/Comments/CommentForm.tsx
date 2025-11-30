@@ -78,16 +78,22 @@ const {user} = useAuth();
           placeholder="Escribe un comentario..."
           multiline
           fullWidth
+          minRows={1}
+          maxRows={6}
           size="small"
           variant="outlined"
           error={!!errors.text}
           helperText={errors.text?.message}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: 3,
-              fontSize: "0.9rem",
-            },
-          }}
+         sx={{
+    "& .MuiOutlinedInput-root": {
+      borderRadius: 3,
+      fontSize: "0.9rem",
+      paddingY: "6px",     
+    },
+    "& textarea": {
+      overflow: "hidden !important", 
+    },
+  }}
         />
 
         {/* Botón de emojis */}

@@ -71,9 +71,16 @@ export default function Sidebar({ userRole = "USER" }) {
   const visibleAdminItems = adminItems.filter((it) => it.roles?.includes(userRole));
 
   useEffect(() => {
-    const current = mainNavItems.find((item) => item.path && pathname.startsWith(item.path));
-    if (current) setActiveItem(current.id);
-  }, [pathname]);
+  const allItems = [...mainNavItems, ...visibleAdminItems];
+
+  const current = allItems.find(
+    (item) => item.path && pathname.startsWith(item.path)
+  );
+
+  if (current) {
+    setActiveItem(current.id);
+  }
+}, [pathname, visibleAdminItems]);
 
   // Weather
   useEffect(() => {

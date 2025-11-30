@@ -4,10 +4,12 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
-
-import { Box, Typography, Button, Paper } from "@mui/material";
+import { useThemeContext } from "@/context/ThemeContext";
+import CenteredLoader from "@/components/CenterLoader";
+import { Box, Typography, Button, Paper , useTheme, CircularProgress} from "@mui/material";
 
 function PublicHome() {
+  const theme = useTheme();
   return (
     <Box
       minHeight="100vh"
@@ -16,7 +18,7 @@ function PublicHome() {
       alignItems="center"
       justifyContent="center"
       bgcolor="background.default"
-      width={"w-full"}
+      width="100%"
       px={4}
       sx={{position:"relative"}}
     >
@@ -87,20 +89,14 @@ export default function RootPage() {
     }
   }, [user, loading, router]);
 
-  if (loading)
-    return (
-      <Box className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Typography className="text-gray-600">Cargando...</Typography>
-      </Box>
-    );
+if (loading) return <CenteredLoader />;
+
 
   if (!user) {
     return <PublicHome />;
   }
 
   return (
-    <Box className="min-h-screen flex items-center justify-center bg-gray-50">
-      <Typography className="text-gray-600">Redirigiendo...</Typography>
-    </Box>
+ <CenteredLoader />
   );
 }

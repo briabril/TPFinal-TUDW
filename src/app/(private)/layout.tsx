@@ -11,7 +11,7 @@ import {
   LayoutDashboard,
   Flag,
 } from "lucide-react";
-
+import CenteredLoader from "@/components/CenterLoader";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -55,15 +55,8 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
   const visibleAdminItems = user ? adminItems.filter((it) => it.roles?.includes(user.role)) : [];
   const itemsForMobile = [...mainNavItems, ...visibleAdminItems];
 
-  if (loading)
-    return (
-      <Box className="w-full h-screen flex flex-col items-center justify-center gap-4 bg-gray-50">
-        <CircularProgress size={60} thickness={4} />
-        <Typography variant="h6" color="textSecondary">
-          Cargando, por favor espera...
-        </Typography>
-      </Box>
-    );
+if (loading) return <CenteredLoader />;
+
 
   if (!user) return null;
 

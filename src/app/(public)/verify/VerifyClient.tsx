@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { Box, Typography } from "@mui/material";
 
 export default function VerifyClient() {
   const search = useSearchParams();
@@ -69,13 +70,24 @@ export default function VerifyClient() {
   }, [token, router, status]);
 
   return (
-    <div className="p-8 text-center">
+    <Box 
+  sx={{
+    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+    p: 4
+  }}
+>
+
       {status === "idle" && <p>Esperando token...</p>}
       {status === "loading" && <p>Verificando tu cuenta...</p>}
       {status === "success" && (
         <>
-          <h1 className="text-2xl font-bold mb-4">Cuenta activada</h1>
-          <p>Redirigiendo a login...</p>
+          <Typography variant="h3" component="h1" className="text-2xl font-bold mb-4">Cuenta activada</Typography>
+          <Typography variant="h5" component="h2">Redirigiendo a login...</Typography>
         </>
       )}
       {status === "error" && (
@@ -84,6 +96,6 @@ export default function VerifyClient() {
           <p>El token no es válido, expiró o ya fue usado.</p>
         </>
       )}
-    </div>
+    </Box>
   );
 }

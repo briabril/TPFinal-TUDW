@@ -100,6 +100,12 @@ export default function ProfilePage() {
     );
 
   const isOwnProfile = !!(user && profile.id === user.id);
+const canViewPosts =
+  isOwnProfile ||
+  followStatus.isFollowing; // ver posts privados
+
+const showPublicPosts =
+  !isOwnProfile && !followStatus.isFollowing; // ver públicos
 
   return (
     <Box className="flex flex-col items-center">
@@ -122,14 +128,24 @@ export default function ProfilePage() {
         !blockStatus.blockedByThem &&
         !loading && (
           <>
-            {
-              isOwnProfile ? (
-                <PostList initialMode="mine" />
-              ) : (
-                <PostList initialMode="user" username={username}/>
-              )
-            }
-          </>
+            
+         {isOwnProfile && (
+  <PostList mode="mine" />
+)}
+
+{!isOwnProfile && followStatus.isFollowing && (
+  <PostList mode="user" username={username} />
+)}
+
+{!isOwnProfile && !followStatus.isFollowing && (
+  <>
+    <PostList mode="public-user" username={username} />
+    <Box className="p-6 text-center text-gray-500">
+      Solo las publicaciones públicas están visibles.
+    </Box>
+  </>
+)}
+     </>
         )}
     </Box>
   );

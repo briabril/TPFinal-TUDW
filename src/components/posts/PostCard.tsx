@@ -23,7 +23,7 @@ export default function PostCard({ post }: PostCardProps) {
   const [editRequested, setEditRequested] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
-  const isOwn = Boolean(user && String(post.author.id) === String(user.id));
+  const isOwn = Boolean(user && String(post.author_id) === String(user.id));
 
   const handleDelete = async () => {
     setLoading(true);

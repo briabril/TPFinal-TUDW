@@ -123,7 +123,7 @@ export default function UserFeed() {
         </Box>
         <CrearPost />
       </Box>
-      <PostList initialMode={feedMode} />
+      <PostList mode={feedMode} />
     </Box>
   )
 }

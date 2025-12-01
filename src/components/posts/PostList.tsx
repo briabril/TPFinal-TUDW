@@ -6,12 +6,12 @@ import PostCard from "./PostCard";
 import { usePosts } from "@/hooks/usePosts";
 
 interface PostListProps {
-  initialMode: string;
+  mode: string;
   username?: string;
 }
 
-export default function PostList({ initialMode, username }: PostListProps) {
-  const { posts, error, loading } = usePosts(initialMode, username);
+export default function PostList({ mode, username }: PostListProps) {
+  const { posts, error, loading } = usePosts(mode, username);
 
   if (loading) {
     return (

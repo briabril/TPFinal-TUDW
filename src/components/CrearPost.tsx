@@ -17,6 +17,7 @@ import {
   Avatar,
   CircularProgress,
   useTheme,
+  Select, MenuItem, FormControl, InputLabel
 } from "@mui/material";
 
 type CrearPostProps = { onCreated?: (createdPost?: any) => void };
@@ -30,6 +31,7 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
   const [loading, setLoading] = useState(false);
   const [attachWeather, setAttachWeather] = useState(false);
   const [weatherData, setWeatherData] = useState<any | null>(null);
+const [visibility, setVisibility] = useState("followers");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(e.target.files || []);
@@ -82,6 +84,8 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
     try {
       const formData = new FormData();
       formData.append("text", contenido);
+      formData.append("visibility", visibility);
+
       if (attachWeather && weatherData) formData.append("weather", JSON.stringify(weatherData));
       for (const f of files) formData.append("files", f);
 
@@ -222,7 +226,19 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
             </IconButton>
           </Tooltip>
         </Box>
-
+<FormControl fullWidth sx={{ mt: 2 }}>
+  <InputLabel id="visibility-label">Visibilidad</InputLabel>
+  <Select
+    labelId="visibility-label"
+    value={visibility}
+    label="Visibilidad"
+    onChange={(e) => setVisibility(e.target.value)}
+  >
+    <MenuItem value="public">Público</MenuItem>
+    <MenuItem value="followers">Solo personas que te siguen</MenuItem>
+    <MenuItem value="intimate">Solo yo</MenuItem>
+  </Select>
+</FormControl>
         <Button
           type="submit"
           variant="contained"

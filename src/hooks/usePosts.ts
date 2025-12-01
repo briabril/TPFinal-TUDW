@@ -15,31 +15,37 @@ export function usePosts(mode: string, username?: string) {
         }
     }, [mode, username])
 
+useEffect(() => {
+    async function fetchPosts() {
+        let endpoint = "/posts/all"
 
-
-    useEffect(() => {
-        async function fetchPosts() {
-
-            let endpoint = "/posts"
-            try {
-                if (mode === "mine") endpoint = "/posts/mine"
-                else if (mode === "following") endpoint = "/posts/following"
-                 else if (mode === "user" && username)
-    endpoint = `/posts/user/${username}`;
-                const { data } = await api.get<{ data: Post[] }>(endpoint)
-
-                setPosts(data.data || [])
-                setError(null)
-            } catch (err: any) {
-                const msg = err.response?.data?.error || err.message || "Error fetching posts"
-                setError(msg)
-            } finally {
-                setLoading(false)
-            }
+        if (mode === "mine") {
+            endpoint = "/posts/mine"
+        } else if (mode === "following") {
+            endpoint = "/posts/following"
+        } else if (mode === "user" && username) {
+            endpoint = `/posts/user/${username}`
+        } else if (mode === "public-user" && username) {
+            endpoint = `/posts/user/${username}?mode=public`
         }
+        console.log("endpoint", endpoint)
+        try {
+            const { data } = await api.get<{ data: Post[] }>(endpoint)
+            setPosts(data.data || [])
+                        console.log("DATA",data.data)
+            console.log("POSTS", posts)
+            setError(null)
+        } catch (err: any) {
+            const msg = err.response?.data?.error || err.message
+            setError(msg)
+        } finally {
+            setLoading(false)
+        }
+    }
 
-        fetchPosts()
-    }, [mode])
+    setLoading(true)
+    fetchPosts()
+}, [mode, username])
 
     useEffect(() => {
         const handleNewPost = (newPost: Post) => {

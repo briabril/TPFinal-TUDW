@@ -100,7 +100,7 @@ export default function LoginPage() {
 
          <TextField
             label="Contraseña"
-            type="password"
+              type={showPassword ? "text" : "password"}
             fullWidth
             {...register("password")}
             error={!!errors.password}

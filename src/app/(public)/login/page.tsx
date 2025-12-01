@@ -8,12 +8,15 @@ import { User } from "../../../types/user";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import ThemeToggle from "@/components/ThemeToggle";
-
-import { Box, Button, Container, TextField, Typography, Paper, Link } from "@mui/material";
+import { Eye, EyeClosed } from "lucide-react";
+import { Box, Button, Container, TextField, Typography, Paper, Link, InputAdornment, IconButton } from "@mui/material";
+import { useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
   const { setUser } = useAuth();
+   const [showPassword, setShowPassword] = useState(false);
+  
   const {
     register,
     handleSubmit,
@@ -95,14 +98,23 @@ export default function LoginPage() {
             helperText={errors.identifier?.message}
           />
 
-          <TextField
+         <TextField
             label="Contraseña"
             type="password"
             fullWidth
             {...register("password")}
             error={!!errors.password}
             helperText={errors.password?.message}
-          />
+                InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword(!showPassword)}>
+                      {showPassword ? <EyeClosed /> : <Eye />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
 
           <Button
             type="submit"
@@ -134,6 +146,15 @@ export default function LoginPage() {
    >
      Continuar con Google
    </Button>
+    <Typography variant="body2" align="center" color="text.secondary">
+          <Link
+            href="/forgot-password"
+            underline="hover"
+            sx={{ fontWeight: 600, cursor: "pointer" }}
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </Typography>
         <Typography variant="body2" align="center" color="text.primary">
           ¿No tienes cuenta?{" "}
           <Link

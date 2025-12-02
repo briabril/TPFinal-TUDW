@@ -52,8 +52,6 @@ export default function UserSearch({ onSelect, showTitle = false }: Props) {
         });
 
         const qLower = q.toLowerCase();
-
-        // 📌 ORDENAMIENTO POR MEJORES COINCIDENCIAS
         const sorted = res.data.results.sort((a, b) => {
           const aScore =
             (a.username.toLowerCase().startsWith(qLower) ? 2 : 0) +

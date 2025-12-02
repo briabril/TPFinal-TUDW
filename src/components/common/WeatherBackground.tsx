@@ -39,9 +39,6 @@ export default function WeatherBackground({ weather, children, className, overla
         const effectiveWeather = localWeather || weather;
         if (!effectiveWeather) return;
 
-        // Try multiple possible shapes for the weather description.
-        // Some stored payloads may not include `current.weather[0].main`, so
-        // fall back to other fields (condition text, location name, etc.)
         const weatherMain =
           effectiveWeather.current?.weather?.[0]?.main ||
           effectiveWeather.current?.weatherMain ||
@@ -53,9 +50,6 @@ export default function WeatherBackground({ weather, children, className, overla
           effectiveWeather?.location?.city ||
           effectiveWeather?.location?.name ||
           null;
-
-        // If we still don't have a usable token, use a generic 'weather' query
-        // but prefer a location-based query if available.
         let base = weatherMain;
         if (!base) {
           if (effectiveWeather?.location?.city) base = effectiveWeather.location.city;

@@ -111,7 +111,6 @@ const CommentForm: React.FC<Props> = ({ onSubmit, parentId }) => {
                     }}
                   />
 
-                  {/* Botón de emojis */}
                   <Box display="flex" justifyContent="flex-start" mt={0.5}>
                     <IconButton size="small" onClick={openPicker}>
                       <EmojiEmotionsIcon fontSize="small" />

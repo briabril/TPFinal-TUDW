@@ -13,7 +13,7 @@ import { useState } from "react";
 interface CommentItemProps {
   comment: Comment;
   onReply: (data: CommentFormData, parentId?: string | number | null) => void;
-    onEdit?: (updated: Comment) => void;
+  onEdit?: (updated: Comment) => void;
   onDelete?: (commentId: string | number) => void;
 }
 
@@ -50,13 +50,13 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply, onEdit, onD
         toast.error("El comentario no puede estar vacío");
         return;
       }
-   const { data: updated } = await api.put(`/comments/${comment.id}`, {
-      text: editedText,
-    });
+      const { data: updated } = await api.put(`/comments/${comment.id}`, {
+        text: editedText,
+      });
 
-    onEdit?.(updated);
-        setIsEditing(false);
-          toast.success("Comentario actualizado ✏️");
+      onEdit?.(updated);
+      setIsEditing(false);
+      toast.success("Comentario actualizado ✏️");
     } catch (error: any) {
       toast.error("Error al editar el comentario");
       console.error("No se pudo editar el comentario:", error);
@@ -69,7 +69,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply, onEdit, onD
     try {
       await api.delete(`/comments/${comment.id}`, { withCredentials: true });
       onDelete?.(comment.id);
-     toast.success("Comentario eliminado 🗑️");
+      toast.success("Comentario eliminado 🗑️");
     } catch (error: any) {
       toast.error("Error al eliminar el comentario");
       console.error("No se pudo eliminar el comentario:", error);
@@ -78,29 +78,29 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply, onEdit, onD
 
   const handleReply = (data: CommentFormData) => {
     onReply(data, comment.id);
-     setShowReply(false);
+    setShowReply(false);
   };
 
   return (
-    <Box sx={{mt: 1}}>
-      <Paper elevation={0} sx={{ p: 2, display: "flex" , gap:2, borderBottom: `1px solid  ${theme.palette.divider}`}}>
-       
+    <Box sx={{ mt: 1 }}>
+      <Paper elevation={0} sx={{ p: 2, display: "flex", gap: 2, borderBottom: `1px solid  ${theme.palette.divider}` }}>
+
         <Avatar alt={comment.author_username || "usuario"}
           src={comment.author_avatar || "../../default-avatar-icon.jpg"}
-          sx={{width: 30, height: 30}}/>
-        <Box sx={{ flexGrow: 1, pl:1}}>
-         <Stack direction="row" alignItems="center" spacing={1}>
-             <Typography variant="subtitle2" fontWeight="bold">
-            {comment.author_username || "Usuario"}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {formatDate(comment.created_at)}
-          </Typography>
-         </Stack>
-         
+          sx={{ width: 30, height: 30 }} />
+        <Box sx={{ flexGrow: 1, pl: 1 }}>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Typography variant="subtitle2" fontWeight="bold">
+              {comment.author_username || "Usuario"}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {formatDate(comment.created_at)}
+            </Typography>
+          </Stack>
+
 
           {isEditing ? (
-            <Box sx={{mt:1 }}>
+            <Box sx={{ mt: 1 }}>
               <TextField
                 value={editedText}
                 onChange={(e) => setEditedText(e.target.value)}
@@ -134,74 +134,73 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply, onEdit, onD
           )}
           <Stack direction="row" alignItems="center" spacing={1} mt={1}>
             <Reaction userId={comment.author_id} targetId={comment.id} type="comment" />
-            <IconButton size="small" onClick={()=> setShowReply((prev)=> !prev)} sx={{color: "text.secondary", "&:hover":{color:"#00d600"}}} aria-label="Mostrar comentarios" title="Mostrar comentarios"><MessageCircle size={16}/></IconButton>
-       
+            <IconButton size="small" onClick={() => setShowReply((prev) => !prev)} sx={{ color: "text.secondary", "&:hover": { color: "#00d600" } }} aria-label="Mostrar comentarios" title="Mostrar comentarios"><MessageCircle size={16} /></IconButton>
+
             {user?.id === comment.author_id && (
               <>
                 <IconButton
-                size="small"
-                  onClick={() =>  setIsEditing(true)}
-                  sx={{color: "text.secondary", "&:hover":{color:"#1966ff"}}}
-                 
+                  size="small"
+                  onClick={() => setIsEditing(true)}
+                  sx={{ color: "text.secondary", "&:hover": { color: "#1966ff" } }}
+
                 >
-                 <Edit2 size={16} />
+                  <Edit2 size={16} />
                 </IconButton>
                 <IconButton
                   size="small"
-                  sx={{color: "text.secondary" , "&:hover":{color:"#e00000"}}}
-                  onClick={ handleDelete} aria-label="Eliminar comentarios" title="Eliminar comentarios"
+                  sx={{ color: "text.secondary", "&:hover": { color: "#e00000" } }}
+                  onClick={handleDelete} aria-label="Eliminar comentarios" title="Eliminar comentarios"
                 >
-                <Trash2 size={16}/>
+                  <Trash2 size={16} />
                 </IconButton>
               </>
             )}
           </Stack>
           {showReply && (
-            <Box sx={{mt:1}}>
+            <Box sx={{ mt: 1 }}>
               <CommentForm
-              postId={comment.post_id}
-              parentId={comment.id}
-              onSubmit={handleReply}
+                postId={comment.post_id}
+                parentId={comment.id}
+                onSubmit={handleReply}
               />
             </Box>
           )}
         </Box>
       </Paper>
 
-      {/* Comentarios hijos */}
-     {(comment.children?.length ?? 0) > 0 && (
-  <Box sx={{ mt: 1, pl: 4, borderLeft: `2px solid ${theme.palette.divider}` ,  backgroundColor: theme.palette.action.hover,}}>
-   
-      <Button
-        size="small"
-        sx={{
-          textTransform: "none",
-          fontSize: "0.8rem",
-          color: "text.secondary",
-          "&:hover": { textDecoration: "underline" },
-        }}
-        onClick={() => setShowReplies((prev)=> !prev)}
-      >
-        {showReplies ? "Ocultar repuestas" :`Ver respuestas (${comment.children?.length})` }
-      </Button>
-   
+      {(comment.children?.length ?? 0) > 0 && (
+        <Box sx={{ mt: 1, pl: 4, borderLeft: `2px solid ${theme.palette.divider}`, backgroundColor: theme.palette.action.hover, }}>
 
-    <Collapse in={showReplies} timeout={300} unmountOnExit sx={{ mt: 1 }}>
-      {comment.children?.map((child) => (
-               <CommentItem
-  key={child.id}
-  comment={child}
-  onReply={onReply}
-  onEdit={onEdit}
-  onDelete={onDelete}
-/>
+          <Button
+            size="small"
+            sx={{
+              textTransform: "none",
+              fontSize: "0.8rem",
+              color: "text.secondary",
+              "&:hover": { textDecoration: "underline" },
+            }}
+            onClick={() => setShowReplies((prev) => !prev)}
+          >
+            {showReplies ? "Ocultar repuestas" : `Ver respuestas (${comment.children?.length})`}
+          </Button>
 
-      ))}
- 
-    </Collapse>
-  </Box>
-)}
-   </Box>
+
+          <Collapse in={showReplies} timeout={300} unmountOnExit sx={{ mt: 1 }}>
+            {comment.children?.map((child) => (
+              <CommentItem
+                key={child.id}
+                comment={child}
+                onReply={onReply}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+
+            ))}
+
+          </Collapse>
+        </Box>
+      )}
+    </Box>
   );
 };
 

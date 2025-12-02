@@ -20,7 +20,7 @@ const Comments: React.FC<CommentProps> = ({ postId }) => {
   const { user } = useAuth();
   const authorId = user?.id;
 
-  const socketRef = useSocket();  // ←♦️ usar el hook
+  const socketRef = useSocket(); 
 
   const fetchComments = async () => {
     setLoading(true);
@@ -34,7 +34,6 @@ const Comments: React.FC<CommentProps> = ({ postId }) => {
     }
   };
 
-  // ------------------- Árbol -------------------
   function addCommentToTree(tree: Comment[], newComment: Comment): Comment[] {
     if (!newComment.parent_id) {
       return [...tree, { ...newComment, children: [] }];
@@ -78,7 +77,6 @@ const Comments: React.FC<CommentProps> = ({ postId }) => {
     return rec(tree);
   }
 
-  // ---------------- SOCKET --------------------
   useEffect(() => {
     fetchComments();
   }, [postId]);
@@ -112,9 +110,7 @@ const Comments: React.FC<CommentProps> = ({ postId }) => {
       socket.off(updateEvent, handleUpd);
       socket.off(deleteEvent, handleDel);
     };
-  }, [postId, socketRef.current]); // importante: NO dependas de socketRef solo
-
-  // ---------------- SUBMIT --------------------
+  }, [postId, socketRef.current]);
   const handleSubmit = async (data: CommentFormData, parentId?: string | number | null) => {
     try {
       const res = await api.post(

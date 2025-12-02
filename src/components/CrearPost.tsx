@@ -17,8 +17,14 @@ import {
   Avatar,
   CircularProgress,
   useTheme,
-  Select, MenuItem, FormControl, InputLabel
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Popover,
 } from "@mui/material";
+import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
+import EmojiPicker from "emoji-picker-react";
 
 type CrearPostProps = { onCreated?: (createdPost?: any) => void };
 
@@ -31,7 +37,8 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
   const [loading, setLoading] = useState(false);
   const [attachWeather, setAttachWeather] = useState(false);
   const [weatherData, setWeatherData] = useState<any | null>(null);
-const [visibility, setVisibility] = useState("followers");
+  const [visibility, setVisibility] = useState("followers");
+const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(e.target.files || []);
@@ -86,7 +93,8 @@ const [visibility, setVisibility] = useState("followers");
       formData.append("text", contenido);
       formData.append("visibility", visibility);
 
-      if (attachWeather && weatherData) formData.append("weather", JSON.stringify(weatherData));
+      if (attachWeather && weatherData)
+        formData.append("weather", JSON.stringify(weatherData));
       for (const f of files) formData.append("files", f);
 
       const res = await api.post("/posts", formData, {
@@ -97,16 +105,24 @@ const [visibility, setVisibility] = useState("followers");
 
       const created = json?.post || null;
       if (created) {
-        created.author = created.author || { id: created.author_id || user?.id };
-        created.author.username = created.author.username || user?.username || "";
-        created.author.displayname = created.author.displayname || user?.displayname || "";
+        created.author = created.author || {
+          id: created.author_id || user?.id,
+        };
+        created.author.username =
+          created.author.username || user?.username || "";
+        created.author.displayname =
+          created.author.displayname || user?.displayname || "";
         created.author.profile_picture_url =
-          created.author.profile_picture_url ?? user?.profile_picture_url ?? null;
+          created.author.profile_picture_url ??
+          user?.profile_picture_url ??
+          null;
         created.medias = json.medias || [];
         created.weather = json.weather || null;
 
         try {
-          window.dispatchEvent(new CustomEvent("post-created", { detail: created }));
+          window.dispatchEvent(
+            new CustomEvent("post-created", { detail: created })
+          );
         } catch {}
       }
 
@@ -129,14 +145,19 @@ const [visibility, setVisibility] = useState("followers");
     if (!attachWeather) return;
 
     if (!user?.city || !user?.country_iso || user.country_iso.trim() === "") {
-      toast.error("Debes agregar tu ciudad y país en tu perfil para usar el clima.");
+      toast.error(
+        "Debes agregar tu ciudad y país en tu perfil para usar el clima."
+      );
       setAttachWeather(false);
       return;
     }
 
     (async () => {
       try {
-        const w = await fetchWeatherByCity(user.city as string, user.country_iso as string);
+        const w = await fetchWeatherByCity(
+          user.city as string,
+          user.country_iso as string
+        );
         setWeatherData(w);
         toast.success("Clima agregado al post");
       } catch {
@@ -147,6 +168,7 @@ const [visibility, setVisibility] = useState("followers");
   }, [attachWeather, user?.city, user?.country_iso]);
 
   const canSubmit = contenido.trim().length > 0 || files.length > 0;
+
 
   return (
     <Box
@@ -176,28 +198,65 @@ const [visibility, setVisibility] = useState("followers");
         </Avatar>
 
         <Box>
-          <Typography fontWeight={600}>{user?.displayname || user?.username}</Typography>
+          <Typography fontWeight={600}>
+            {user?.displayname || user?.username}
+          </Typography>
+          
           <Typography variant="body2" color="text.secondary">
             ¿Qué estás pensando hoy?
           </Typography>
         </Box>
+        
       </Box>
 
-      <TextField
-        fullWidth
-        multiline
-        minRows={1}
-        maxRows={8}
-        value={contenido}
-        onChange={(e) => setContenido(e.target.value)}
-        placeholder="Comparte tus ideas, fotos, música o clima…"
-        label="Texto para post"
 
+       <Box sx={{ position: "relative", mb: 2 }}>
+  <TextField
+    fullWidth
+    multiline
+    minRows={1}
+    maxRows={8}
+    value={contenido}
+    onChange={(e) => setContenido(e.target.value)}
+    placeholder="Comparte tus ideas, fotos, música o clima…"
+    label="Texto para post"
+  />
 
-      />
+  {/* Botón de emojis */}
+  <Box display="flex" justifyContent="flex-start" mt={0.5}>
+    <IconButton
+      size="small"
+      onClick={(e) => setAnchorEl(e.currentTarget)}
+    >
+      <EmojiEmotionsIcon fontSize="small" />
+    </IconButton>
+  </Box>
 
-      <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Box sx={{ display: "flex", gap: 1 }}>
+  {/* Picker de emojis */}
+  <Popover
+    open={Boolean(anchorEl)}
+    anchorEl={anchorEl}
+    onClose={() => setAnchorEl(null)}
+    anchorOrigin={{
+      vertical: "top",
+      horizontal: "left",
+    }}
+    transformOrigin={{
+      vertical: "bottom",
+      horizontal: "left",
+    }}
+  >
+    <EmojiPicker
+      onEmojiClick={(emojiData: any) => {
+        const emoji = emojiData.emoji;
+        setContenido((prev) => (prev ?? "") + emoji);
+      }}
+      height={350}
+    />
+  </Popover>
+</Box>
+<Box sx={{ display: "flex", justifyContent:"space-between", alignItems:"center", gap: 1 }}>
+  <Box sx={{ display: "flex", gap: 1 }}>
           <input
             id="upload-file"
             type="file"
@@ -206,9 +265,16 @@ const [visibility, setVisibility] = useState("followers");
             onChange={handleFileChange}
             style={{ display: "none" }}
           />
-          <Tooltip title="Añadir imágenes, videos o audio" aria-label="Añadir imágenes, videos o audio">
+          <Tooltip
+            title="Añadir imágenes, videos o audio"
+            aria-label="Añadir imágenes, videos o audio"
+          >
             <label htmlFor="upload-file" style={{ cursor: "pointer" }}>
-              <IconButton color="primary" component="span" sx={{ bgcolor: "action.hover" }}>
+              <IconButton
+                color="primary"
+                component="span"
+                sx={{ bgcolor: "action.hover" }}
+              >
                 <FileUp size={18} />
               </IconButton>
             </label>
@@ -219,36 +285,52 @@ const [visibility, setVisibility] = useState("followers");
               onClick={() => setAttachWeather(!attachWeather)}
               color={attachWeather ? "primary" : "default"}
               sx={{
-                bgcolor: attachWeather ? theme.palette.primary.light : "action.hover",
+                bgcolor: attachWeather
+                  ? theme.palette.primary.light
+                  : "action.hover",
               }}
             >
               <Wind size={18} />
             </IconButton>
           </Tooltip>
         </Box>
-<FormControl fullWidth sx={{ mt: 2 }}>
-  <InputLabel id="visibility-label">Visibilidad</InputLabel>
-  <Select
-    labelId="visibility-label"
-    value={visibility}
-    label="Visibilidad"
-    onChange={(e) => setVisibility(e.target.value)}
+ 
+</Box>
+        
+       <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+         <FormControl  sx={{ mt: 2 }}>
+          <InputLabel id="visibility-label">Visibilidad</InputLabel>
+          <Select
+         size="small"
+            labelId="visibility-label"
+            value={visibility}
+            label="Visibilidad"
+            onChange={(e) => setVisibility(e.target.value)}
+          >
+            <MenuItem value="public">Público</MenuItem>
+            <MenuItem value="followers">Solo personas que te siguen</MenuItem>
+            <MenuItem value="intimate">Solo yo</MenuItem>
+          </Select>
+        </FormControl>
+        <Box sx={{ display: "flex", justifyContent: "flex-end"}}>
+           <Button
+    type="submit"
+    variant="contained"
+    disabled={!canSubmit || loading}
+    sx={{ px: 4, borderRadius: 20 }}
   >
-    <MenuItem value="public">Público</MenuItem>
-    <MenuItem value="followers">Solo personas que te siguen</MenuItem>
-    <MenuItem value="intimate">Solo yo</MenuItem>
-  </Select>
-</FormControl>
-        <Button
-          type="submit"
-          variant="contained"
-          disabled={!canSubmit || loading}
-          sx={{ px: 4, borderRadius: 20 }}
-        >
-          {loading ? <CircularProgress size={20} color="inherit" /> : "Publicar"}
-        </Button>
-      </Box>
+    {loading ? (
+      <CircularProgress size={20} color="inherit" />
+    ) : (
+      "Publicar"
+    )}
+  </Button>
+        </Box>
+ 
+</Box>
 
+      
+ 
       {previews.length > 0 && (
         <Box sx={{ mt: 3 }}>
           <Divider sx={{ mb: 2 }} />
@@ -264,19 +346,47 @@ const [visibility, setVisibility] = useState("followers");
             }}
           >
             {previews.map((p, i) => (
-              <Box key={i} sx={{ position: "relative", borderRadius: 2, overflow: "hidden", height: 120 }}>
+              <Box
+                key={i}
+                sx={{
+                  position: "relative",
+                  borderRadius: 2,
+                  overflow: "hidden",
+                  height: 120,
+                }}
+              >
                 {files[i]?.type?.startsWith("video") ? (
                   <video
                     src={p}
                     controls
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
                   />
                 ) : files[i]?.type?.startsWith("audio") ? (
-                  <Box sx={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", bgcolor: theme.palette.background.paper }}>
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      bgcolor: theme.palette.background.paper,
+                    }}
+                  >
                     <audio src={p} controls style={{ width: "90%" }} />
                   </Box>
                 ) : (
-                  <img src={p} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img
+                    src={p}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
                 )}
                 <IconButton
                   onClick={() => {

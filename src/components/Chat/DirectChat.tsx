@@ -17,7 +17,7 @@ import {
 import SendIcon from "@mui/icons-material/Send";
 import DoneIcon from "@mui/icons-material/Done";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
-import useSocket from "@/hooks/useSocket";
+import { useSocket } from "@/hooks/useSocket";
 import api from "@/api";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
@@ -37,7 +37,6 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
   const [typing, setTyping] = useState(false);
   const listRef = useRef<HTMLUListElement | null>(null);
 
-  // Eliminar mensajes duplicados por `id`, preservando el orden de la primera ocurrencia
   const dedupeMessages = (arr: any[]) => {
     const seen = new Set<string>();
     return arr.filter((m) => {

@@ -1,82 +1,42 @@
-"use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 import api from "@/api";
 
+let globalSocket: Socket | null = null;
+
 export function useSocket() {
-  const socketRef = useRef<Socket | null>(null);
-  const [, setReadyTick] = useState(0);
+  const ref = useRef<Socket | null>(null);
 
   useEffect(() => {
-    let mounted = true;
+    if (globalSocket) {
+      ref.current = globalSocket;
+      return;
+    }
+
     const setup = async () => {
       try {
-        
-        const envBackendPublic = process.env.NEXT_PUBLIC_BACKEND_URL;
-        const envBackend = process.env.BACKEND_URL;
-        const envApi = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL;
-        let backendUrl: string | undefined = envBackendPublic || envBackend;
-        if (!backendUrl && envApi) {
-          try {
-            backendUrl = new URL(envApi).origin;
-          } catch (e) {
-            // ignore
-          }
-        }
-        if (!backendUrl && typeof window !== "undefined") {
-          backendUrl = window.location.origin;
-        }
-
-        
-
-        
         let token: string | undefined;
+
         try {
           const res = await api.get("/auth/socket-token", { withCredentials: true });
           token = res.data?.token;
-        } catch (err) {
-          
-        }
+        } catch {}
 
-        
-        if (!backendUrl) {
-          return;
-        }
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-        const socket = io(backendUrl, {
+        globalSocket = io(backendUrl!, {
           auth: token ? { token } : undefined,
-          transports: ["websocket"],
+          transports: ["websocket"]
         });
 
-        socketRef.current = socket;
-        setReadyTick((t) => t + 1);
-
-        socket.on("connect", () => {
-          console.debug("[useSocket] connected", socket.id);
-        });
-        socket.on("disconnect", (reason) => {
-          console.debug("[useSocket] disconnected", reason);
-        });
-        socket.on("connect_error", (err) => {
-          console.debug("[useSocket] connect_error", err?.message || err);
-        });
-      } catch (err) {
-        console.debug("[useSocket] setup error", err);
+        ref.current = globalSocket;
+      } catch (e) {
+        console.error("Socket setup error", e);
       }
     };
 
     setup();
-
-    return () => {
-      mounted = false;
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
-    };
   }, []);
 
-  return socketRef;
+  return ref;
 }
-
-export default useSocket;

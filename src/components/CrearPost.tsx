@@ -79,10 +79,14 @@ const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     e.preventDefault();
     if (!user) return toast.error("Debes iniciar sesión");
 
-    if (!contenido.trim() && files.length === 0) {
+    if (!contenido.trim() && files.length === 0 ) {
       return toast.error("El post requiere texto o al menos un archivo.");
     }
 
+    if (contenido.length > 300) {
+      return toast.error("El contenido no puede exceder los 300 caracteres.");
+    }
+    
     setLoading(true);
 
     try {

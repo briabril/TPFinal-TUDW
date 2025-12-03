@@ -65,7 +65,11 @@ if (loading) return <CenteredLoader />;
 
       {/* Sidebar desktop */}
       {!isMobile && (
-        <div className="z-20">
+        <div className="z-20" style={{
+    position: "sticky",
+    top: 0,
+    height: "100vh",
+  }}>
           <Sidebar userRole={user.role} />
         </div>
       )}

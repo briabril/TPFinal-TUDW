@@ -25,6 +25,7 @@ import {
 } from "@mui/material";
 import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
 import EmojiPicker from "emoji-picker-react";
+import { Directions } from "@mui/icons-material";
 
 type CrearPostProps = { onCreated?: (createdPost?: any) => void };
 
@@ -296,7 +297,8 @@ const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
  
 </Box>
         
-       <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+       <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2, gap:2 }} flexDirection={{xs: "column", sm: 'row',md: "row", lg: 'row'}} alignItems={{xs: "center" , sm: "center"}}>
+
          <FormControl  sx={{ mt: 2 }}>
           <InputLabel id="visibility-label">Visibilidad</InputLabel>
           <Select

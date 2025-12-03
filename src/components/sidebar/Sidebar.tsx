@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Box, Button, Avatar, Typography } from "@mui/material";
 import getImageUrl from "@/utils/getImageUrl";
+import { useMessages } from "@/hooks/useMessages";
 import {
   Home,
   User,
@@ -14,6 +15,7 @@ import {
   LayoutDashboard,
   Flag,
   LogOut,
+  BellIcon
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { SidebarItem } from "./SidebarItem";
@@ -25,6 +27,7 @@ export default function Sidebar({ userRole = "USER" }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, loading, logout } = useAuth();
+  const { unread } = useMessages(user?.id ?? null)
 
   const [activeItem, setActiveItem] = useState("home");
   const [isExpanded, setIsExpanded] = useState<boolean | null>(null);
@@ -50,16 +53,24 @@ export default function Sidebar({ userRole = "USER" }) {
     if (isExpanded === null) return;
     try {
       localStorage.setItem("sidebar-expanded", String(isExpanded));
-    } catch {}
+    } catch { }
   }, [isExpanded]);
 
   const mainNavItems: NavItem[] = [
     { id: "home", label: "Inicio", icon: Home, path: "/feed", expandable: true },
     { id: "profile", label: "Perfil", icon: User, path: `/${user?.username}`, expandable: true },
     { id: "search", label: "Buscar", icon: SearchIcon, expandable: false },
-    // { id: "notifications", label: "Notificaciones", icon: BellDotIcon, path: '/notifications', expandable: true },
     { id: "settings", label: "Configuración", icon: Settings, path: "/settings", expandable: true },
-    { id: "messages", label: "Mensajes", icon: MessageSquare, path: "/messages", expandable: true },
+    { id: "notifications", label: "Notificaciones", icon: BellIcon, path: "/notifications", expandable: true },
+    {
+      id: "messages",
+      label: "Mensajes",
+      icon: MessageSquare,
+      path: "/messages",
+      expandable: true,
+      badge: unread,
+    },
+
   ];
 
   // Admin
@@ -71,16 +82,16 @@ export default function Sidebar({ userRole = "USER" }) {
   const visibleAdminItems = adminItems.filter((it) => it.roles?.includes(userRole));
 
   useEffect(() => {
-  const allItems = [...mainNavItems, ...visibleAdminItems];
+    const allItems = [...mainNavItems, ...visibleAdminItems];
 
-  const current = allItems.find(
-    (item) => item.path && pathname.startsWith(item.path)
-  );
+    const current = allItems.find(
+      (item) => item.path && pathname.startsWith(item.path)
+    );
 
-  if (current) {
-    setActiveItem(current.id);
-  }
-}, [pathname, visibleAdminItems]);
+    if (current) {
+      setActiveItem(current.id);
+    }
+  }, [pathname, visibleAdminItems]);
 
   // Weather
   useEffect(() => {
@@ -91,7 +102,7 @@ export default function Sidebar({ userRole = "USER" }) {
           const w = await fetchWeatherByCity(user.city, user.country_iso);
           if (mounted) setWeather(w);
         }
-      } catch {}
+      } catch { }
     })();
     return () => {
       mounted = false;
@@ -286,7 +297,7 @@ export default function Sidebar({ userRole = "USER" }) {
           style={{
             position: "fixed",
             top: 0,
-            left: isExpanded ? 250 : 70, 
+            left: isExpanded ? 250 : 70,
             width: `calc(100vw - ${isExpanded ? 250 : 70}px)`,
             height: "100vh",
             background: "rgba(0,0,0,0.5)",

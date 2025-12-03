@@ -12,7 +12,6 @@ import {
   useMediaQuery,
   useTheme,
   Paper,
-  Fade,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import DoneIcon from "@mui/icons-material/Done";
@@ -97,7 +96,7 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
     return () => {
       try {
         socket?.emit("leave_dm", otherUserId);
-      } catch (e) {}
+      } catch (e) { }
       socket?.off("connect", onConnect);
       socket?.off("dm_message", handler);
       socket?.off("typing", typingHandler);
@@ -113,6 +112,22 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
       } catch { }
     })();
   }, [otherUserId]);
+
+  useEffect(() => {
+    if (!socketRef.current || !user) return;
+
+    socketRef.current.emit("dm_seen", {
+      from: user.id,
+      to: otherUserId,
+    });
+
+    // actualizar visualmente
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.from !== user.id ? { ...m, read: true } : m
+      )
+    );
+  }, [otherUserId, user, socketRef.current]);
 
   useEffect(() => {
     const el = listRef.current;
@@ -146,6 +161,16 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
     } catch { }
   };
 
+  useEffect(() => {
+    (async () => {
+      const conv = await api.get(`/messages/conversations`);
+      const found = conv.data.find((c: any) => c.otherUser.id === otherUserId);
+      if (found) {
+        await api.post("/messages/mark-read", { conversationId: found.id });
+      }
+    })();
+  }, [otherUserId]);
+
   const handleTyping = () => {
     socketRef.current?.emit("typing", { to: otherUserId });
   };
@@ -156,6 +181,7 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
     const curr = new Date(messages[index].created_at).toDateString();
     return prev !== curr;
   };
+
 
   return (
     <Paper
@@ -182,7 +208,6 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
           const mine = m.from === user?.id;
 
           return (
-            
             <React.Fragment key={m.id}>
               {isNewDate(i) && (
                 <Box sx={{ textAlign: "center", my: 1 }}>
@@ -230,18 +255,18 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
                       color: mine
                         ? theme.palette.primary.contrastText
                         : theme.palette.text.primary,
-                      p: 1.3,                     
-                      px: 1.6,     
+                      p: 1.3,
+                      px: 1.6,
                       borderRadius: mine
                         ? "14px 14px 4px 14px"
                         : "14px 14px 14px 4px",
                       fontSize: isMobile ? "0.85rem" : "0.9rem",
                       boxShadow: 2,
                       display: "flex",
-                      flexDirection: "column",   
+                      flexDirection: "column",
                       gap: 0.4,
                       minWidth: "fit-content",
-                      wordBreak: "break-word", 
+                      wordBreak: "break-word",
                     }}
                   >
                     <Typography
@@ -253,6 +278,7 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
                     >
                       {m.text}
                     </Typography>
+
                     <Box
                       sx={{
                         display: "flex",
@@ -318,6 +344,7 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
             }
           }}
         />
+
         <IconButton
           onClick={send}
           color="primary"

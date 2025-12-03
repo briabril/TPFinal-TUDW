@@ -17,12 +17,17 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Box, CircularProgress, Typography, useMediaQuery } from "@mui/material";
 import type { ReactNode } from "react";
+import { useNotificationsSocket } from "@/hooks/useNotificationSocket";
+import { useMessages } from "@/hooks/useMessages";
 
 export default function PrivateLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
+  const { unread } = useMessages(user?.id || null)
   const router = useRouter();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
+  useNotificationsSocket()
+  
   const [activePanel, setActivePanel] = useState<"none" | "search" | "settings" | "messages">("none");
 
   const shouldPush = activePanel === "settings";
@@ -36,27 +41,26 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
     () =>
       user
         ? [
-            { id: "home", label: "Inicio", icon: Home, path: "/feed" },
-            { id: "search", label: "Buscar", icon: SearchIcon, path: "/search" },
-            { id: "settings", label: "Configuración", icon: Settings, path: "/settings" },
-            { id: "messages", label: "Mensajes", icon: MessageSquare, path: "/messages" },
-          ]
+          { id: "home", label: "Inicio", icon: Home, path: "/feed" },
+          { id: "search", label: "Buscar", icon: SearchIcon, path: "/search" },
+          { id: "settings", label: "Configuración", icon: Settings, path: "/settings" },
+          { id: "messages", label: "Mensajes", icon: MessageSquare, path: "/messages", badge: unread > 0 ? unread : null },
+        ]
         : [],
-    [user?.username]
+    [user?.username, unread]
   );
 
   const adminItems = user
     ? [
-        { id: "admin-dashboard", label: "Admin Panel", icon: LayoutDashboard, path: "/admin/dashboard", roles: ["ADMIN"] },
-        { id: "admin-reports", label: "Reportes", icon: Flag, path: "/admin/reports", roles: ["ADMIN"] },
-      ]
+      { id: "admin-dashboard", label: "Admin Panel", icon: LayoutDashboard, path: "/admin/dashboard", roles: ["ADMIN"] },
+      { id: "admin-reports", label: "Reportes", icon: Flag, path: "/admin/reports", roles: ["ADMIN"] },
+    ]
     : [];
 
   const visibleAdminItems = user ? adminItems.filter((it) => it.roles?.includes(user.role)) : [];
   const itemsForMobile = [...mainNavItems, ...visibleAdminItems];
 
-if (loading) return <CenteredLoader />;
-
+  if (loading) return <CenteredLoader />;
 
   if (!user) return null;
 

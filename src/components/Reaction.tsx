@@ -59,7 +59,9 @@ export const Reaction = ({
   };
   useEffect(()=>{
     const fetchLikesUsers = async ()=>{
-      try{const users = await api.get(`reactions/post/${targetId}/users`)
+      try{const users = await api.get(`/reactions/post/${targetId}/users`, {
+        withCredentials: true
+      })
       setUsers(users.data)
     }catch(error){
       console.error("Error al traer los usuarios que dieron like", error)

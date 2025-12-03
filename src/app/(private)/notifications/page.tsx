@@ -1,27 +1,12 @@
-"use client";
-
-import { useState } from "react";
-import { useNotificationsSocket } from "@/hooks/useNotificationsSocket";
-import { Notification } from "@/types/notification";
+import NotificationBell from "@/components/notifications/NotificationBell";
+import NotificationList from "@/components/notifications/NotificationList";
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-
-  useNotificationsSocket((notif) => {
-    setNotifications((prev) => [notif, ...prev]);
-  });
-
   return (
-    <div>
-      <h2>Notificaciones</h2>
+    <div className="p-10 space-y-6">
+      <NotificationBell />
 
-      {notifications.length === 0 && <p>No hay notificaciones aún.</p>}
-
-      {notifications.map((n) => (
-        <div key={n.id} className="border p-2 rounded">
-          {n.type} — {n.actor?.username}
-        </div>
-      ))}
+      <NotificationList />
     </div>
   );
 }

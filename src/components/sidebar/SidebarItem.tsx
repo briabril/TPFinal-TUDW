@@ -12,6 +12,7 @@ interface SidebarItemProps {
     onClick: () => void
     title?: string
     variant?: "default" | "danger"
+    badge?: number
 }
 
 export function SidebarItem({
@@ -23,12 +24,12 @@ export function SidebarItem({
     onClick,
     title,
     variant = "default",
+    badge
 }: SidebarItemProps) {
 
     const isDanger = variant === "danger"
 
     return (
-
         <motion.button
             onClick={onClick}
             whileHover={{ scale: 1.02, cursor: "pointer" }}
@@ -62,6 +63,19 @@ export function SidebarItem({
                 >
                     {label}
                 </motion.span>
+            )}
+            {badge !== undefined && badge > 0 && (
+                <span
+                    className="
+                        absolute right-3 top-2 
+                        text-xs font-bold 
+                        bg-red-600 text-white 
+                        rounded-full 
+                        px-2 py-0.5
+                    "
+                >
+                    {badge}
+                </span>
             )}
         </motion.button>
     )

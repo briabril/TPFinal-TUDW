@@ -70,7 +70,6 @@ export default function useTranslation(): Result {
       setTranslated(translatedText);
       setSourceLang(detectedSourceLang);
 
-      // save to cache
       if (typeof window !== "undefined") {
         window.localStorage.setItem(key, JSON.stringify({ translatedText, detectedSourceLang }));
       }

@@ -63,7 +63,6 @@ if (loading) return <CenteredLoader />;
   return (
     <div className="flex relative min-h-screen w-full">
 
-      {/* Sidebar desktop */}
       {!isMobile && (
         <div className="z-20" style={{
     position: "sticky",

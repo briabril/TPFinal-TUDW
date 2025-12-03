@@ -5,7 +5,6 @@ export default function Head() {
     <>
       <title>Bloop</title>
       <meta name="description" content="Bloop - comparte momentos con tus amigos" />
-      {/* Prefer a true /favicon.ico in public/. If missing, fall back to the repo SVG */}
       <link rel="icon" href="/favicon.ico" />
       <link rel="icon" type="image/svg+xml" href="/file.svg" />
       <link rel="apple-touch-icon" href="/file.svg" />

@@ -58,7 +58,6 @@ const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     }
 
     const newFiles = [...files, ...selected].slice(0, 4);
-    // revoke previous previews (cleanup) will run in effect, but revoke here defensively
     previews.forEach((u) => {
       try {
         URL.revokeObjectURL(u);
@@ -68,8 +67,6 @@ const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     setFiles(newFiles);
     setPreviews(newFiles.map((f) => URL.createObjectURL(f)));
   };
-
-  // Revoke object URLs when previews change or component unmounts
   useEffect(() => {
     return () => {
       try {
@@ -222,7 +219,6 @@ const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     label="Texto para post"
   />
 
-  {/* Botón de emojis */}
   <Box display="flex" justifyContent="flex-start" mt={0.5}>
     <IconButton
       size="small"
@@ -232,7 +228,6 @@ const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     </IconButton>
   </Box>
 
-  {/* Picker de emojis */}
   <Popover
     open={Boolean(anchorEl)}
     anchorEl={anchorEl}
@@ -391,7 +386,6 @@ const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
                 <IconButton
                   onClick={() => {
                     const nf = files.filter((_, idx) => idx !== i);
-                    // revoke the removed preview URL
                     try {
                       URL.revokeObjectURL(p);
                     } catch {}

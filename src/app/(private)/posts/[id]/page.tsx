@@ -1,26 +1,28 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import api from "../../../../api/index";
+import { useEffect, useState } from "react"
+import { useParams, useRouter } from "next/navigation"
+import api from "../../../../api/index"
 import {
   Card,
   CardContent,
   CircularProgress,
   Box,
-} from "@mui/material";
-import Comments from "@/components/Comments/Comments";
-import AuthorHeader from "@/components/posts/AuthorHeader";
-import PostBody from "@/components/posts/PostBody";
-import PostActions from "@/components/posts/PostActions";
-import { useAuth } from "@/context/AuthContext";
-import { Post } from "../../../../types";
+} from "@mui/material"
+import Comments from "@/components/Comments/Comments"
+import AuthorHeader from "@/components/posts/AuthorHeader"
+import PostBody from "@/components/posts/PostBody"
+import PostActions from "@/components/posts/PostActions"
+import { useAuth } from "@/context/AuthContext"
+import { Post } from "../../../../types"
 
 const PostDetail = () => {
   const { id } = useParams();
   const router = useRouter();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -37,6 +39,8 @@ const PostDetail = () => {
     if (id) fetchPost();
   }, [id]);
 
+  const isOwn = Boolean(user && String(post?.author?.id) === String(user.id));
+
   if (loading || !post || !post.author) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
@@ -44,9 +48,6 @@ const PostDetail = () => {
       </Box>
     );
   }
-
-  const { user } = useAuth();
-  const isOwn = Boolean(user && String(post.author.id) === String(user.id));
 
   const handleDelete = async () => {
     try {
@@ -83,10 +84,10 @@ const PostDetail = () => {
           postId={post.id}
         />
         <PostBody post={post} description={post.text ?? ""} />
-        <Comments postId={post.id} authorId={post.author.id} />
+        <Comments postId={post.id} />
       </CardContent>
     </Card>
   );
 };
 
-export default PostDetail;
+export default PostDetail

@@ -38,7 +38,7 @@ export default function ModalBase({
     setMounted(true);
   }, []);
 
-  if (!mounted) return null; // 👈 evita renderizar en SSR
+  if (!mounted) return null; 
 
   return (
     <Dialog

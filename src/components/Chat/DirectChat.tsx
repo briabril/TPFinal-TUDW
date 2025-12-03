@@ -17,7 +17,7 @@ import {
 import SendIcon from "@mui/icons-material/Send";
 import DoneIcon from "@mui/icons-material/Done";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
-import useSocket from "@/hooks/useSocket";
+import { useSocket } from "@/hooks/useSocket";
 import api from "@/api";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
@@ -37,7 +37,6 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
   const [typing, setTyping] = useState(false);
   const listRef = useRef<HTMLUListElement | null>(null);
 
-  // Eliminar mensajes duplicados por `id`, preservando el orden de la primera ocurrencia
   const dedupeMessages = (arr: any[]) => {
     const seen = new Set<string>();
     return arr.filter((m) => {
@@ -54,7 +53,6 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   let typingTimeout: any;
 
-  // ✅ SOCKET SETUP
   useEffect(() => {
     const socket = socketRef.current;
     if (!user) return;
@@ -63,10 +61,8 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
 
     const handler = (msg: any) => {
       setMessages((m) => {
-        // Si el mensaje con el mismo id del servidor ya existe, ignorar
         if (msg.id && m.some((ex) => ex.id === msg.id)) return m;
 
-        // Si el mensaje es del usuario actual, intentar reemplazar un mensaje temporal coincidente
         if (msg.from === user?.id) {
           const tempIndex = m.findIndex(
             (ex) =>
@@ -108,26 +104,22 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
     };
   }, [socketRef.current, otherUserId, user]);
 
-  // ✅ LOAD HISTORY
   useEffect(() => {
     (async () => {
       try {
         const res = await api.get(`/messages/${otherUserId}`);
         const normalized = res.data.map((m: any) => ({ ...m, from: m.from || m.sender_id }));
-        // Reemplazar los mensajes actuales por el historial de la conversación seleccionada
         setMessages(dedupeMessages(normalized));
       } catch { }
     })();
   }, [otherUserId]);
 
-  // ✅ AUTO-SCROLL
   useEffect(() => {
     const el = listRef.current;
     if (!el) return;
     requestAnimationFrame(() => (el.scrollTop = el.scrollHeight));
   }, [messages]);
 
-  // ✅ SEND MESSAGE
   const send = async () => {
     if (!text.trim()) return;
 

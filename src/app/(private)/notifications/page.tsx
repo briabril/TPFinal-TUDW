@@ -221,9 +221,24 @@ export default function NotificationsPage() {
         </Tabs>
         <List sx={{ width: "100%" }}>
           {filtered.length === 0 ? (
-            <Typography textAlign="center" color="text.secondary" py={6}>
-              Nada por aquí ✨
-            </Typography>
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              py={6}
+              gap={2}
+            >
+              <img
+                src={darkMode ? "/cat_darkmode.png" : "/cat_lightmode.png"}
+                alt="No hay notificaciones"
+                style={{ width: 230, opacity: 0.9 }}
+              />
+
+              <Typography variant="body1" color="text.secondary">
+                No hay notificaciones
+              </Typography>
+            </Box>
           ) : (
             <AnimatePresence>
               {filtered.map((n, index) => (

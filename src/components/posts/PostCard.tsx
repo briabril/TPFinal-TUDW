@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Box, Divider } from "@mui/material";
 import AuthorHeader from "./AuthorHeader";
 import PostBody from "./PostBody";
@@ -10,6 +10,7 @@ import { Post } from "../../types/post";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import WeatherBackground from "../common/WeatherBackground";
+import { useSocket } from "@/hooks/useSocket";
 
 interface PostCardProps {
   post: Post;
@@ -19,14 +20,26 @@ interface PostCardProps {
 export default function PostCard({ post }: PostCardProps) {
   const { user } = useAuth();
   const description = post.text ?? "(sin descripción)";
+  const { socket, ready } = useSocket();
   const isShared = Boolean(post.shared_post);
 
   const [editRequested, setEditRequested] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  useEffect(() => {
+    if (!ready || !socket.current) return;
+
+    console.log("Uniéndose al room del post:", post.id);
+    socket.current.emit("join_post", post.id);
+
+    return () => {
+      console.log("Saliendo del room del post:", post.id);
+      socket.current?.emit("leave_post", post.id);
+    };
+  }, [ready, socket, post.id]);
 
   const isOwn = Boolean(user && String(post.author.id) === String(user.id));
 
-console.log("user.id:", user?.id);
+  console.log("user.id:", user?.id);
 
   const handleDelete = async () => {
     setLoading(true);
@@ -110,8 +123,8 @@ console.log("user.id:", user?.id);
               <AuthorHeader
                 author={post.author}
                 sharedBy={post.shared_post?.author ?? null}
-                 createdAt={post.created_at}
-                 visibility={post.visibility}
+                createdAt={post.created_at}
+                visibility={post.visibility}
                 actions={
                   <PostActions
                     onEdit={handleEditRequest}

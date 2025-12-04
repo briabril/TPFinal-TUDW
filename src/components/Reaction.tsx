@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Button, IconButton, Stack, Typography, Box, Avatar } from "@mui/material";
-import { AlignJustify, Heart, Repeat2} from "lucide-react";
+import { AlignJustify, Heart, Repeat2 } from "lucide-react";
 import api from "../api/index";
 import toast from "react-hot-toast";
 import { User } from "@/types";
@@ -35,9 +35,9 @@ export const Reaction = ({
   const [shared, setShared] = useState(false);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState<boolean>(false);
-  const [showLikes, setShowLikes] =useState<boolean>(false)
+  const [showLikes, setShowLikes] = useState<boolean>(false)
   const [users, setUsers] = useState<User[]>([])
-   const router =useRouter()
+  const router = useRouter()
   const toggleReaction = async () => {
     try {
       const endpoint =
@@ -50,28 +50,27 @@ export const Reaction = ({
         {},
         { withCredentials: true }
       );
-     
+
       setLiked(result.data.liked);
       fetchCount();
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Error al dar like");
     }
   };
-  useEffect(()=>{
-    const fetchLikesUsers = async ()=>{
-      try{const users = await api.get(`/reactions/post/${targetId}/users`, {
-        withCredentials: true
-      })
-      setUsers(users.data)
-    }catch(error){
-      console.error("Error al traer los usuarios que dieron like", error)
-      toast.error("Error al traer los usuarios que dieron like")
+  useEffect(() => {
+    const fetchLikesUsers = async () => {
+      try {
+        const users = await api.get(`/reactions/post/${targetId}/users`, {
+          withCredentials: true
+        })
+        setUsers(users.data)
+      } catch (error) {
+        console.error("Error al traer los usuarios que dieron like", error)
+        toast.error("Error al traer los usuarios que dieron like")
+      }
     }
-  } 
-  fetchLikesUsers()
+    fetchLikesUsers()
   }, [showLikes])
-  
-
 
   const fetchCount = async () => {
     try {
@@ -138,86 +137,84 @@ export const Reaction = ({
     <Stack direction="row" spacing={3} alignItems="center">
 
       <Stack direction="row" alignItems="center" >
-        <Box sx={{width: 35}} display="flex" alignItems="center">
+        <Box sx={{ width: 35 }} display="flex" alignItems="center">
           <IconButton onClick={toggleReaction} size="small" aria-label="Poner me gusta al post" title="Poner me gusta al post">
-          <Heart
-            size={20}
-            className={liked ? "text-red-500" : "text-gray-500"}
-            fill={liked ? "red" : "none"}
-          />
-        </IconButton>
+            <Heart
+              size={20}
+              className={liked ? "text-red-500" : "text-gray-500"}
+              fill={liked ? "red" : "none"}
+            />
+          </IconButton>
           {count > 0 && (
-         
-          
-           <IconButton title="Ver likes del post"  size="small" onClick={() => setShowLikes(true)}  aria-label="Ver likes del post"   sx={{
-    cursor: "pointer",
-  padding: "2px",
-    minWidth: 0,
-    width: "20px",
-    height: "20px",
-    transition: "0.2s",
-    "&:hover": {
-      color: "primary.main",
-      textDecoration: "underline",
-    },
-   
-  }}>
-             <Typography variant="body2" color="text.secondary"  sx={{maxWidth: 5}}>
-            {count}
-          </Typography>
-           </IconButton>
-           )}
+
+
+            <IconButton title="Ver likes del post" size="small" onClick={() => setShowLikes(true)} aria-label="Ver likes del post" sx={{
+              cursor: "pointer",
+              padding: "2px",
+              minWidth: 0,
+              width: "20px",
+              height: "20px",
+              transition: "0.2s",
+              "&:hover": {
+                color: "primary.main",
+                textDecoration: "underline",
+              },
+
+            }}>
+              <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 5 }}>
+                {count}
+              </Typography>
+            </IconButton>
+          )}
         </Box>
-        
-       
         {count > 0 && (
           <>
-          
-             <ModalBase title="Likes del post" open={showLikes} onClose={() => setShowLikes(false)}  cancelText="Cerrar"   >{
-          users.map((u)=>(
+
+            <ModalBase title="Likes del post" open={showLikes} onClose={() => setShowLikes(false)} cancelText="Cerrar"   >{
+              users.map((u) => (
                 <Stack
-  key={u.id}
-  direction="row"
-  alignItems="center"
-  spacing={2}
-  sx={{
-    width: "100%",
-    p: 2,
-    borderRadius: "12px",
-    backgroundColor: "background.paper",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
-    transition: "all 0.2s ease",
-    cursor: "pointer",
-    "&:hover": {
-      transform: "translateY(-2px)",
-      boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
-    },
-    
-  }}
-  onClick={() => router.push(`/${u.username}`)} 
->
-  <Avatar
-    src={u.profile_picture_url || "/default-avatar-icon.png"}
-    sx={{ width: 48, height: 48 }}
-  />
+                  key={u.id}
+                  direction="row"
+                  alignItems="center"
+                  spacing={2}
+                  sx={{
+                    width: "100%",
+                    p: 2,
+                    borderRadius: "12px",
+                    backgroundColor: "background.paper",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+                    transition: "all 0.2s ease",
+                    cursor: "pointer",
+                    "&:hover": {
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+                    },
 
-  <Stack direction="column" spacing={0.2}>
-    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-      {u.username}
-    </Typography>
-    <Typography variant="body2" color="text.secondary">
-      {u.displayname}
-    </Typography>
-  </Stack>
-</Stack>
-      
+                  }}
+                  onClick={() => router.push(`/${u.username}`)}
+                >
+                  <Avatar
+                    src={u.profile_picture_url || "/default-avatar-icon.png"}
+                    sx={{ width: 48, height: 48 }}
+                  />
 
-          ))
-          }</ModalBase>
+                  <Stack direction="column" spacing={0.2}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      {u.username}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {u.displayname}
+                    </Typography>
+                  </Stack>
+                </Stack>
+
+
+              ))
+            }</ModalBase>
           </>
         )}
       </Stack>
-    
+
       {type === "post" && (
         <IconButton onClick={handleShare} size="small" disabled={shared} aria-label="Compartir post" title="Compartir post">
           <Repeat2
@@ -228,6 +225,6 @@ export const Reaction = ({
       )}
 
     </Stack>
-     
+
   );
 };

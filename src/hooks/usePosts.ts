@@ -3,15 +3,6 @@ import api from "../api/index";
 import { Post } from "../types/post";
 import { useSocket } from "./useSocket";
 
-/**
- * usePosts unificado:
- *  - fetch inicial (replace)
- *  - polling cada 8s (merge)
- *  - cache interno por clave
- *  - sockets: new, update, delete
- *  - window events: post-created / post-deleted
- *  - soporta visibility en "mine"
- */
 export function usePosts(mode: string, username?: string, visibility?: string) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -21,41 +12,30 @@ export function usePosts(mode: string, username?: string, visibility?: string) {
   const fetchingRef = useRef(false);
   const cacheRef = useRef<Record<string, Post[]>>({});
 
-  const socketRef = useSocket();
+  const { socket, ready } = useSocket();
 
-  // Clave única
   const key = `${mode}-${username ?? ""}-${visibility ?? "all"}`;
 
   useEffect(() => {
     mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
+    return () => { mountedRef.current = false; };
   }, []);
 
-  /** Endpoint dinámico */
   const getEndpoint = useCallback(() => {
-    if (mode === "mine") {
-      return visibility ? `/posts/mine?visibility=${visibility}` : "/posts/mine";
-    }
+    if (mode === "mine") return visibility ? `/posts/mine?visibility=${visibility}` : "/posts/mine";
     if (mode === "following") return "/posts/following";
     if (mode === "user" && username) return `/posts/user/${username}`;
-    if (mode === "public-user" && username)
-      return `/posts/user/${username}?mode=public`;
-
+    if (mode === "public-user" && username) return `/posts/user/${username}?mode=public`;
     return "/posts/all";
   }, [mode, username, visibility]);
 
-  /** FETCH: Replace */
   const fetchReplace = useCallback(async () => {
     if (fetchingRef.current) return;
-
     fetchingRef.current = true;
 
     setLoading(true);
 
     try {
-      // Si está en caché → usarlo
       if (cacheRef.current[key]) {
         setPosts(cacheRef.current[key]);
         setLoading(false);
@@ -63,10 +43,8 @@ export function usePosts(mode: string, username?: string, visibility?: string) {
         return;
       }
 
-      const endpoint = getEndpoint();
-      const { data } = await api.get<{ data: Post[] }>(endpoint);
+      const { data } = await api.get<{ data: Post[] }>(getEndpoint());
       const incoming = data.data ?? [];
-
       if (!mountedRef.current) return;
 
       setPosts(incoming);
@@ -76,132 +54,84 @@ export function usePosts(mode: string, username?: string, visibility?: string) {
       if (!mountedRef.current) return;
       setError(err?.response?.data?.error || err.message);
     } finally {
-      if (mountedRef.current) setLoading(false);
+      loading && setLoading(false);
       fetchingRef.current = false;
     }
   }, [getEndpoint, key]);
 
-  /** FETCH: Merge (comparar cambios) */
   const fetchMerge = useCallback(async () => {
     if (fetchingRef.current) return;
     fetchingRef.current = true;
 
     try {
-      const endpoint = getEndpoint();
-      const { data } = await api.get<{ data: Post[] }>(endpoint);
+      const { data } = await api.get<{ data: Post[] }>(getEndpoint());
       const incoming = data.data ?? [];
-
       if (!mountedRef.current) return;
 
-      setPosts((prev) => {
-        const prevIds = new Set(prev.map((p) => p.id));
-        const incomingIds = new Set(incoming.map((p) => p.id));
+      setPosts(prev => {
+        const prevIds = new Set(prev.map(p => p.id));
+        const incomingIds = new Set(incoming.map(p => p.id));
 
-        const added = incoming.filter((p) => !prevIds.has(p.id));
-        const removed = prev.filter((p) => !incomingIds.has(p.id));
+        const added = incoming.filter(p => !prevIds.has(p.id));
+        const removed = prev.filter(p => !incomingIds.has(p.id));
 
-        if (added.length === 0 && removed.length === 0) return prev;
-
+        if (!added.length && !removed.length) return prev;
         cacheRef.current[key] = incoming;
         return incoming;
       });
     } catch (err: any) {
-      if (!mountedRef.current) return;
-      setError(err?.response?.data?.error || err.message);
+      if (mountedRef.current) setError(err?.response?.data?.error || err.message);
     } finally {
       fetchingRef.current = false;
     }
   }, [getEndpoint, key]);
 
-  /** Initial fetch */
+  useEffect(() => { fetchReplace(); }, [fetchReplace]);
   useEffect(() => {
-    fetchReplace();
-  }, [fetchReplace]);
-
-  /** Polling cada 8s */
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchMerge();
-    }, 8000);
-
+    const interval = setInterval(fetchMerge, 8000);
     return () => clearInterval(interval);
   }, [fetchMerge]);
 
-  /** WINDOWS EVENTS: created / deleted */
   useEffect(() => {
-    const onCreated = (e: Event) => {
-      const newPost = (e as CustomEvent).detail as Post;
-      if (!newPost) return;
+    if (!ready || !socket.current) return;
 
-      setPosts((prev) => {
-        if (prev.some((p) => p.id === newPost.id)) return prev;
-        const newList = [newPost, ...prev];
-        cacheRef.current[key] = newList;
-        return newList;
-      });
-    };
-
-    const onDeleted = (e: Event) => {
-      const id = (e as CustomEvent).detail as string | number;
-      if (!id) return;
-
-      setPosts((prev) => {
-        const newList = prev.filter((p) => p.id !== id);
-        cacheRef.current[key] = newList;
-        return newList;
-      });
-    };
-
-    window.addEventListener("post-created", onCreated);
-    window.addEventListener("post-deleted", onDeleted);
-
-    return () => {
-      window.removeEventListener("post-created", onCreated);
-      window.removeEventListener("post-deleted", onDeleted);
-    };
-  }, [key]);
-
-  /** SOCKETS */
-  useEffect(() => {
-    const socket = socketRef.current;
-    if (!socket) return;
+    const s = socket.current;
 
     const handleNew = (newPost: Post) => {
-      setPosts((prev) => {
-        if (prev.some((p) => p.id === newPost.id)) return prev;
-
-        const newList = [newPost, ...prev];
-        cacheRef.current[key] = newList;
-        return newList;
+      setPosts(prev => {
+        if (prev.some(p => p.id === newPost.id)) return prev;
+        const list = [newPost, ...prev];
+        cacheRef.current[key] = list;
+        return list;
       });
     };
 
     const handleUpdate = (updated: Post) => {
-      setPosts((prev) => {
-        const newList = prev.map((p) => (p.id === updated.id ? updated : p));
-        cacheRef.current[key] = newList;
-        return newList;
+      setPosts(prev => {
+        const list = prev.map(p => p.id === updated.id ? updated : p);
+        cacheRef.current[key] = list;
+        return list;
       });
     };
 
     const handleDelete = (id: string | number) => {
-      setPosts((prev) => {
-        const newList = prev.filter((p) => p.id !== id);
-        cacheRef.current[key] = newList;
-        return newList;
+      setPosts(prev => {
+        const list = prev.filter(p => p.id !== id);
+        cacheRef.current[key] = list;
+        return list;
       });
     };
 
-    socket.on("new-post", handleNew);
-    socket.on("update-post", handleUpdate);
-    socket.on("delete-post", handleDelete);
+    s.on("new-post", handleNew);
+    s.on("update-post", handleUpdate);
+    s.on("delete-post", handleDelete);
 
     return () => {
-      socket.off("new-post", handleNew);
-      socket.off("update-post", handleUpdate);
-      socket.off("delete-post", handleDelete);
+      s.off("new-post", handleNew);
+      s.off("update-post", handleUpdate);
+      s.off("delete-post", handleDelete);
     };
-  }, [key, socketRef]);
+  }, [socket, ready, key]);
 
   return { posts, error, loading };
 }

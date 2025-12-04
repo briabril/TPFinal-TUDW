@@ -1,26 +1,33 @@
-"use client";
-
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSocket } from "./useSocket";
+import { useNotificationStore } from "@/store/notificationStore";
 import { Notification } from "@/types/notification";
 
-type OnNotification = (notif: Notification) => void
-
-export function useNotificationsSocket(onNotification: OnNotification) {
-  const socketRef = useSocket();
-
+export function useNotificationsSocket() {
+  const { socket, ready } = useSocket()
+  const addNotification = useNotificationStore(s => s.addNotification);
+  const markAsSeen = useNotificationStore(s => s.markAsSeen);
   useEffect(() => {
-    const socket = socketRef.current;
-    if (!socket) return;
+    if (!ready) return
+    const s = socket.current
+    if (!s) return
+    
+    s.off("notification");
+    s.off("notification_seen");
 
-    const handler = (notif: Notification) => {
-      onNotification(notif); 
-    };
+    s.on("notification", (notif: Notification) => {
+      console.log("Nueva notificación:", notif);
+      addNotification(notif);
+    });
 
-    socket.on("notification", handler);
+    s.on("notification_seen", (notif: Notification) => {
+      console.log("Vista:", notif);
+      markAsSeen(notif);
+    });
 
     return () => {
-      socket.off("notification", handler);
+      s.off("notification");
+      s.off("notification_seen");
     };
-  }, [socketRef, onNotification]);
+  }, [ready]);
 }

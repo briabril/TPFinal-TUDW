@@ -21,16 +21,27 @@ export const useNotificationStore = create<NotificationState>((set) => ({
     })),
 
   addNotification: (notif) =>
-    set((state) => ({
-      notifications: [notif, ...state.notifications],
-      unread: state.unread + 1,
-    })),
+    set((state) => {
+      console.log("⚡ RT NOTIFICATION RECEIVED:", notif);
 
+      if (state.notifications.some((n) => n.id === notif.id)) {
+        return state;
+      }
+
+      return {
+        notifications: [notif, ...state.notifications],
+        unread: state.unread + (notif.is_seen ? 0 : 1),
+      };
+    }),
   markAsSeen: (notif) =>
-    set((state) => ({
-      notifications: state.notifications.map((n) =>
-        n.id === notif.id ? { ...n, is_seen: true } : n
-      ),
-      unread: Math.max(0, state.unread - (notif.is_seen ? 0 : 1)),
-    })),
-}));
+    set((state) => {
+      const alreadySeen = state.notifications.find((n) => n.id === notif.id)?.is_seen;
+
+      return {
+        notifications: state.notifications.map((n) =>
+          n.id === notif.id ? { ...n, is_seen: true } : n
+        ),
+        unread: alreadySeen ? state.unread : Math.max(0, state.unread - 1),
+      };
+    }),
+}))

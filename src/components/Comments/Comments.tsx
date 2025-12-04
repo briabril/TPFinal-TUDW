@@ -20,7 +20,7 @@ const Comments: React.FC<CommentProps> = ({ postId }) => {
   const { user } = useAuth();
   const authorId = user?.id;
 
-  const socketRef = useSocket(); 
+  const { socket, ready } = useSocket();
 
   const fetchComments = async () => {
     setLoading(true);
@@ -47,10 +47,7 @@ const Comments: React.FC<CommentProps> = ({ postId }) => {
             children: [...(node.children || []), { ...newComment, children: [] }],
           };
         }
-        return {
-          ...node,
-          children: addRecursively(node.children || []),
-        };
+        return { ...node, children: addRecursively(node.children || []) };
       });
 
     return addRecursively(tree);
@@ -59,9 +56,7 @@ const Comments: React.FC<CommentProps> = ({ postId }) => {
   function updateCommentInTree(tree: Comment[], updated: Comment): Comment[] {
     const rec = (nodes: Comment[]): Comment[] =>
       nodes.map((n) => {
-        if (n.id === updated.id) {
-          return { ...n, text: updated.text };
-        }
+        if (n.id === updated.id) return { ...n, text: updated.text };
         return { ...n, children: rec(n.children || []) };
       });
 
@@ -82,55 +77,43 @@ const Comments: React.FC<CommentProps> = ({ postId }) => {
   }, [postId]);
 
   useEffect(() => {
-    const socket = socketRef.current;
-    if (!socket) return;
+    if (!ready || !socket.current) return;
+
+    const s = socket.current;
 
     const newEvent = `new-comment-${postId}`;
     const updateEvent = `update-comment-${postId}`;
     const deleteEvent = `delete-comment-${postId}`;
 
-    const handleNew = (c: Comment) => {
+    const handleNew = (c: Comment) =>
       setComments((prev) => addCommentToTree(prev, c));
-    };
 
-    const handleUpd = (c: Comment) => {
+    const handleUpd = (c: Comment) =>
       setComments((prev) => updateCommentInTree(prev, c));
-    };
 
-    const handleDel = (id: string | number) => {
+    const handleDel = (id: string | number) =>
       setComments((prev) => deleteCommentFromTree(prev, id));
-    };
 
-    socket.on(newEvent, handleNew);
-    socket.on(updateEvent, handleUpd);
-    socket.on(deleteEvent, handleDel);
+    s.on(newEvent, handleNew);
+    s.on(updateEvent, handleUpd);
+    s.on(deleteEvent, handleDel);
 
     return () => {
-      socket.off(newEvent, handleNew);
-      socket.off(updateEvent, handleUpd);
-      socket.off(deleteEvent, handleDel);
+      s.off(newEvent, handleNew);
+      s.off(updateEvent, handleUpd);
+      s.off(deleteEvent, handleDel);
     };
-  }, [postId, socketRef.current]);
+  }, [postId, ready, socket]);
+
   const handleSubmit = async (data: CommentFormData, parentId?: string | number | null) => {
     try {
       const res = await api.post(
         `/comments/post/${postId}`,
-        {
-          author_id: authorId,
-          text: data.text,
-          parent_id: parentId || null,
-        },
+        { author_id: authorId, text: data.text, parent_id: parentId || null },
         { withCredentials: true }
       );
 
-      const created = res.data as Comment;
-
-      // created.author_username = created.author_username || user?.username || "Usuario";
-      // created.author_avatar = created.author_avatar || user?.profile_picture_url || null;
-
-      // setComments((prev) => addCommentToTree(prev, created));
-
-      return created;
+      return res.data as Comment; // El comentario lo agregará el socket
     } catch {
       toast.error("Error al publicar comentario");
     }

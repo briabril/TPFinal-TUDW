@@ -2,16 +2,8 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import {
-  Box,
-  TextField,
-  IconButton,
-  List,
-  ListItem,
-  Typography,
-  Avatar,
-  useMediaQuery,
-  useTheme,
-  Paper,
+  Box, TextField, IconButton, List, ListItem, Typography, Avatar,
+  useMediaQuery, useTheme, Paper
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import DoneIcon from "@mui/icons-material/Done";
@@ -21,6 +13,7 @@ import api from "@/api";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
 
+
 type Props = {
   otherUserId: string;
   otherUserDisplay?: string;
@@ -28,13 +21,17 @@ type Props = {
 };
 
 export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAvatar }: Props) {
+
   const theme = useTheme();
-  const socketRef = useSocket();
+  const { socket, ready } = useSocket();  // <-- nuevo
   const { user } = useAuth();
+
   const [messages, setMessages] = useState<any[]>([]);
   const [text, setText] = useState("");
   const [typing, setTyping] = useState(false);
+
   const listRef = useRef<HTMLUListElement | null>(null);
+  let typingTimeout: any;
 
   const dedupeMessages = (arr: any[]) => {
     const seen = new Set<string>();
@@ -43,40 +40,32 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
       if (m.id) {
         if (seen.has(String(m.id))) return false;
         seen.add(String(m.id));
-        return true;
       }
       return true;
     });
   };
 
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  let typingTimeout: any;
 
+  // ========================= SOCKET ==============================
   useEffect(() => {
-    const socket = socketRef.current;
-    if (!user) return;
+    if (!ready || !socket.current || !user) return;
 
-    const onConnect = () => socket?.emit("join_dm", otherUserId);
+    const s = socket.current;
 
-    const handler = (msg: any) => {
+    const join = () => s.emit("join_dm", otherUserId);
+
+    const msgHandler = (msg: any) => {
       setMessages((m) => {
         if (msg.id && m.some((ex) => ex.id === msg.id)) return m;
 
-        if (msg.from === user?.id) {
-          const tempIndex = m.findIndex(
-            (ex) =>
-              ex.sending &&
-              ex.from === user?.id &&
-              ex.to === msg.to &&
-              ex.text === msg.text
+        if (msg.from === user.id) {
+          const idx = m.findIndex(
+            ex => ex.sending && ex.from === user.id && ex.text === msg.text
           );
-
-          if (tempIndex !== -1) {
-            const replaced = m.map((ex, idx) => (idx === tempIndex ? msg : ex));
-            return dedupeMessages(replaced);
-          }
+          if (idx !== -1)
+            return dedupeMessages(m.map((x, i) => i === idx ? msg : x));
         }
-
         return dedupeMessages([...m, msg]);
       });
     };
@@ -87,102 +76,92 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
       typingTimeout = setTimeout(() => setTyping(false), 1200);
     };
 
-    socket?.on("connect", onConnect);
-    socket?.on("dm_message", handler);
-    socket?.on("typing", typingHandler);
+    s.on("connect", join);
+    s.on("dm_message", msgHandler);
+    s.on("typing", typingHandler);
 
-    if (socket?.connected) socket.emit("join_dm", otherUserId);
+    if (s.connected) join();
 
     return () => {
-      try {
-        socket?.emit("leave_dm", otherUserId);
-      } catch (e) { }
-      socket?.off("connect", onConnect);
-      socket?.off("dm_message", handler);
-      socket?.off("typing", typingHandler);
+      s.emit("leave_dm", otherUserId);
+      s.off("connect", join);
+      s.off("dm_message", msgHandler);
+      s.off("typing", typingHandler);
     };
-  }, [socketRef.current, otherUserId, user]);
+  }, [ready, socket, user, otherUserId]);
 
+
+  // ===================== Cargar historial al abrir ======================
   useEffect(() => {
     (async () => {
-      try {
-        const res = await api.get(`/messages/${otherUserId}`);
-        const normalized = res.data.map((m: any) => ({ ...m, from: m.from || m.sender_id }));
-        setMessages(dedupeMessages(normalized));
-      } catch { }
+      const res = await api.get(`/messages/${otherUserId}`);
+      setMessages(dedupeMessages(res.data.map((m: any) => ({ ...m, from: m.from || m.sender_id }))));
     })();
   }, [otherUserId]);
 
+
+  // ===================== Marcar como visto ======================
   useEffect(() => {
-    if (!socketRef.current || !user) return;
+    if (!ready || !socket.current || !user) return;
 
-    socketRef.current.emit("dm_seen", {
-      from: user.id,
-      to: otherUserId,
-    });
+    socket.current.emit("dm_seen", { from: user.id, to: otherUserId });
 
-    // actualizar visualmente
-    setMessages((prev) =>
-      prev.map((m) =>
-        m.from !== user.id ? { ...m, read: true } : m
-      )
+    setMessages(prev =>
+      prev.map(m => m.from !== user.id ? { ...m, read: true } : m)
     );
-  }, [otherUserId, user, socketRef.current]);
+  }, [otherUserId, ready]);
 
+  useEffect(() => {
+    (async () => {
+      const conv = await api.get("/messages/conversations");
+      const find = conv.data.find((c: any) => c.otherUser.id === otherUserId);
+      if (find) await api.post("/messages/mark-read", { conversationId: find.id });
+    })();
+  }, [otherUserId]);
+
+
+  // Auto scroll
   useEffect(() => {
     const el = listRef.current;
-    if (!el) return;
-    requestAnimationFrame(() => (el.scrollTop = el.scrollHeight));
+    if (el) requestAnimationFrame(() => el.scrollTop = el.scrollHeight);
   }, [messages]);
 
+
+  // ===================== Enviar mensaje ======================
   const send = async () => {
     if (!text.trim()) return;
-
     const trimmed = text.trim();
-    const tempId = `temp-${Date.now()}`;
+    const tempId = "tmp-" + Date.now();
 
     const tempMsg = {
       id: tempId,
-      from: user?.id,
-      to: otherUserId,
-      text: trimmed,
-      created_at: new Date().toISOString(),
-      sending: true,
-      read: false,
+      from: user?.id, to: otherUserId,
+      text: trimmed, created_at: new Date().toISOString(),
+      sending: true, read: false
     };
 
-    setMessages((m) => [...m, tempMsg]);
+    setMessages(m => [...m, tempMsg]);
     setText("");
 
     try {
       const res = await api.post("/messages", { to: otherUserId, text: trimmed });
-      const saved = res.data;
-      setMessages((prev) => dedupeMessages(prev.map((m) => (m.id === tempId ? saved : m))));
+      setMessages(prev => prev.map(m => m.id === tempId ? res.data : m));
     } catch { }
   };
 
-  useEffect(() => {
-    (async () => {
-      const conv = await api.get(`/messages/conversations`);
-      const found = conv.data.find((c: any) => c.otherUser.id === otherUserId);
-      if (found) {
-        await api.post("/messages/mark-read", { conversationId: found.id });
-      }
-    })();
-  }, [otherUserId]);
-
   const handleTyping = () => {
-    socketRef.current?.emit("typing", { to: otherUserId });
+    if (ready) socket.current?.emit("typing", { to: otherUserId });
   };
 
-  const isNewDate = (index: number) => {
-    if (index === 0) return true;
-    const prev = new Date(messages[index - 1].created_at).toDateString();
-    const curr = new Date(messages[index].created_at).toDateString();
-    return prev !== curr;
+  const isNewDate = (i: number) => {
+    if (i === 0) return true;
+    return new Date(messages[i - 1].created_at).toDateString()
+      !== new Date(messages[i].created_at).toDateString();
   };
 
 
+  // =============================== UI =================================
+  // =============================== UI =================================
   return (
     <Paper
       elevation={isMobile ? 0 : 2}
@@ -284,9 +263,8 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
                         display: "flex",
                         justifyContent: "flex-end",
                         alignItems: "center",
-                        gap: 0.6,
-                        opacity: 0.75,
-                        mt: 0.2,
+                        gap: .6,
+                        opacity: .75,
                       }}
                     >
                       <Typography sx={{ fontSize: "0.65rem" }}>
@@ -295,7 +273,7 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
 
                       {mine &&
                         (m.sending ? (
-                          <Typography sx={{ fontSize: "0.6rem", opacity: 0.6 }}>…</Typography>
+                          <Typography sx={{ fontSize: "0.6rem", opacity: .6 }}>…</Typography>
                         ) : m.read ? (
                           <DoneAllIcon sx={{ fontSize: 14 }} />
                         ) : (
@@ -323,25 +301,18 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
           fullWidth
           size="small"
           multiline
-          minRows={1}
           maxRows={4}
           value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-            handleTyping();
-          }}
+          onChange={(e) => { setText(e.target.value); handleTyping(); }}
           placeholder="Escribe un mensaje"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+          }}
           sx={{
             "& .MuiOutlinedInput-root": {
               background: theme.palette.background.default,
               borderRadius: 2,
             },
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              send();
-            }
           }}
         />
 
@@ -352,9 +323,7 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
             borderRadius: 2,
             background: theme.palette.primary.main,
             color: theme.palette.primary.contrastText,
-            "&:hover": {
-              background: theme.palette.primary.dark,
-            },
+            "&:hover": { background: theme.palette.primary.dark },
           }}
         >
           <SendIcon />
@@ -364,8 +333,6 @@ export default function DirectChat({ otherUserId, otherUserDisplay, otherUserAva
   );
 }
 
-function formatMessageDate(input: string) {
-  if (!input) return "";
-  const d = new Date(input);
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+function formatMessageDate(i: string) {
+  return new Date(i).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }

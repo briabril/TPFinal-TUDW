@@ -15,7 +15,8 @@ interface AuthorHeaderProps {
   actions?: React.ReactNode;
   weather?: any | null;
   postId?: string;
-  createdAt?: string;
+  createdAt: string | Date ;
+  visibility?: string;
 }
 
 export default function AuthorHeader({
@@ -25,6 +26,7 @@ export default function AuthorHeader({
   weather,
   postId,
   createdAt,
+  visibility
 }: AuthorHeaderProps) {
   const router = useRouter();
   const [localWeather, setLocalWeather] = useState<any | null>(weather ?? null);
@@ -35,7 +37,24 @@ export default function AuthorHeader({
   const goToProfile = () => {
     router.push(`/${author.username}`);
   };
+const formatDate = (dateString: string | Date) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - date.getTime()) / 1000); // diferencia en segundos
 
+    if (diff < 60) return "ahora";
+    if (diff < 3600) {
+      const m = Math.floor(diff / 60);
+      return `${m} min${m > 1 ? "s" : ""}`;
+    }
+    if (diff < 86400) {
+      const h = Math.floor(diff / 3600);
+      return `${h} h${h > 1 ? "s" : ""}`;
+    }
+    const d = Math.floor(diff / 86400);
+    if (d < 7) return `${d} día${d > 1 ? "s" : ""}`;
+    return date.toLocaleDateString();
+  };
   // Cargar clima desde ciudad del autor
   useEffect(() => {
     let mounted = true;
@@ -107,7 +126,12 @@ export default function AuthorHeader({
           "&:hover": { opacity: 0.85 },
         }}
       />
-
+  <Box sx={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          width: "80%"
+        }}>
       <Box
         sx={{
           display: "flex",
@@ -117,15 +141,14 @@ export default function AuthorHeader({
         }}
         onClick={goToProfile}
       >
-        <Typography variant="body1" fontWeight={600} sx={{ lineHeight: 1.2 }}>
+         <Typography variant="body1" fontWeight={600} sx={{ lineHeight: 1.2 }}>
           {author.displayname || author.username}
         </Typography>
 
         <Typography variant="body2" color="text.secondary">
-          @{author.username} • {createdAt || ""}
+          @{author.username} • {formatDate(createdAt) || ""}
         </Typography>
-
-        {sharedBy && (
+          {sharedBy && (
           <Typography
             variant="caption"
             color="text.secondary"
@@ -134,6 +157,13 @@ export default function AuthorHeader({
             Compartido por {sharedBy.displayname || sharedBy.username}
           </Typography>
         )}
+      
+     
+        </Box>
+        
+          <Typography>{visibility || ""} </Typography>
+      
+        
       </Box>
 
       <Box sx={{ flexGrow: 1 }} />

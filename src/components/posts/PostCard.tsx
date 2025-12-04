@@ -13,6 +13,7 @@ import WeatherBackground from "../common/WeatherBackground";
 
 interface PostCardProps {
   post: Post;
+  visibility?: string
 }
 
 export default function PostCard({ post }: PostCardProps) {
@@ -24,6 +25,8 @@ export default function PostCard({ post }: PostCardProps) {
   const [loading, setLoading] = React.useState(false);
 
   const isOwn = Boolean(user && String(post.author.id) === String(user.id));
+
+console.log("user.id:", user?.id);
 
   const handleDelete = async () => {
     setLoading(true);
@@ -107,6 +110,8 @@ export default function PostCard({ post }: PostCardProps) {
               <AuthorHeader
                 author={post.author}
                 sharedBy={post.shared_post?.author ?? null}
+                 createdAt={post.created_at}
+                 visibility={post.visibility}
                 actions={
                   <PostActions
                     onEdit={handleEditRequest}

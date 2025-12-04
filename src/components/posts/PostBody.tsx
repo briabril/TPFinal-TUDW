@@ -20,7 +20,7 @@ import { Media } from "../../types/post";
 import { Reaction } from "../Reaction";
 import { updatePost } from "@/services/postService";
 import useTranslation from "@/hooks/useTranslation";
-import {MessageCircle} from "lucide-react"
+import { MessageCircle } from "lucide-react";
 
 interface PostBodyProps {
   post: any;
@@ -48,7 +48,7 @@ export default function PostBody({
   const [loading, setLoading] = useState(false);
   const [commentCounter, setCommentCounter] = useState<number>(0);
 
-
+  
   const [alert, setAlert] = useState<{
     type: "error" | "success" | null;
     text?: string;
@@ -67,9 +67,9 @@ export default function PostBody({
     setLoading(true);
     try {
       const { data } = await api.get<Comment[]>(`/comments/post/${postId}`);
-      setCommentCounter(data.length)
+      setCommentCounter(data.length);
     } catch (error) {
-      setLoading(false)
+      setLoading(false);
     } finally {
       setLoading(false);
     }
@@ -78,11 +78,9 @@ export default function PostBody({
     fetchComments();
   }, []);
 
-
   const browserLang =
     (typeof navigator !== "undefined"
-      ? navigator.language ||
-      (navigator.languages && navigator.languages[0])
+      ? navigator.language || (navigator.languages && navigator.languages[0])
       : "en"
     )
       ?.slice(0, 2)
@@ -112,8 +110,7 @@ export default function PostBody({
       setAlert({
         type: "error",
         text:
-          err.response?.data?.error?.message ||
-          "Ocurrió un error al guardar.",
+          err.response?.data?.error?.message || "Ocurrió un error al guardar.",
       });
     } finally {
       setLoadingSave(false);
@@ -163,7 +160,7 @@ export default function PostBody({
           <CardMedia
             component="img"
             image={media.url}
-            alt= "imagen del post"
+            alt="imagen del post"
             sx={{
               width: "100%",
               height: { xs: 200, sm: 320 },
@@ -261,14 +258,15 @@ export default function PostBody({
                     medias.length === 2
                       ? "repeat(2, 1fr)"
                       : medias.length >= 3
-                        ? "repeat(3, 1fr)"
-                        : "1fr",
+                      ? "repeat(3, 1fr)"
+                      : "1fr",
                 },
               }}
             >
               {medias.map(renderMedia)}
             </Box>
           )}
+       
           <Divider sx={{ my: 2 }} />
 
           <Stack
@@ -279,7 +277,7 @@ export default function PostBody({
             flexWrap="wrap"
           >
             <Stack direction="row" spacing={1.5} alignItems="center">
-              <Reaction  userId={user?.id} type="post" targetId={post.id} />
+              <Reaction userId={user?.id} type="post" targetId={post.id} />
 
               {showTranslateBtn && (
                 <Tooltip title="Traducir al idioma de tu navegador">
@@ -320,22 +318,27 @@ export default function PostBody({
               )}
             </Stack>
 
-     <Link display="flex" justifyContent="center" alignItems="center" sx={{gap: 1}}
+            <Link
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              sx={{ gap: 1 }}
               href={`/posts/${post.id}`}
               style={{ textDecoration: "none" }}
             >
-        <MessageCircle size={20} className="text-gray-500" aria-label="comments"/>
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ cursor: "pointer" }}
-          >
-            {commentCounter}
-          </Typography>
-      
+              <MessageCircle
+                size={20}
+                className="text-gray-500"
+                aria-label="comments"
+              />
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ cursor: "pointer" }}
+              >
+                {commentCounter}
+              </Typography>
             </Link>
-
-         
           </Stack>
         </>
       )}

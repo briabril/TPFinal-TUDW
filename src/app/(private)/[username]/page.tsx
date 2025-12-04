@@ -9,6 +9,7 @@ import ProfileHeader from "@/components/profile/ProfileHeader";
 import BlockStatusMessage from "@/components/profile/BlockStatusMessage";
 import PostList from "@/components/posts/PostList";
 import { Alert, AlertTitle, CircularProgress, Box } from "@mui/material";
+import MyPostsTabs from "@/components/posts/MyPostTabs";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -60,7 +61,7 @@ export default function ProfilePage() {
     };
 
     if (username) fetchProfileData();
-  }, [username, user]);
+  }, [username]);
 
   const handleUnblock = async () => {
     if (!profile) return;
@@ -128,9 +129,10 @@ const showPublicPosts =
         !blockStatus.blockedByThem &&
         !loading && (
           <>
-            
+          
+
          {isOwnProfile && (
-  <PostList mode="mine" />
+     <MyPostsTabs />
 )}
 
 {!isOwnProfile && followStatus.isFollowing && (

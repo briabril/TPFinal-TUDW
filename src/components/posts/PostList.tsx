@@ -8,11 +8,12 @@ import { usePosts } from "@/hooks/usePosts";
 interface PostListProps {
   mode: string;
   username?: string;
+  visibility?: string
 }
 
-export default function PostList({ mode, username }: PostListProps) {
-  const { posts, error, loading } = usePosts(mode, username);
-
+const PostList =({ mode, username , visibility}: PostListProps) => {
+  const { posts, error, loading } = usePosts(mode, username, visibility);
+console.log("posts", posts)
   if (loading) {
     return (
       <Stack spacing={4} sx={{ width: "100%", maxWidth: 800, mx: "auto" }}>
@@ -66,9 +67,10 @@ export default function PostList({ mode, username }: PostListProps) {
     <Fade in timeout={300}>
       <Stack sx={{ width: "100%", maxWidth: 800, mx: "auto" }}>
         {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
+          <PostCard key={post.id} post={post} visibility={post.visibility} />
         ))}
       </Stack>
     </Fade>
   );
 }
+export default React.memo(PostList);

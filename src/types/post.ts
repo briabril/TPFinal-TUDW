@@ -28,4 +28,5 @@ export interface Post {
   medias: Media[];
   shared_post?: SharedPost | null;
   mode: string
+  visibility?: string;
 }

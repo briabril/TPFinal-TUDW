@@ -1,140 +1,209 @@
-import { useCallback, useEffect, useRef, useState } from "react"
-import api from "../api/index"
-import { Post } from "../types/post"
+import { useCallback, useEffect, useRef, useState } from "react";
+import api from "../api/index";
+import { Post } from "../types/post";
+import { useSocket } from "./useSocket";
 
 /**
- * usePosts
- * - fetch inicial (replace)
- * - cada 8s polling (merge)
- * - escucha a eventos de ventana para actualizaciones inmediatas
+ * usePosts unificado:
+ *  - fetch inicial (replace)
+ *  - polling cada 8s (merge)
+ *  - cache interno por clave
+ *  - sockets: new, update, delete
+ *  - window events: post-created / post-deleted
+ *  - soporta visibility en "mine"
  */
-export function usePosts(mode: string, username?: string) {
-    const [posts, setPosts] = useState<Post[]>([])
-    const [error, setError] = useState<string | null>(null)
-    const [loading, setLoading] = useState<boolean>(true)
+export function usePosts(mode: string, username?: string, visibility?: string) {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-    const mountedRef = useRef(true)
-    const fetchingRef = useRef(false)
+  const mountedRef = useRef(true);
+  const fetchingRef = useRef(false);
+  const cacheRef = useRef<Record<string, Post[]>>({});
 
-    useEffect(() => {
-        mountedRef.current = true
-        return () => {
-            mountedRef.current = false
-        }
-    }, [])
+  const socketRef = useSocket();
 
-    useEffect(() => {
-        if (mode === "mine") localStorage.setItem("postsMode", mode)
-    }, [mode])
+  // Clave única
+  const key = `${mode}-${username ?? ""}-${visibility ?? "all"}`;
 
-    const getEndpoint = useCallback(() => {
-        let endpoint = "/posts/all"
-        if (mode === "mine") endpoint = "/posts/mine"
-        else if (mode === "following") endpoint = "/posts/following"
-        else if (mode === "user" && username) endpoint = `/posts/user/${username}`
-        else if (mode === "public-user" && username) endpoint = `/posts/user/${username}?mode=public`
-        return endpoint
-    }, [mode, username])
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
-    const fetchReplace = useCallback(async () => {
-        if (fetchingRef.current) return
-        fetchingRef.current = true
-        if (mountedRef.current) setLoading(true)
-        try {
-            const endpoint = getEndpoint()
-            // console.log("[usePosts] fetchReplace -> fetching", endpoint)
-            const { data } = await api.get<{ data: Post[] }>(endpoint)
-            const incoming = data?.data ?? []
-            // console.log("[usePosts] fetchReplace -> received", incoming.length, "posts")
-            if (!mountedRef.current) return
-            setPosts(incoming)
-            setError(null)
-        } catch (err: any) {
-            if (!mountedRef.current) return
-            const msg = err?.response?.data?.error || err?.message || "Error loading posts"
-            setError(msg)
-        } finally {
-            if (!mountedRef.current) return
-            setLoading(false)
-            fetchingRef.current = false
-        }
-    }, [getEndpoint])
+  /** Endpoint dinámico */
+  const getEndpoint = useCallback(() => {
+    if (mode === "mine") {
+      return visibility ? `/posts/mine?visibility=${visibility}` : "/posts/mine";
+    }
+    if (mode === "following") return "/posts/following";
+    if (mode === "user" && username) return `/posts/user/${username}`;
+    if (mode === "public-user" && username)
+      return `/posts/user/${username}?mode=public`;
 
-    const fetchMerge = useCallback(async () => {
-        if (fetchingRef.current) return
-        fetchingRef.current = true
-        try {
-            const endpoint = getEndpoint()
-            // console.log("[usePosts] fetchMerge -> fetching", endpoint)
-            const { data } = await api.get<{ data: Post[] }>(endpoint)
-            const incoming = data?.data ?? []
-            // console.log("[usePosts] fetchMerge -> received", incoming.length, "posts")
-            if (!mountedRef.current) return
-            // Compara incoming con el anterior para detectar adiciones/eliminaciones, luego reemplaza
-            setPosts((prev) => {
-                const prevIds = new Set(prev.map((p) => p.id))
-                const incomingIds = new Set(incoming.map((p) => p.id))
-                const added = incoming.filter((p) => !prevIds.has(p.id)).map((p) => p.id)
-                const removed = prev.filter((p) => !incomingIds.has(p.id)).map((p) => p.id)
-                if (added.length === 0 && removed.length === 0) {
-                    // console.log("[usePosts] fetchMerge -> no changes")
-                    return prev
-                }
-                // if (added.length) console.log("[usePosts] fetchMerge -> added:", added)
-                // if (removed.length) console.log("[usePosts] fetchMerge -> removed:", removed)
-                return incoming
-            })
-            setError(null)
-        } catch (err: any) {
-            if (!mountedRef.current) return
-            const msg = err?.response?.data?.error || err?.message || "Error loading posts"
-            setError(msg)
-        } finally {
-            if (!mountedRef.current) return
-            fetchingRef.current = false
-        }
-    }, [getEndpoint])
+    return "/posts/all";
+  }, [mode, username, visibility]);
 
-    // initial replace
-    useEffect(() => {
-        fetchReplace()
-    }, [fetchReplace])
+  /** FETCH: Replace */
+  const fetchReplace = useCallback(async () => {
+    if (fetchingRef.current) return;
 
-    // polling to merge new posts
-    useEffect(() => {
-        const interval = setInterval(() => {
-            // console.log("[usePosts] poll tick")
-            fetchMerge()
-        }, 8000)
-        return () => clearInterval(interval)
-    }, [fetchMerge])
+    fetchingRef.current = true;
 
-    // window listeners para actualizaciones inmediatas (post creado/eliminado en otra parte de la app)
-    useEffect(() => {
-        const onCreated = (e: Event) => {
-            const detail = (e as CustomEvent).detail as Post | undefined
-            // console.log("[usePosts] window post-created", detail?.id)
-            if (!detail) return
-            setPosts((prev) => (prev.some((p) => p.id === detail.id) ? prev : [detail, ...prev]))
-        }
+    setLoading(true);
 
-        const onDeleted = (e: Event) => {
-            const id = (e as CustomEvent).detail as string | number | undefined
-            // console.log("[usePosts] window post-deleted", id)
-            if (id === undefined) return
-            setPosts((prev) => prev.filter((p) => p.id !== id))
-        }
+    try {
+      // Si está en caché → usarlo
+      if (cacheRef.current[key]) {
+        setPosts(cacheRef.current[key]);
+        setLoading(false);
+        fetchingRef.current = false;
+        return;
+      }
 
-        window.addEventListener("post-created", onCreated)
-        window.addEventListener("post-deleted", onDeleted)
+      const endpoint = getEndpoint();
+      const { data } = await api.get<{ data: Post[] }>(endpoint);
+      const incoming = data.data ?? [];
 
-        return () => {
-            window.removeEventListener("post-created", onCreated)
-            window.removeEventListener("post-deleted", onDeleted)
-        }
-    }, [])
+      if (!mountedRef.current) return;
 
-    return { posts, error, loading }
+      setPosts(incoming);
+      cacheRef.current[key] = incoming;
+      setError(null);
+    } catch (err: any) {
+      if (!mountedRef.current) return;
+      setError(err?.response?.data?.error || err.message);
+    } finally {
+      if (mountedRef.current) setLoading(false);
+      fetchingRef.current = false;
+    }
+  }, [getEndpoint, key]);
+
+  /** FETCH: Merge (comparar cambios) */
+  const fetchMerge = useCallback(async () => {
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
+
+    try {
+      const endpoint = getEndpoint();
+      const { data } = await api.get<{ data: Post[] }>(endpoint);
+      const incoming = data.data ?? [];
+
+      if (!mountedRef.current) return;
+
+      setPosts((prev) => {
+        const prevIds = new Set(prev.map((p) => p.id));
+        const incomingIds = new Set(incoming.map((p) => p.id));
+
+        const added = incoming.filter((p) => !prevIds.has(p.id));
+        const removed = prev.filter((p) => !incomingIds.has(p.id));
+
+        if (added.length === 0 && removed.length === 0) return prev;
+
+        cacheRef.current[key] = incoming;
+        return incoming;
+      });
+    } catch (err: any) {
+      if (!mountedRef.current) return;
+      setError(err?.response?.data?.error || err.message);
+    } finally {
+      fetchingRef.current = false;
+    }
+  }, [getEndpoint, key]);
+
+  /** Initial fetch */
+  useEffect(() => {
+    fetchReplace();
+  }, [fetchReplace]);
+
+  /** Polling cada 8s */
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchMerge();
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, [fetchMerge]);
+
+  /** WINDOWS EVENTS: created / deleted */
+  useEffect(() => {
+    const onCreated = (e: Event) => {
+      const newPost = (e as CustomEvent).detail as Post;
+      if (!newPost) return;
+
+      setPosts((prev) => {
+        if (prev.some((p) => p.id === newPost.id)) return prev;
+        const newList = [newPost, ...prev];
+        cacheRef.current[key] = newList;
+        return newList;
+      });
+    };
+
+    const onDeleted = (e: Event) => {
+      const id = (e as CustomEvent).detail as string | number;
+      if (!id) return;
+
+      setPosts((prev) => {
+        const newList = prev.filter((p) => p.id !== id);
+        cacheRef.current[key] = newList;
+        return newList;
+      });
+    };
+
+    window.addEventListener("post-created", onCreated);
+    window.addEventListener("post-deleted", onDeleted);
+
+    return () => {
+      window.removeEventListener("post-created", onCreated);
+      window.removeEventListener("post-deleted", onDeleted);
+    };
+  }, [key]);
+
+  /** SOCKETS */
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (!socket) return;
+
+    const handleNew = (newPost: Post) => {
+      setPosts((prev) => {
+        if (prev.some((p) => p.id === newPost.id)) return prev;
+
+        const newList = [newPost, ...prev];
+        cacheRef.current[key] = newList;
+        return newList;
+      });
+    };
+
+    const handleUpdate = (updated: Post) => {
+      setPosts((prev) => {
+        const newList = prev.map((p) => (p.id === updated.id ? updated : p));
+        cacheRef.current[key] = newList;
+        return newList;
+      });
+    };
+
+    const handleDelete = (id: string | number) => {
+      setPosts((prev) => {
+        const newList = prev.filter((p) => p.id !== id);
+        cacheRef.current[key] = newList;
+        return newList;
+      });
+    };
+
+    socket.on("new-post", handleNew);
+    socket.on("update-post", handleUpdate);
+    socket.on("delete-post", handleDelete);
+
+    return () => {
+      socket.off("new-post", handleNew);
+      socket.off("update-post", handleUpdate);
+      socket.off("delete-post", handleDelete);
+    };
+  }, [key, socketRef]);
+
+  return { posts, error, loading };
 }
 
-export default usePosts
+export default usePosts;

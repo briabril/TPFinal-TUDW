@@ -73,7 +73,7 @@ const PostDetail = () => {
           author={post.author}
           actions={
             <PostActions
-              onEdit={() => {}}
+              onEdit={() => { }}
               onDelete={handleDelete}
               onReport={handleReport}
               loading={false}
@@ -82,7 +82,9 @@ const PostDetail = () => {
             />
           }
           postId={post.id}
+          createdAt={post.created_at}
         />
+
         <PostBody post={post} description={post.text ?? ""} />
         <Comments postId={post.id} />
       </CardContent>

@@ -283,9 +283,10 @@ export default function NotificationsPage() {
                         <>
                           <Typography variant="body2">{n.message}</Typography>
                           <Typography variant="caption" color="text.secondary">
-                            {new Date(n.created_at).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
+                            {new Date(n.created_at).toLocaleString("es-AR", {
+                              dateStyle: "short",
+                              timeStyle: "short",
+                              timeZone: "America/Argentina/Buenos_Aires",
                             })}
                           </Typography>
                         </>

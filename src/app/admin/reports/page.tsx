@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import Link from "next/link";
 import api from "../../../api/index";
 
@@ -40,22 +40,64 @@ export default function AdminReportsPage() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
+    let mounted = true
+     const initialLoadedRef = { current: false }
+
     const fetchData = async () => {
-      setLoading(true);
+      if (!mounted) return
+      const isInitial = !initialLoadedRef.current
+      if (isInitial) setLoading(true)
       try {
         const listRes = await api.get<Report[]>(`/reports/${tab}`);
+        if (!mounted) return
         setReports(listRes.data);
 
         setStats((prev) => ({
           ...prev,
           [tab]: listRes.data.length,
         }));
+        initialLoadedRef.current = true
       } finally {
-        setLoading(false);
+        if (!mounted) return
+        if (isInitial) setLoading(false)
       }
     };
+
+    initialLoadedRef.current = false
+
     fetchData();
+
+    const interval = setInterval(() => {
+      fetchData()
+    }, 8000)
+
+    return () => { mounted = false; clearInterval(interval) }
   }, [tab]);
+
+  const statsIntervalRef = useRef<number | null>(null)
+  const fetchStats = useCallback(async () => {
+    try {
+      const [pendingRes, blockedRes, dismissedRes] = await Promise.all([
+        api.get<Report[]>("/reports/pending"),
+        api.get<Report[]>("/reports/blocked"),
+        api.get<Report[]>("/reports/dismissed"),
+      ])
+      setStats({
+        pending: pendingRes.data.length,
+        blocked: blockedRes.data.length,
+        dismissed: dismissedRes.data.length,
+      })
+    } catch (e) {
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchStats()
+    statsIntervalRef.current = window.setInterval(() => fetchStats(), 8000)
+    return () => {
+      if (statsIntervalRef.current) clearInterval(statsIntervalRef.current)
+    }
+  }, [fetchStats])
 
   const filtered = useMemo(() => {
     return reports.filter(

@@ -54,6 +54,7 @@ export default function SharedPost({ post }: any) {
                 postId={originalPost.id}
             />
           }
+          createdAt=''
         />
         <PostBody post={originalPost} description={originalPost.text} />
       </Box>

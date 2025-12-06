@@ -134,7 +134,7 @@ export default function LoginPage() {
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton onClick={() => setShowPassword(!showPassword)}>
-                          {showPassword ? <EyeClosed /> : <Eye />}
+                          {showPassword ? <Eye /> : <EyeClosed />}
                         </IconButton>
                       </InputAdornment>
                     ),

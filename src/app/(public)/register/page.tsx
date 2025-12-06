@@ -149,7 +149,7 @@ export default function RegisterPage() {
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                      {showConfirmPassword ? <EyeClosed /> : <Eye />}
+                      {showConfirmPassword ? <Eye /> : <EyeClosed />}
                     </IconButton>
                   </InputAdornment>
                 ),

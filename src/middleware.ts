@@ -24,39 +24,29 @@ function pathMatchesAny(path: string, list: string[]) {
 
 export default async function middleware(req: NextRequest) {
   const path = normalize(req.nextUrl.pathname);
+
   const requiresAdmin = pathMatchesAny(path, ADMIN_PATHS);
   const requiresAuth = pathMatchesAny(path, AUTH_PATHS);
 
-  // Público
   if (!requiresAdmin && !requiresAuth) return NextResponse.next();
 
   const token = req.cookies.get("token");
-  if (!token) {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
+  if (!token) return NextResponse.redirect(new URL("/login", req.url));
 
   try {
-    // App Router internal API 
-    const proxyUrl = `${req.nextUrl.origin}/api/auth/me-proxy`;
+    //  Internal fetch compatible con Vercel Edge
+    const url = req.nextUrl.clone();
+    url.pathname = "/api/auth/me-proxy";
 
-    const backendResp = await fetch(proxyUrl, {
+    const backendResp = await fetch(url, {
       method: "GET",
       headers: {
         Cookie: req.cookies.toString(),
       },
+      cache: "no-store",
     });
 
-    if (!backendResp.ok) {
-      let bodyText = "";
-      try {
-        const ct = backendResp.headers.get("content-type") || "";
-        bodyText = ct.includes("application/json") ? JSON.stringify(await backendResp.json()) : await backendResp.text();
-      } catch (e) {
-        bodyText = "(failed to read body)";
-      }
-      console.warn("Auth proxy returned non-ok:", backendResp.status, bodyText);
-      throw new Error("Unauthorized");
-    }
+    if (!backendResp.ok) throw new Error("Unauthorized");
 
     const me = await backendResp.json();
 
@@ -69,5 +59,6 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 }
+
 
 

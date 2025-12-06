@@ -12,6 +12,8 @@ import { Box, Button, TextField, Typography, Paper, Link,
 import ThemeToggle from "@/components/ThemeToggle";
 import { useState } from "react";
 import {Eye ,EyeClosed } from "lucide-react"
+import { motion } from "framer-motion";
+
 export default function RegisterPage() {
   const router = useRouter();
  const [showPassword, setShowPassword] = useState(false);
@@ -50,10 +52,19 @@ export default function RegisterPage() {
       <div className="absolute top-3 right-4">
          <ThemeToggle  />
       </div>
+       {/* Motion wrapper */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
+            style={{ width: "100%" }}
+          >
+        
       <Paper
         elevation={6}
         sx={{
-          p: { xs: 3, md: 5 },
+          px: { xs: 3, md: 5 },
+          py: 2,
           borderRadius: 4,
           width: "100%",
           maxWidth: 520,
@@ -63,6 +74,17 @@ export default function RegisterPage() {
           gap: 3,
         }}
       >
+            {/* Logo */}
+            <motion.img
+              src="/logo.png"
+              alt="Bloop"
+              width={80}
+              height={80}
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.18, duration: 0.4 }}
+              style={{ display: "block", marginLeft: "auto", marginRight: "auto" }}
+            />
         <Typography variant="h4" align="center" fontWeight="bold" gutterBottom>
           Crear Cuenta
         </Typography>
@@ -173,6 +195,7 @@ export default function RegisterPage() {
           </Link>
         </Typography>
       </Paper>
+    </motion.div>
     </Box>
     </main>
   );

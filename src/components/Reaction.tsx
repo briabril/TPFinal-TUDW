@@ -1,6 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Button, IconButton, Stack, Typography, Box, Avatar } from "@mui/material";
+import {
+  Button,
+  IconButton,
+  Stack,
+  Typography,
+  Box,
+  Avatar,
+} from "@mui/material";
 import { AlignJustify, Heart, Repeat2 } from "lucide-react";
 import api from "../api/index";
 import toast from "react-hot-toast";
@@ -26,18 +33,14 @@ interface ShareStatusResponse {
   shared: boolean;
 }
 
-export const Reaction = ({
-  userId,
-  targetId,
-  type
-}: PostReactionProps) => {
+export const Reaction = ({ userId, targetId, type }: PostReactionProps) => {
   const [liked, setLiked] = useState(false);
   const [shared, setShared] = useState(false);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState<boolean>(false);
-  const [showLikes, setShowLikes] = useState<boolean>(false)
-  const [users, setUsers] = useState<User[]>([])
-  const router = useRouter()
+  const [showLikes, setShowLikes] = useState<boolean>(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const router = useRouter();
   const toggleReaction = async () => {
     try {
       const endpoint =
@@ -61,16 +64,16 @@ export const Reaction = ({
     const fetchLikesUsers = async () => {
       try {
         const users = await api.get(`/reactions/post/${targetId}/users`, {
-          withCredentials: true
-        })
-        setUsers(users.data)
+          withCredentials: true,
+        });
+        setUsers(users.data);
       } catch (error) {
-        console.error("Error al traer los usuarios que dieron like", error)
-        toast.error("Error al traer los usuarios que dieron like")
+        console.error("Error al traer los usuarios que dieron like", error);
+        toast.error("Error al traer los usuarios que dieron like");
       }
-    }
-    fetchLikesUsers()
-  }, [showLikes])
+    };
+    fetchLikesUsers();
+  }, [showLikes]);
 
   const fetchCount = async () => {
     try {
@@ -121,7 +124,9 @@ export const Reaction = ({
       toast.success("Post compartido correctamente");
       setShared(true);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Error al compartir el post");
+      toast.error(
+        error.response?.data?.message || "Error al compartir el post"
+      );
     } finally {
       setLoading(false);
     }
@@ -135,10 +140,14 @@ export const Reaction = ({
 
   return (
     <Stack direction="row" spacing={3} alignItems="center">
-
-      <Stack direction="row" alignItems="center" >
+      <Stack direction="row" alignItems="center">
         <Box sx={{ width: 35 }} display="flex" alignItems="center">
-          <IconButton onClick={toggleReaction} size="small" aria-label="Poner me gusta al post" title="Poner me gusta al post">
+          <IconButton
+            onClick={toggleReaction}
+            size="small"
+            aria-label="Poner me gusta al post"
+            title="Poner me gusta al post"
+          >
             <Heart
               size={20}
               className={liked ? "text-red-500" : "text-gray-500"}
@@ -146,22 +155,29 @@ export const Reaction = ({
             />
           </IconButton>
           {count > 0 && (
-
-
-            <IconButton title="Ver likes del post" size="small" onClick={() => setShowLikes(true)} aria-label="Ver likes del post" sx={{
-              cursor: "pointer",
-              padding: "2px",
-              minWidth: 0,
-              width: "20px",
-              height: "20px",
-              transition: "0.2s",
-              "&:hover": {
-                color: "primary.main",
-                textDecoration: "underline",
-              },
-
-            }}>
-              <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 5 }}>
+            <IconButton
+              title="Ver likes del post"
+              size="small"
+              onClick={() => setShowLikes(true)}
+              aria-label="Ver likes del post"
+              sx={{
+                cursor: "pointer",
+                padding: "2px",
+                minWidth: 0,
+                width: "20px",
+                height: "20px",
+                transition: "0.2s",
+                "&:hover": {
+                  color: "primary.main",
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ maxWidth: 5 }}
+              >
                 {count}
               </Typography>
             </IconButton>
@@ -169,62 +185,69 @@ export const Reaction = ({
         </Box>
         {count > 0 && (
           <>
+            <ModalBase
+              title="Likes del post"
+              open={showLikes}
+              onClose={() => setShowLikes(false)}
+              cancelText="Cerrar"
+            >
+              <Stack direction="column" spacing={2} sx={{ mt: 1 }}>
+                {users.map((u) => (
+                  <Stack
+                    key={u.id}
+                    direction="row"
+                    alignItems="center"
+                    spacing={2}
+                    sx={{
+                      width: "100%",
+                      p: 2,
+                      borderRadius: "12px",
+                      backgroundColor: "background.paper",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+                      transition: "all 0.2s ease",
+                      cursor: "pointer",
+                      "&:hover": {
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+                      },
+                    }}
+                    onClick={() => router.push(`/${u.username}`)}
+                  >
+                    <Avatar
+                      src={u.profile_picture_url || "/default-avatar-icon.png"}
+                      sx={{ width: 48, height: 48 }}
+                    />
 
-            <ModalBase title="Likes del post" open={showLikes} onClose={() => setShowLikes(false)} cancelText="Cerrar"   >{
-              users.map((u) => (
-                <Stack
-                  key={u.id}
-                  direction="row"
-                  alignItems="center"
-                  spacing={2}
-                  sx={{
-                    width: "100%",
-                    p: 2,
-                    borderRadius: "12px",
-                    backgroundColor: "background.paper",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
-                    transition: "all 0.2s ease",
-                    cursor: "pointer",
-                    "&:hover": {
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
-                    },
-
-                  }}
-                  onClick={() => router.push(`/${u.username}`)}
-                >
-                  <Avatar
-                    src={u.profile_picture_url || "/default-avatar-icon.png"}
-                    sx={{ width: 48, height: 48 }}
-                  />
-
-                  <Stack direction="column" spacing={0.2}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                      {u.username}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {u.displayname}
-                    </Typography>
+                    <Stack direction="column" spacing={0.2}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                        {u.username}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {u.displayname}
+                      </Typography>
+                    </Stack>
                   </Stack>
-                </Stack>
-
-
-              ))
-            }</ModalBase>
+                ))}
+              </Stack>
+            </ModalBase>
           </>
         )}
       </Stack>
 
       {type === "post" && (
-        <IconButton onClick={handleShare} size="small" disabled={shared} aria-label="Compartir post" title="Compartir post">
+        <IconButton
+          onClick={handleShare}
+          size="small"
+          disabled={shared}
+          aria-label="Compartir post"
+          title="Compartir post"
+        >
           <Repeat2
             className={shared ? "text-blue-600" : "text-gray-600"}
             fill={shared ? "blue" : "none"}
           />
         </IconButton>
       )}
-
     </Stack>
-
   );
 };

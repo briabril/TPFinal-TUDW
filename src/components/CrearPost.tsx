@@ -39,7 +39,7 @@ export default function CrearPost({ onCreated }: CrearPostProps = {}) {
   const [attachWeather, setAttachWeather] = useState(false);
   const [weatherData, setWeatherData] = useState<any | null>(null);
   const [visibility, setVisibility] = useState("followers");
-const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(e.target.files || []);
@@ -80,14 +80,14 @@ const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     e.preventDefault();
     if (!user) return toast.error("Debes iniciar sesión");
 
-    if (!contenido.trim() && files.length === 0 ) {
+    if (!contenido.trim() && files.length === 0) {
       return toast.error("El post requiere texto o al menos un archivo.");
     }
 
     if (contenido.length > 300) {
       return toast.error("El contenido no puede exceder los 300 caracteres.");
     }
-    
+
     setLoading(true);
 
     try {
@@ -171,7 +171,6 @@ const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const canSubmit = contenido.trim().length > 0 || files.length > 0;
 
-
   return (
     <Box
       component="form"
@@ -203,60 +202,65 @@ const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
           <Typography fontWeight={600}>
             {user?.displayname || user?.username}
           </Typography>
-          
+
           <Typography variant="body2" color="text.secondary">
             ¿Qué estás pensando hoy?
           </Typography>
         </Box>
-        
       </Box>
 
+      <Box sx={{ position: "relative", mb: 2 }}>
+        <TextField
+          fullWidth
+          multiline
+          minRows={1}
+          maxRows={8}
+          value={contenido}
+          onChange={(e) => setContenido(e.target.value)}
+          placeholder="Comparte tus ideas, fotos, música o clima…"
+          label="Texto para post"
+        />
 
-       <Box sx={{ position: "relative", mb: 2 }}>
-  <TextField
-    fullWidth
-    multiline
-    minRows={1}
-    maxRows={8}
-    value={contenido}
-    onChange={(e) => setContenido(e.target.value)}
-    placeholder="Comparte tus ideas, fotos, música o clima…"
-    label="Texto para post"
-  />
+        <Box display="flex" justifyContent="flex-start" mt={0.5}>
+          <IconButton
+            size="small"
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+          >
+            <EmojiEmotionsIcon fontSize="small" />
+          </IconButton>
+        </Box>
 
-  <Box display="flex" justifyContent="flex-start" mt={0.5}>
-    <IconButton
-      size="small"
-      onClick={(e) => setAnchorEl(e.currentTarget)}
-    >
-      <EmojiEmotionsIcon fontSize="small" />
-    </IconButton>
-  </Box>
-
-  <Popover
-    open={Boolean(anchorEl)}
-    anchorEl={anchorEl}
-    onClose={() => setAnchorEl(null)}
-    anchorOrigin={{
-      vertical: "top",
-      horizontal: "left",
-    }}
-    transformOrigin={{
-      vertical: "bottom",
-      horizontal: "left",
-    }}
-  >
-    <EmojiPicker
-      onEmojiClick={(emojiData: any) => {
-        const emoji = emojiData.emoji;
-        setContenido((prev) => (prev ?? "") + emoji);
-      }}
-      height={350}
-    />
-  </Popover>
-</Box>
-<Box sx={{ display: "flex", justifyContent:"space-between", alignItems:"center", gap: 1 }}>
-  <Box sx={{ display: "flex", gap: 1 }}>
+        <Popover
+          open={Boolean(anchorEl)}
+          anchorEl={anchorEl}
+          onClose={() => setAnchorEl(null)}
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: "left",
+          }}
+          transformOrigin={{
+            vertical: "bottom",
+            horizontal: "left",
+          }}
+        >
+          <EmojiPicker
+            onEmojiClick={(emojiData: any) => {
+              const emoji = emojiData.emoji;
+              setContenido((prev) => (prev ?? "") + emoji);
+            }}
+            height={350}
+          />
+        </Popover>
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <Box sx={{ display: "flex", gap: 1 }}>
           <input
             id="upload-file"
             type="file"
@@ -294,44 +298,10 @@ const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
             </IconButton>
           </Tooltip>
         </Box>
- 
-</Box>
-        
-       <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2, gap:2 }} flexDirection={{xs: "column", sm: 'row',md: "row", lg: 'row'}} alignItems={{xs: "center" , sm: "center"}}>
+      </Box>
 
-         <FormControl  sx={{ mt: 2 }}>
-          <InputLabel id="visibility-label">Visibilidad</InputLabel>
-          <Select
-         size="small"
-            labelId="visibility-label"
-            value={visibility}
-            label="Visibilidad"
-            onChange={(e) => setVisibility(e.target.value)}
-          >
-            <MenuItem value="public">Público</MenuItem>
-            <MenuItem value="followers">Solo personas que te siguen</MenuItem>
-            <MenuItem value="intimate">Solo yo</MenuItem>
-          </Select>
-        </FormControl>
-        <Box sx={{ display: "flex", justifyContent: "flex-end"}}>
-           <Button
-    type="submit"
-    variant="contained"
-    disabled={!canSubmit || loading}
-    sx={{ px: 4, borderRadius: 20 }}
-  >
-    {loading ? (
-      <CircularProgress size={20} color="inherit" />
-    ) : (
-      "Publicar"
-    )}
-  </Button>
-        </Box>
- 
-</Box>
+     
 
-      
- 
       {previews.length > 0 && (
         <Box sx={{ mt: 3 }}>
           <Divider sx={{ mb: 2 }} />
@@ -433,6 +403,40 @@ const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
           Limpiar
         </Button>
       ) : null}
+       <Box
+        sx={{ display: "flex", justifyContent: "space-between", mt: 2, gap: 2 }}
+        flexDirection={{ xs: "column", sm: "row", md: "row", lg: "row" }}
+        alignItems={{ xs: "center", sm: "center" }}
+      >
+        <FormControl sx={{ mt: 2 }}>
+          <InputLabel id="visibility-label">Visibilidad</InputLabel>
+          <Select
+            size="small"
+            labelId="visibility-label"
+            value={visibility}
+            label="Visibilidad"
+            onChange={(e) => setVisibility(e.target.value)}
+          >
+            <MenuItem value="public">Público</MenuItem>
+            <MenuItem value="followers">Solo personas que te siguen</MenuItem>
+            <MenuItem value="intimate">Solo yo</MenuItem>
+          </Select>
+        </FormControl>
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={!canSubmit || loading}
+            sx={{ px: 4, borderRadius: 20 }}
+          >
+            {loading ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              "Publicar"
+            )}
+          </Button>
+        </Box>
+      </Box>
     </Box>
   );
 }

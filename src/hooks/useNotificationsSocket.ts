@@ -16,12 +16,10 @@ export function useNotificationsSocket() {
     s.off("notification_seen");
 
     s.on("notification", (notif: Notification) => {
-      console.log("Nueva notificación:", notif);
       addNotification(notif);
     });
 
     s.on("notification_seen", (notif: Notification) => {
-      console.log("Vista:", notif);
       markAsSeen(notif);
     });
 

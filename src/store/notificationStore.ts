@@ -22,7 +22,6 @@ export const useNotificationStore = create<NotificationState>((set) => ({
 
   addNotification: (notif) =>
     set((state) => {
-      console.log("⚡ RT NOTIFICATION RECEIVED:", notif);
 
       if (state.notifications.some((n) => n.id === notif.id)) {
         return state;

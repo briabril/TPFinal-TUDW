@@ -13,7 +13,6 @@ interface PostListProps {
 
 const PostList =({ mode, username , visibility}: PostListProps) => {
   const { posts, error, loading } = usePosts(mode, username, visibility);
-console.log("posts", posts)
   if (loading) {
     return (
       <Stack spacing={4} sx={{ width: "100%", maxWidth: 800, mx: "auto" }}>

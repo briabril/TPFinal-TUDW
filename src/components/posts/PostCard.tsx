@@ -28,18 +28,15 @@ export default function PostCard({ post }: PostCardProps) {
   useEffect(() => {
     if (!ready || !socket.current) return;
 
-    console.log("Uniéndose al room del post:", post.id);
     socket.current.emit("join_post", post.id);
 
     return () => {
-      console.log("Saliendo del room del post:", post.id);
       socket.current?.emit("leave_post", post.id);
     };
   }, [ready, socket, post.id]);
 
   const isOwn = Boolean(user && String(post.author.id) === String(user.id));
 
-  console.log("user.id:", user?.id);
 
   const handleDelete = async () => {
     setLoading(true);

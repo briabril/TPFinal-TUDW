@@ -19,7 +19,7 @@ export function useMessages(userId: string | null) {
                 });
                 setUnread(res.data.unread || 0);
             } catch (e) {
-                console.log("Error loading unread count:", e);
+                console.error("Error loading unread count:", e);
             }
         }
 

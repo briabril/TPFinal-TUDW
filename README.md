@@ -48,7 +48,6 @@ Notificaciones en tiempo real para nuevos mensajes.
 ### 🔹 Back-End  
 - **[Node.js](https://nodejs.org/)** ![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white) + **[Express](https://expressjs.com/)** ![Express](https://img.shields.io/badge/Express-000000?logo=express&logoColor=white) → Servidor, rutas, autenticación y lógica de negocio.  
 - **[Socket.IO](https://socket.io/)** ![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?logo=socket.io&logoColor=white) → **Comunicación en tiempo real** para mensajería y notificaciones.  
-- **[Luxon](https://moment.github.io/luxon/)** → Manejo avanzado de **fechas, horarios y zonas horarias**.  
 
 ---
 

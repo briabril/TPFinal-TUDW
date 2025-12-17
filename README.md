@@ -53,7 +53,6 @@ Notificaciones en tiempo real para nuevos mensajes.
 
 ### 🔹 Base de Datos  
 - **[PostgreSQL](https://www.postgresql.org/)** ![Postgres](https://img.shields.io/badge/PostgreSQL-336791?logo=postgresql&logoColor=white) → Base de datos **relacional** para usuarios, publicaciones, comentarios, reacciones y mensajes.
-- 
 
 ---
 ### 🔹 Estado y Peticiones  
